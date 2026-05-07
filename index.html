@@ -618,16 +618,22 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-5',
             max_tokens: 500,
             system: systemPrompt,
             messages: conversationHistory
           })
         });
         const data = await response.json();
-        reply = data.content?.[0]?.text || 'ごめんね、うまく答えられなかった😢';
+        console.log('API response:', JSON.stringify(data));
+        if (!response.ok) {
+          reply = `エラー ${response.status}: ${data.error?.message || JSON.stringify(data)}`;
+        } else {
+          reply = data.content?.[0]?.text || 'ごめんね、うまく答えられなかった😢';
+        }
       } catch (e) {
-        reply = 'エラーが起きちゃった😢 APIキーを確認してみてね。';
+        console.error('Fetch error:', e);
+        reply = `通信エラー: ${e.message}`;
       }
     } else {
       // デモモード
