@@ -295,13 +295,22 @@
     showScreen('app');
   }
 
-  async function ensureFamily() {
-    let { data } = await sb.from('families').select('id').eq('name', currentUser.id).single();
-    if (!data) {
-      const { data: nf } = await sb.from('families').insert({ name: currentUser.id }).select('id').single();
-      data = nf;
+ async function ensureFamily() {
+    try {
+      let { data, error } = await sb.from('families').select('id').eq('name', currentUser.id).single();
+      if (error || !data) {
+        const { data: nf, error: insertError } = await sb.from('families')
+          .insert({ name: currentUser.id })
+          .select('id')
+          .single();
+        if (insertError) throw new Error('family作成失敗: ' + insertError.message);
+        data = nf;
+      }
+      familyId = data.id;
+    } catch(e) {
+      alert('初期化エラー: ' + e.message);
+      throw e;
     }
-    familyId = data.id;
   }
 
   async function loadSchedules() {
