@@ -432,18 +432,51 @@
       : 'アカウントがない方は <span onclick="toggleMode()">新規登録</span>';
   }
 
-  async function handleEmailAuth() {
+ async function handleEmailAuth() {
     const email = document.getElementById('emailInput').value.trim();
     const password = document.getElementById('passwordInput').value;
-    document.getElementById('errorMsg').classList.remove('show');
-    if (!email||!password) { document.getElementById('errorMsg').textContent='メールとパスワードを入力してください'; document.getElementById('errorMsg').classList.add('show'); return; }
-    document.getElementById('emailBtn').disabled = true;
-    const result = isSignUp
-      ? await sb.auth.signUp({ email, password })
-      : await sb.auth.signInWithPassword({ email, password });
-    document.getElementById('emailBtn').disabled = false;
-    if (result.error) { document.getElementById('errorMsg').textContent=result.error.message; document.getElementById('errorMsg').classList.add('show'); }
-    else if (isSignUp) { document.getElementById('errorMsg').textContent='確認メールを送りました！📧'; document.getElementById('errorMsg').classList.add('show'); }
+    const errEl = document.getElementById('errorMsg');
+    const btn = document.getElementById('emailBtn');
+    errEl.classList.remove('show');
+
+    if (!email || !password) {
+      errEl.textContent = 'メールとパスワードを入力してください';
+      errEl.classList.add('show');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '処理中...';
+
+    try {
+      if (isSignUp) {
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if (error) {
+          errEl.textContent = 'エラー: ' + error.message;
+          errEl.classList.add('show');
+        } else if (data?.session) {
+          await onLogin(data.session.user);
+        } else {
+          errEl.textContent = 'アカウント作成！ログインモードで再度お試しください';
+          errEl.classList.add('show');
+          toggleMode();
+        }
+      } else {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+          errEl.textContent = 'エラー: ' + error.message;
+          errEl.classList.add('show');
+        } else if (data?.session) {
+          await onLogin(data.session.user);
+        }
+      }
+    } catch(e) {
+      errEl.textContent = '予期しないエラー: ' + e.message;
+      errEl.classList.add('show');
+    }
+
+    btn.disabled = false;
+    btn.textContent = isSignUp ? 'アカウントを作成' : 'ログイン';
   }
 
   async function handleGoogleLogin() {
