@@ -575,8 +575,7 @@
   }
 
   function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
-  function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
-  function sendQuick(text) { document.getElementById('msgInput').value=text; sendMessage(); }
+  function handleKey(e) { if(e.key==='Enter'&&e.shiftKey){e.preventDefault();sendMessage();} }function sendQuick(text) { document.getElementById('msgInput').value=text; sendMessage(); }
   function showScheduleModal() { document.getElementById('scheduleModal').classList.remove('hidden'); }
   function hideScheduleModal() {
     document.getElementById('scheduleModal').classList.add('hidden');
