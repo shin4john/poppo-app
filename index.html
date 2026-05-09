@@ -316,11 +316,15 @@
     }
   }
 
-  async function loadSchedules() {
+async function loadSchedules() {
     const today = new Date().toISOString().split('T')[0];
-    const { data } = await sb.from('schedules').select('*')
-      .eq('family_id', familyId).eq('is_done', false)
-      .gte('event_date', today).order('event_date').limit(10);
+    const { data, error } = await sb.from('schedules').select('*')
+      .eq('family_id', familyId)
+      .eq('is_done', false)
+      .or(`event_date.gte.${today},event_date.is.null`)
+      .order('event_date', { ascending: true, nullsFirst: false })
+      .limit(10);
+    if (error) console.error('schedules取得エラー:', error);
     schedules = data || [];
     renderScheduleBanner();
   }
@@ -359,17 +363,20 @@ function renderScheduleBanner() {
   async function addSchedule() {
     const title = document.getElementById('scheduleTitle').value.trim();
     if (!title) return;
-    await sb.from('schedules').insert({
+    const { error } = await sb.from('schedules').insert({
       family_id: familyId, title,
       event_date: document.getElementById('scheduleDate').value || null,
       category: document.getElementById('scheduleCategory').value,
       assigned_to: document.getElementById('scheduleAssigned').value.trim() || null
     });
+    if (error) {
+      alert('予定の保存に失敗: ' + error.message);
+      return;
+    }
     hideScheduleModal();
     await loadSchedules();
     addMessageToUI(`「${title}」を予定に追加したよ！🐰✨`, 'ai');
   }
-
   async function loadConversationHistory() {
     const { data } = await sb.from('conversations').select('role,content')
       .eq('family_id', familyId).order('created_at').limit(20);
