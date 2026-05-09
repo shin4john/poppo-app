@@ -8,146 +8,122 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --cream: #FFF8F0; --pink: #FFB5C8; --pink-dark: #FF8FAD;
-    --lavender: #E8D5FF; --lavender-dark: #C9A8FF;
-    --brown: #6B4C3B; --text: #3D2B1F;
-    --shadow: 0 8px 32px rgba(180,100,130,0.12);
+    --cream:#FFF8F0;--pink:#FFB5C8;--pink-dark:#FF8FAD;
+    --lavender:#E8D5FF;--lavender-dark:#C9A8FF;
+    --brown:#6B4C3B;--text:#3D2B1F;
+    --shadow:0 8px 32px rgba(180,100,130,0.12);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Zen Maru Gothic', sans-serif;
-    background: var(--cream); height: 100dvh;
-    display: flex; flex-direction: column; overflow: hidden;
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(255,181,200,0.25) 0%, transparent 50%),
-      radial-gradient(circle at 80% 90%, rgba(200,168,255,0.2) 0%, transparent 50%);
-  }
-  .hidden { display: none !important; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Zen Maru Gothic',sans-serif;background:var(--cream);height:100dvh;display:flex;flex-direction:column;overflow:hidden;background-image:radial-gradient(circle at 20% 10%,rgba(255,181,200,0.25) 0%,transparent 50%),radial-gradient(circle at 80% 90%,rgba(200,168,255,0.2) 0%,transparent 50%);}
+  .hidden{display:none !important;}
 
-  /* ===== ログイン画面 ===== */
-  #loginScreen {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 32px 24px; gap: 20px;
-  }
-  .login-bunny svg { width: 100px; height: 100px; animation: float 3s ease-in-out infinite; }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-  .login-title { font-family:'Nunito',sans-serif; font-size:26px; font-weight:800; color:var(--brown); text-align:center; }
-  .login-sub { font-size:13px; color:#aaa; text-align:center; }
-  .login-card {
-    background:white; border-radius:24px; padding:24px 20px;
-    width:100%; max-width:360px; box-shadow:var(--shadow);
-    display:flex; flex-direction:column; gap:12px;
-  }
-  .login-card h2 { font-family:'Nunito',sans-serif; font-size:16px; font-weight:700; color:var(--brown); }
-  .input-field {
-    width:100%; border:2px solid var(--lavender); border-radius:12px;
-    padding:11px 14px; font-size:14px; font-family:'Zen Maru Gothic',sans-serif;
-    outline:none; color:var(--text); transition:border-color 0.2s; background:white;
-  }
-  .input-field:focus { border-color:var(--pink); }
-  .btn {
-    width:100%; padding:13px; border-radius:14px; border:none;
-    font-family:'Nunito',sans-serif; font-size:15px; font-weight:800;
-    cursor:pointer; transition:transform 0.15s, opacity 0.15s;
-  }
-  .btn:active { transform:scale(0.97); }
-  .btn:disabled { opacity:0.6; }
-  .btn-primary { background:linear-gradient(135deg,var(--pink),var(--lavender-dark)); color:white; box-shadow:0 4px 16px rgba(255,100,150,0.25); }
-  .btn-google { background:white; border:2px solid #ddd !important; color:var(--text); display:flex; align-items:center; justify-content:center; gap:8px; }
-  .btn-secondary { background:var(--cream); color:var(--brown); font-size:13px; }
-  .divider { display:flex; align-items:center; gap:10px; color:#ccc; font-size:12px; }
-  .divider::before,.divider::after { content:''; flex:1; height:1px; background:#eee; }
-  .toggle-mode { text-align:center; font-size:13px; color:#aaa; }
-  .toggle-mode span { color:var(--pink-dark); font-weight:700; cursor:pointer; }
-  .error-msg { background:#FFE8E8; color:#D44; border-radius:10px; padding:8px 12px; font-size:12px; display:none; }
-  .error-msg.show { display:block; }
+  /* 共通 */
+  .screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px;}
+  .login-bunny svg{width:100px;height:100px;animation:float 3s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .login-title{font-family:'Nunito',sans-serif;font-size:26px;font-weight:800;color:var(--brown);text-align:center;}
+  .login-sub{font-size:13px;color:#aaa;text-align:center;}
+  .card{background:white;border-radius:24px;padding:24px 20px;width:100%;max-width:360px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;}
+  .card h2{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--brown);}
+  .card p{font-size:13px;color:#888;line-height:1.7;}
+  .card a{color:var(--pink-dark);}
+  .input-field{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);transition:border-color 0.2s;background:white;}
+  .input-field:focus{border-color:var(--pink);}
+  .btn{width:100%;padding:13px;border-radius:14px;border:none;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:transform 0.15s,opacity 0.15s;}
+  .btn:active{transform:scale(0.97);}
+  .btn:disabled{opacity:0.6;}
+  .btn-primary{background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;box-shadow:0 4px 16px rgba(255,100,150,0.25);}
+  .btn-google{background:white;border:2px solid #ddd !important;color:var(--text);display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-secondary{background:var(--cream);color:var(--brown);font-size:13px;}
+  .btn-outline{background:white;border:2px solid var(--pink) !important;color:var(--pink-dark);font-size:14px;}
+  .divider{display:flex;align-items:center;gap:10px;color:#ccc;font-size:12px;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:#eee;}
+  .toggle-mode{text-align:center;font-size:13px;color:#aaa;}
+  .toggle-mode span{color:var(--pink-dark);font-weight:700;cursor:pointer;}
+  .error-msg{background:#FFE8E8;color:#D44;border-radius:10px;padding:8px 12px;font-size:12px;display:none;}
+  .error-msg.show{display:block;}
+  .success-msg{background:#E8FFE8;color:#2A7;border-radius:10px;padding:8px 12px;font-size:12px;display:none;}
+  .success-msg.show{display:block;}
 
-  /* ===== APIキー設定画面 ===== */
-  #apiKeyScreen {
-    flex:1; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; padding:32px 24px; gap:16px;
-  }
-  #apiKeyScreen .card {
-    background:white; border-radius:24px; padding:24px 20px;
-    width:100%; max-width:360px; box-shadow:var(--shadow);
-    display:flex; flex-direction:column; gap:12px;
-  }
-  #apiKeyScreen h2 { font-family:'Nunito',sans-serif; font-size:20px; font-weight:800; color:var(--brown); }
-  #apiKeyScreen p { font-size:13px; color:#888; line-height:1.7; }
-  #apiKeyScreen a { color:var(--pink-dark); }
-  #apiKeyError { background:#FFE8E8; color:#D44; border-radius:10px; padding:8px 12px; font-size:12px; display:none; }
+  /* 招待コード表示 */
+  .invite-code-box{background:var(--lavender);border-radius:16px;padding:16px;text-align:center;}
+  .invite-code-box .code{font-family:'Nunito',sans-serif;font-size:28px;font-weight:800;color:var(--brown);letter-spacing:4px;}
+  .invite-code-box .hint{font-size:11px;color:#888;margin-top:4px;}
 
-  /* ===== アプリ画面 ===== */
-  #appScreen { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-  .header {
-    background:white; padding:10px 16px; display:flex; align-items:center; gap:12px;
-    box-shadow:0 2px 16px rgba(180,100,130,0.1); z-index:10;
-  }
-  .bunny-svg { width:52px; height:52px; animation:float 3s ease-in-out infinite; flex-shrink:0; }
-  .header-info h1 { font-family:'Nunito',sans-serif; font-size:18px; font-weight:800; color:var(--brown); }
-  .header-info p { font-size:11px; color:var(--pink-dark); font-weight:500; }
-  .status-dot { width:8px; height:8px; background:#5CE65C; border-radius:50%; display:inline-block; margin-right:4px; animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-  .header-actions { margin-left:auto; display:flex; gap:8px; flex-shrink:0; }
-  .icon-btn { background:var(--lavender); border:none; border-radius:20px; padding:5px 12px; font-size:11px; font-family:'Zen Maru Gothic',sans-serif; color:var(--brown); font-weight:600; cursor:pointer; white-space:nowrap; }
+  /* アプリ画面 */
+  #appScreen{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .header{background:white;padding:10px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(180,100,130,0.1);z-index:10;}
+  .bunny-svg{width:52px;height:52px;animation:float 3s ease-in-out infinite;flex-shrink:0;}
+  .header-info h1{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--brown);}
+  .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;}
+  .status-dot{width:8px;height:8px;background:#5CE65C;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  .header-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+  .icon-btn{background:var(--lavender);border:none;border-radius:20px;padding:5px 12px;font-size:11px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:600;cursor:pointer;white-space:nowrap;}
 
-  .schedule-banner { background:linear-gradient(135deg,var(--lavender),var(--pink)); padding:8px 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
-  .schedule-banner::-webkit-scrollbar { display:none; }
-  .schedule-chip { background:white; border-radius:20px; padding:5px 12px; font-size:11px; white-space:nowrap; color:var(--brown); font-weight:600; box-shadow:0 2px 8px rgba(0,0,0,0.08); flex-shrink:0; display:flex; align-items:center; gap:6px; cursor:pointer; transition:all 0.2s; }
-  .schedule-chip .check-btn { width:18px; height:18px; border-radius:50%; border:2px solid var(--pink); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; color:transparent; transition:all 0.2s; }
-  .schedule-chip:hover .check-btn, .schedule-chip:active .check-btn { background:var(--pink); color:white; }
-  @keyframes chipComplete { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.1)} 100%{transform:scale(0);opacity:0;width:0;padding:0;margin:0} }
-  .schedule-chip.completing { animation:chipComplete 0.4s ease forwards; }
-  .chat-area { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; scroll-behavior:smooth; }
-  .chat-area::-webkit-scrollbar { display:none; }
-  .message { display:flex; gap:8px; max-width:85%; animation:slideIn 0.3s ease; }
-  @keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .message.ai { align-self:flex-start; }
-  .message.user { align-self:flex-end; flex-direction:row-reverse; }
-  .msg-avatar { width:32px; height:32px; flex-shrink:0; margin-top:auto; }
-  .msg-avatar svg { width:32px; height:32px; }
-  .bubble { padding:10px 14px; border-radius:18px; font-size:14px; line-height:1.6; color:var(--text); box-shadow:0 2px 12px rgba(0,0,0,0.07); }
-  .message.ai .bubble { background:white; border-bottom-left-radius:4px; }
-  .message.user .bubble { background:var(--pink); color:var(--brown); border-bottom-right-radius:4px; }
+  .schedule-banner{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:8px 16px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
+  .schedule-banner::-webkit-scrollbar{display:none;}
+  .schedule-chip{background:white;border-radius:20px;padding:5px 12px;font-size:11px;white-space:nowrap;color:var(--brown);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all 0.2s;}
+  .schedule-chip .check-btn{width:18px;height:18px;border-radius:50%;border:2px solid var(--pink);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:transparent;transition:all 0.2s;}
+  .schedule-chip:active .check-btn{background:var(--pink);color:white;}
+  @keyframes chipComplete{0%{transform:scale(1);opacity:1}50%{transform:scale(1.1)}100%{transform:scale(0);opacity:0;width:0;padding:0;margin:0}}
+  .schedule-chip.completing{animation:chipComplete 0.4s ease forwards;}
 
-  .typing { display:none; align-self:flex-start; align-items:center; gap:8px; }
-  .typing.active { display:flex; animation:slideIn 0.3s ease; }
-  .typing-bubble { background:white; border-radius:18px; border-bottom-left-radius:4px; padding:12px 16px; display:flex; gap:4px; box-shadow:0 2px 12px rgba(0,0,0,0.07); }
-  .typing-dot { width:7px; height:7px; background:var(--pink-dark); border-radius:50%; animation:bounce 1.2s infinite; }
-  .typing-dot:nth-child(2){animation-delay:0.2s} .typing-dot:nth-child(3){animation-delay:0.4s}
-  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+  .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
+  .chat-area::-webkit-scrollbar{display:none;}
+  .message{display:flex;gap:8px;max-width:85%;animation:slideIn 0.3s ease;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .message.ai{align-self:flex-start;}
+  .message.user{align-self:flex-end;flex-direction:row-reverse;}
+  .msg-avatar{width:32px;height:32px;flex-shrink:0;margin-top:auto;}
+  .msg-avatar svg{width:32px;height:32px;}
+  .bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.6;color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+  .message.ai .bubble{background:white;border-bottom-left-radius:4px;}
+  .message.user .bubble{background:var(--pink);color:var(--brown);border-bottom-right-radius:4px;}
 
-  .quick-replies { display:flex; gap:8px; overflow-x:auto; padding:0 16px 8px; scrollbar-width:none; }
-  .quick-replies::-webkit-scrollbar { display:none; }
-  .qr-btn { background:white; border:2px solid var(--pink); border-radius:20px; padding:7px 14px; font-size:13px; font-family:'Zen Maru Gothic',sans-serif; color:var(--pink-dark); font-weight:600; white-space:nowrap; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
-  .qr-btn:active { background:var(--pink); color:white; transform:scale(0.97); }
+  .typing{display:none;align-self:flex-start;align-items:center;gap:8px;}
+  .typing.active{display:flex;animation:slideIn 0.3s ease;}
+  .typing-bubble{background:white;border-radius:18px;border-bottom-left-radius:4px;padding:12px 16px;display:flex;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+  .typing-dot{width:7px;height:7px;background:var(--pink-dark);border-radius:50%;animation:bounce 1.2s infinite;}
+  .typing-dot:nth-child(2){animation-delay:0.2s}.typing-dot:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 
-  .input-area { background:white; padding:10px 12px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); display:flex; gap:10px; align-items:center; box-shadow:0 -2px 16px rgba(180,100,130,0.1); }
-  .input-wrap { flex:1; background:var(--cream); border-radius:24px; display:flex; align-items:center; padding:8px 16px; border:2px solid transparent; transition:border-color 0.2s; }
-  .input-wrap:focus-within { border-color:var(--pink); }
-  #msgInput { flex:1; background:none; border:none; outline:none; font-size:15px; font-family:'Zen Maru Gothic',sans-serif; color:var(--text); resize:none; max-height:80px; line-height:1.4; }
-  #msgInput::placeholder { color:#CCC; }
-  .send-btn { width:44px; height:44px; background:linear-gradient(135deg,var(--pink),var(--lavender-dark)); border:none; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:transform 0.15s,opacity 0.15s; box-shadow:0 4px 12px rgba(255,100,150,0.3); }
-  .send-btn:active { transform:scale(0.93); }
-  .send-btn:disabled { opacity:0.5; }
+  .quick-replies{display:flex;gap:8px;overflow-x:auto;padding:0 16px 8px;scrollbar-width:none;}
+  .quick-replies::-webkit-scrollbar{display:none;}
+  .qr-btn{background:white;border:2px solid var(--pink);border-radius:20px;padding:7px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--pink-dark);font-weight:600;white-space:nowrap;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+  .qr-btn:active{background:var(--pink);color:white;transform:scale(0.97);}
 
-  .modal-overlay { position:fixed; inset:0; background:rgba(60,30,40,0.5); display:flex; align-items:flex-end; z-index:100; backdrop-filter:blur(4px); }
-  .modal-overlay.hidden { display:none; }
-  .modal { background:white; border-radius:24px 24px 0 0; padding:24px 20px; padding-bottom:calc(24px + env(safe-area-inset-bottom)); width:100%; animation:slideUp 0.3s ease; display:flex; flex-direction:column; gap:12px; }
-  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-  .modal h2 { font-family:'Nunito',sans-serif; font-size:20px; font-weight:800; color:var(--brown); }
-  .modal select { width:100%; border:2px solid var(--lavender); border-radius:12px; padding:11px 14px; font-size:14px; font-family:'Zen Maru Gothic',sans-serif; outline:none; color:var(--text); background:white; }
+  .input-area{background:white;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;box-shadow:0 -2px 16px rgba(180,100,130,0.1);}
+  .input-wrap{flex:1;background:var(--cream);border-radius:24px;display:flex;align-items:center;padding:8px 16px;border:2px solid transparent;transition:border-color 0.2s;}
+  .input-wrap:focus-within{border-color:var(--pink);}
+  #msgInput{flex:1;background:none;border:none;outline:none;font-size:15px;font-family:'Zen Maru Gothic',sans-serif;color:var(--text);resize:none;max-height:80px;line-height:1.4;}
+  #msgInput::placeholder{color:#CCC;}
+  .send-btn{width:44px;height:44px;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s,opacity 0.15s;box-shadow:0 4px 12px rgba(255,100,150,0.3);}
+  .send-btn:active{transform:scale(0.93);}
+  .send-btn:disabled{opacity:0.5;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(60,30,40,0.5);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
+  .modal-overlay.hidden{display:none;}
+  .modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));width:100%;animation:slideUp 0.3s ease;display:flex;flex-direction:column;gap:12px;}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal h2{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);}
+  .modal select{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);background:white;}
+
+  /* メンバー一覧 */
+  .member-list{display:flex;flex-direction:column;gap:8px;}
+  .member-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--cream);border-radius:12px;}
+  .member-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .member-name{font-size:14px;font-weight:600;color:var(--brown);}
+  .member-role{font-size:11px;color:#aaa;}
 </style>
 </head>
 <body>
 
 <!-- ログイン画面 -->
-<div id="loginScreen">
-  <div class="login-bunny">
-    <svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
-  </div>
+<div id="loginScreen" class="screen">
+  <div class="login-bunny"><svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
   <div><div class="login-title">ぽぽちゃん 🌸</div><div class="login-sub">家族のAIアシスタント</div></div>
-  <div class="login-card">
+  <div class="card">
     <h2 id="loginTitle">ログイン</h2>
     <div class="error-msg" id="errorMsg"></div>
     <input class="input-field" type="email" id="emailInput" placeholder="メールアドレス"/>
@@ -163,30 +139,46 @@
 </div>
 
 <!-- APIキー設定画面 -->
-<div id="apiKeyScreen" class="hidden">
-  <div class="login-bunny">
-    <svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/></svg>
-  </div>
+<div id="apiKeyScreen" class="screen hidden">
+  <div class="login-bunny"><svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/></svg></div>
   <div class="card">
     <h2>🔑 APIキーの設定</h2>
     <p>Claude APIキーを入力してね！<br><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>で取得できるよ🐰<br><br>入力したキーはあなた専用のDBに安全に保存されます🔒</p>
-    <div id="apiKeyError"></div>
+    <div id="apiKeyError" class="error-msg"></div>
     <input class="input-field" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..."/>
     <button class="btn btn-primary" onclick="saveApiKey()">保存してはじめる ✨</button>
     <button class="btn btn-secondary" onclick="logout()">ログアウト</button>
   </div>
 </div>
 
+<!-- 家族設定画面 -->
+<div id="familyScreen" class="screen hidden">
+  <div class="login-bunny"><svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/></svg></div>
+  <div class="card">
+    <h2>👨‍👩‍👧 家族グループの設定</h2>
+    <p>あなたの名前と、家族グループをどうするか選んでね！</p>
+    <input class="input-field" type="text" id="displayNameInput" placeholder="あなたの名前（例：パパ、ママ）"/>
+    <div class="error-msg" id="familyError"></div>
+    <div class="success-msg" id="familySuccess"></div>
+    <button class="btn btn-primary" onclick="createFamily()">🏠 新しい家族グループを作る</button>
+    <div class="divider">または</div>
+    <input class="input-field" type="text" id="inviteCodeInput" placeholder="招待コードを入力（例：SAKURA25）" style="text-transform:uppercase;letter-spacing:2px;"/>
+    <button class="btn btn-outline" onclick="joinFamily()">🔗 招待コードで参加する</button>
+    <button class="btn btn-secondary" onclick="logout()">ログアウト</button>
+  </div>
+</div>
+
 <!-- アプリ画面 -->
-<div id="appScreen" class="hidden">
+<div id="appScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
   <div class="header">
     <svg class="bunny-svg" viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
     <div class="header-info">
-      <h1>ぽぽちゃん 🌸</h1>
-      <p><span class="status-dot"></span>家族のAIアシスタント</p>
+      <h1 id="familyNameHeader">ぽぽちゃん 🌸</h1>
+      <p><span class="status-dot"></span><span id="memberCountText">家族のAIアシスタント</span></p>
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="showScheduleModal()">➕ 予定</button>
+      <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧</button>
       <button class="icon-btn" onclick="logout()">ログアウト</button>
     </div>
   </div>
@@ -211,8 +203,7 @@
 
   <div class="input-area">
     <div class="input-wrap">
-      <textarea id="msgInput" placeholder="ぽぽちゃんに話しかけてね..." rows="1"
-        oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <textarea id="msgInput" placeholder="ぽぽちゃんに話しかけてね..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
     </div>
     <button class="send-btn" id="sendBtn" onclick="sendMessage()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/></svg>
@@ -237,23 +228,37 @@
   </div>
 </div>
 
+<!-- 家族情報モーダル -->
+<div class="modal-overlay hidden" id="familyModal">
+  <div class="modal">
+    <h2>👨‍👩‍👧 家族メンバー</h2>
+    <div class="member-list" id="memberList"></div>
+    <div class="divider">招待コード</div>
+    <div class="invite-code-box">
+      <div class="code" id="inviteCodeDisplay">------</div>
+      <div class="hint">このコードを家族に教えてね！</div>
+    </div>
+    <button class="btn btn-secondary" onclick="hideFamilyModal()">閉じる</button>
+  </div>
+</div>
+
 <script>
-  // ============================================================
-  // ここだけ書き換えてください（APIキーは不要！）
   const SUPABASE_URL = 'https://svuzjqwumfcidoqfwqqm.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dXpqcXd1bWZjaWRvcWZ3cXFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTQ1NjEsImV4cCI6MjA5Mzc5MDU2MX0.k7YTiXqZgFY9CY5R5cX9ldp7YLBO7HV5ic7E8AfQ7SM';
-  // ============================================================
 
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let currentUser = null;
   let familyId = null;
+  let familyData = null;
   let claudeApiKey = '';
   let conversationHistory = [];
   let schedules = [];
+  let members = [];
   let isSignUp = false;
 
+  // ===== 初期化 =====
   async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) await onLogin(session.user);
@@ -265,80 +270,174 @@
 
   async function onLogin(user) {
     currentUser = user;
-    await ensureFamily();
-    const { data } = await sb.from('user_settings').select('claude_api_key').eq('user_id', currentUser.id).single();
-    if (data?.claude_api_key) {
-      claudeApiKey = data.claude_api_key;
+
+    // family_membersから家族を検索
+    const { data: memberData } = await sb.from('family_members')
+      .select('family_id, role, display_name')
+      .eq('user_id', currentUser.id)
+      .single();
+
+    if (!memberData) {
+      // 家族未設定→家族設定画面へ
+      showScreen('family');
+      return;
+    }
+
+    familyId = memberData.family_id;
+
+    // familyデータ取得
+    const { data: fData } = await sb.from('families')
+      .select('id, family_name, invite_code')
+      .eq('id', familyId)
+      .single();
+    familyData = fData;
+
+    // APIキー確認
+    const { data: settings } = await sb.from('user_settings')
+      .select('claude_api_key').eq('user_id', currentUser.id).single();
+
+    if (settings?.claude_api_key) {
+      claudeApiKey = settings.claude_api_key;
+      await loadMembers();
       await loadSchedules();
       await loadConversationHistory();
+      updateFamilyHeader();
       showScreen('app');
     } else {
       showScreen('apiKey');
     }
   }
 
+  // ===== 家族グループ作成 =====
+  async function createFamily() {
+    const displayName = document.getElementById('displayNameInput').value.trim();
+    const errEl = document.getElementById('familyError');
+    errEl.classList.remove('show');
+    if (!displayName) { errEl.textContent = '名前を入力してください'; errEl.classList.add('show'); return; }
+
+    // ランダムな6文字の招待コード生成
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    const { data: newFamily, error } = await sb.from('families')
+      .insert({ family_name: displayName + 'の家族', invite_code: code })
+      .select('id, invite_code').single();
+
+    if (error) { errEl.textContent = '作成失敗: ' + error.message; errEl.classList.add('show'); return; }
+
+    // family_membersに追加
+    await sb.from('family_members').insert({
+      family_id: newFamily.id,
+      user_id: currentUser.id,
+      role: 'owner',
+      display_name: displayName
+    });
+
+    familyId = newFamily.id;
+    familyData = newFamily;
+
+    // APIキー設定へ
+    showScreen('apiKey');
+  }
+
+  // ===== 招待コードで参加 =====
+  async function joinFamily() {
+    const displayName = document.getElementById('displayNameInput').value.trim();
+    const code = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
+    const errEl = document.getElementById('familyError');
+    const succEl = document.getElementById('familySuccess');
+    errEl.classList.remove('show'); succEl.classList.remove('show');
+
+    if (!displayName) { errEl.textContent = '名前を入力してください'; errEl.classList.add('show'); return; }
+    if (!code) { errEl.textContent = '招待コードを入力してください'; errEl.classList.add('show'); return; }
+
+    // 招待コードで家族を検索
+    const { data: family, error } = await sb.from('families')
+      .select('id, family_name').eq('invite_code', code).single();
+
+    if (error || !family) { errEl.textContent = '招待コードが見つかりません😢'; errEl.classList.add('show'); return; }
+
+    // すでに参加済みか確認
+    const { data: existing } = await sb.from('family_members')
+      .select('id').eq('family_id', family.id).eq('user_id', currentUser.id).single();
+
+    if (existing) { errEl.textContent = 'すでにこの家族に参加しています'; errEl.classList.add('show'); return; }
+
+    // family_membersに追加
+    const { error: joinError } = await sb.from('family_members').insert({
+      family_id: family.id,
+      user_id: currentUser.id,
+      role: 'member',
+      display_name: displayName
+    });
+
+    if (joinError) { errEl.textContent = '参加失敗: ' + joinError.message; errEl.classList.add('show'); return; }
+
+    familyId = family.id;
+    familyData = family;
+    succEl.textContent = `「${family.family_name}」に参加したよ！🎉`;
+    succEl.classList.add('show');
+
+    setTimeout(() => showScreen('apiKey'), 1500);
+  }
+
+  // ===== メンバー読み込み =====
+  async function loadMembers() {
+    const { data } = await sb.from('family_members')
+      .select('display_name, role').eq('family_id', familyId);
+    members = data || [];
+  }
+
+  function updateFamilyHeader() {
+    if (familyData?.family_name) {
+      document.getElementById('familyNameHeader').textContent = familyData.family_name + ' 🌸';
+    }
+    document.getElementById('memberCountText').textContent =
+      `👨‍👩‍👧 ${members.length}人のメンバー`;
+  }
+
+  // ===== APIキー保存 =====
   async function saveApiKey() {
     const key = document.getElementById('apiKeyInput').value.trim();
     const errEl = document.getElementById('apiKeyError');
     errEl.style.display = 'none';
     if (!key.startsWith('sk-ant-')) {
       errEl.textContent = 'APIキーは sk-ant- で始まる文字列です';
-      errEl.style.display = 'block';
-      return;
+      errEl.style.display = 'block'; return;
     }
     const { error } = await sb.from('user_settings').upsert({
-      user_id: currentUser.id,
-      claude_api_key: key,
+      user_id: currentUser.id, claude_api_key: key,
       updated_at: new Date().toISOString()
     });
     if (error) { errEl.textContent = '保存に失敗: ' + error.message; errEl.style.display = 'block'; return; }
     claudeApiKey = key;
+    await loadMembers();
     await loadSchedules();
     await loadConversationHistory();
+    updateFamilyHeader();
     showScreen('app');
   }
 
- async function ensureFamily() {
-    try {
-      let { data, error } = await sb.from('families').select('id').eq('name', currentUser.id).single();
-      if (error || !data) {
-        const { data: nf, error: insertError } = await sb.from('families')
-          .insert({ name: currentUser.id })
-          .select('id')
-          .single();
-        if (insertError) throw new Error('family作成失敗: ' + insertError.message);
-        data = nf;
-      }
-      familyId = data.id;
-    } catch(e) {
-      alert('初期化エラー: ' + e.message);
-      throw e;
-    }
-  }
-
-async function loadSchedules() {
+  // ===== 予定 =====
+  async function loadSchedules() {
     const today = new Date().toISOString().split('T')[0];
     const { data, error } = await sb.from('schedules').select('*')
-      .eq('family_id', familyId)
-      .eq('is_done', false)
+      .eq('family_id', familyId).eq('is_done', false)
       .or(`event_date.gte.${today},event_date.is.null`)
-      .order('event_date', { ascending: true, nullsFirst: false })
-      .limit(10);
+      .order('event_date', { ascending: true, nullsFirst: false }).limit(10);
     if (error) console.error('schedules取得エラー:', error);
     schedules = data || [];
     renderScheduleBanner();
   }
 
-function renderScheduleBanner() {
-    const icons = { '予定':'📅', '宿題':'📚', 'イベント':'🎉' };
+  function renderScheduleBanner() {
+    const icons = { '予定':'📅','宿題':'📚','イベント':'🎉' };
     const banner = document.getElementById('scheduleBanner');
     if (schedules.length === 0) {
-      banner.innerHTML = '<div class="schedule-chip">🎉 予定なし！のんびりしてね</div>';
-      return;
+      banner.innerHTML = '<div class="schedule-chip">🎉 予定なし！のんびりしてね</div>'; return;
     }
     banner.innerHTML = schedules.map(s => {
       const date = s.event_date ? s.event_date.slice(5).replace('-','/') + ' ' : '';
-      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}', '${s.title}', this)">
+      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}','${s.title.replace(/'/g,"\\'")}',this)">
         <div class="check-btn">✓</div>
         <span>${icons[s.category]||'📅'} ${date}${s.title}</span>
       </div>`;
@@ -357,9 +456,10 @@ function renderScheduleBanner() {
         `「${title}」ばっちり！すごいすごい！🌸`,
         `わあ！「${title}」できたね！おつかれさま🎉`
       ];
-      addMessageToUI(praise[Math.floor(Math.random() * praise.length)], 'ai');
+      addMessageToUI(praise[Math.floor(Math.random()*praise.length)], 'ai');
     }, 400);
   }
+
   async function addSchedule() {
     const title = document.getElementById('scheduleTitle').value.trim();
     if (!title) return;
@@ -369,21 +469,21 @@ function renderScheduleBanner() {
       category: document.getElementById('scheduleCategory').value,
       assigned_to: document.getElementById('scheduleAssigned').value.trim() || null
     });
-    if (error) {
-      alert('予定の保存に失敗: ' + error.message);
-      return;
-    }
+    if (error) { alert('予定の保存に失敗: ' + error.message); return; }
     hideScheduleModal();
     await loadSchedules();
     addMessageToUI(`「${title}」を予定に追加したよ！🐰✨`, 'ai');
   }
+
+  // ===== 会話 =====
   async function loadConversationHistory() {
     const { data } = await sb.from('conversations').select('role,content')
       .eq('family_id', familyId).order('created_at').limit(20);
     conversationHistory = data || [];
     document.getElementById('chatArea').innerHTML = '';
     if (conversationHistory.length === 0) {
-      addMessageToUI('こんにちは！ぽぽちゃんだよ🐰💕\n家族のことなんでも相談してね！\n予定管理・宿題・イベントのお知らせ、なんでもおまかせ✨', 'ai');
+      const name = familyData?.family_name || 'みんな';
+      addMessageToUI(`こんにちは！ぽぽちゃんだよ🐰💕\n${name}のこと、なんでも相談してね！\n予定のチップをタップすると完了にできるよ✅`, 'ai');
     } else {
       conversationHistory.forEach(m => addMessageToUI(m.content, m.role === 'assistant' ? 'ai' : 'user'));
     }
@@ -403,7 +503,8 @@ function renderScheduleBanner() {
     document.getElementById('typing').classList.add('active');
     document.getElementById('chatArea').scrollTop = 99999;
 
-    const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。小学生の子どもがいる家族のために、予定管理・宿題・学校イベントのサポートをします。やさしく、ひらがなを多めに使い、絵文字を適度に使います。現在の家族の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}`;
+    const memberNames = members.map(m => m.display_name).join('、');
+    const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}`;
 
     let reply;
     try {
@@ -416,17 +517,14 @@ function renderScheduleBanner() {
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 500,
+          model: 'claude-sonnet-4-5', max_tokens: 500,
           system: systemPrompt,
           messages: conversationHistory.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }))
         })
       });
       const data = await res.json();
-      reply = res.ok ? (data.content?.[0]?.text || 'ごめんね😢') : `エラー ${res.status}: ${data.error?.message || ''}`;
-    } catch(e) {
-      reply = `通信エラー: ${e.message}`;
-    }
+      reply = res.ok ? (data.content?.[0]?.text || 'ごめんね😢') : `エラー ${res.status}: ${data.error?.message||''}`;
+    } catch(e) { reply = `通信エラー: ${e.message}`; }
 
     document.getElementById('typing').classList.remove('active');
     addMessageToUI(reply, 'ai');
@@ -435,6 +533,7 @@ function renderScheduleBanner() {
     document.getElementById('sendBtn').disabled = false;
   }
 
+  // ===== UI =====
   function addMessageToUI(text, role) {
     const area = document.getElementById('chatArea');
     const div = document.createElement('div');
@@ -447,10 +546,33 @@ function renderScheduleBanner() {
     area.scrollTop = area.scrollHeight;
   }
 
+  function showFamilyModal() {
+    // 招待コード表示
+    document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
+    // メンバー一覧
+    const emojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
+    document.getElementById('memberList').innerHTML = members.map((m, i) => `
+      <div class="member-item">
+        <div class="member-avatar">${emojis[i % emojis.length]}</div>
+        <div>
+          <div class="member-name">${m.display_name}</div>
+          <div class="member-role">${m.role === 'owner' ? '👑 オーナー' : 'メンバー'}</div>
+        </div>
+      </div>`).join('');
+    document.getElementById('familyModal').classList.remove('hidden');
+  }
+
+  function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
+
   function showScreen(name) {
-    document.getElementById('loginScreen').classList.toggle('hidden', name !== 'login');
-    document.getElementById('apiKeyScreen').classList.toggle('hidden', name !== 'apiKey');
-    document.getElementById('appScreen').classList.toggle('hidden', name !== 'app');
+    ['loginScreen','apiKeyScreen','familyScreen','appScreen'].forEach(id => {
+      const el = document.getElementById(id);
+      if (id === name + 'Screen' || (name === 'app' && id === 'appScreen')) {
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    });
   }
 
   function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
@@ -462,6 +584,7 @@ function renderScheduleBanner() {
     ['scheduleTitle','scheduleDate','scheduleAssigned'].forEach(id => document.getElementById(id).value='');
   }
   document.getElementById('scheduleModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideScheduleModal(); });
+  document.getElementById('familyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideFamilyModal(); });
 
   function toggleMode() {
     isSignUp = !isSignUp;
@@ -472,51 +595,28 @@ function renderScheduleBanner() {
       : 'アカウントがない方は <span onclick="toggleMode()">新規登録</span>';
   }
 
- async function handleEmailAuth() {
+  async function handleEmailAuth() {
     const email = document.getElementById('emailInput').value.trim();
     const password = document.getElementById('passwordInput').value;
     const errEl = document.getElementById('errorMsg');
     const btn = document.getElementById('emailBtn');
     errEl.classList.remove('show');
-
-    if (!email || !password) {
-      errEl.textContent = 'メールとパスワードを入力してください';
-      errEl.classList.add('show');
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = '処理中...';
-
+    if (!email||!password) { errEl.textContent='メールとパスワードを入力してください'; errEl.classList.add('show'); return; }
+    btn.disabled=true; btn.textContent='処理中...';
     try {
       if (isSignUp) {
         const { data, error } = await sb.auth.signUp({ email, password });
-        if (error) {
-          errEl.textContent = 'エラー: ' + error.message;
-          errEl.classList.add('show');
-        } else if (data?.session) {
-          await onLogin(data.session.user);
-        } else {
-          errEl.textContent = 'アカウント作成！ログインモードで再度お試しください';
-          errEl.classList.add('show');
-          toggleMode();
-        }
+        if (error) { errEl.textContent='エラー: '+error.message; errEl.classList.add('show'); }
+        else if (data?.session) { await onLogin(data.session.user); }
+        else { errEl.textContent='アカウント作成！ログインモードで再度お試しください'; errEl.classList.add('show'); toggleMode(); }
       } else {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) {
-          errEl.textContent = 'エラー: ' + error.message;
-          errEl.classList.add('show');
-        } else if (data?.session) {
-          await onLogin(data.session.user);
-        }
+        if (error) { errEl.textContent='エラー: '+error.message; errEl.classList.add('show'); }
+        else if (data?.session) { await onLogin(data.session.user); }
       }
-    } catch(e) {
-      errEl.textContent = '予期しないエラー: ' + e.message;
-      errEl.classList.add('show');
-    }
-
-    btn.disabled = false;
-    btn.textContent = isSignUp ? 'アカウントを作成' : 'ログイン';
+    } catch(e) { errEl.textContent='予期しないエラー: '+e.message; errEl.classList.add('show'); }
+    btn.disabled=false;
+    btn.textContent=isSignUp?'アカウントを作成':'ログイン';
   }
 
   async function handleGoogleLogin() {
@@ -525,7 +625,7 @@ function renderScheduleBanner() {
 
   async function logout() {
     await sb.auth.signOut();
-    conversationHistory=[]; schedules=[]; claudeApiKey=''; familyId=null;
+    conversationHistory=[]; schedules=[]; claudeApiKey=''; familyId=null; familyData=null; members=[];
     showScreen('login');
   }
 
