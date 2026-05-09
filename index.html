@@ -319,9 +319,8 @@
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     const { data: newFamily, error } = await sb.from('families')
-      .insert({ family_name: displayName + 'の家族', invite_code: code })
-      .select('id, invite_code').single();
-
+      .insert({ name: displayName + 'の家族', family_name: displayName + 'の家族', invite_code: code })
+      .select('id, invite_code, family_name').single();
     if (error) { errEl.textContent = '作成失敗: ' + error.message; errEl.classList.add('show'); return; }
 
     // family_membersに追加
