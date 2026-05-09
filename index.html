@@ -406,7 +406,7 @@
     const { error } = await sb.from('user_settings').upsert({
       user_id: currentUser.id, claude_api_key: key,
       updated_at: new Date().toISOString()
-    });
+    }, { onConflict: 'user_id' });
     if (error) { errEl.textContent = '保存に失敗: ' + error.message; errEl.style.display = 'block'; return; }
     claudeApiKey = key;
     await loadMembers();
