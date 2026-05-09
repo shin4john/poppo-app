@@ -93,8 +93,11 @@
 
   .schedule-banner { background:linear-gradient(135deg,var(--lavender),var(--pink)); padding:8px 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
   .schedule-banner::-webkit-scrollbar { display:none; }
-  .schedule-chip { background:white; border-radius:20px; padding:5px 12px; font-size:11px; white-space:nowrap; color:var(--brown); font-weight:600; box-shadow:0 2px 8px rgba(0,0,0,0.08); flex-shrink:0; }
-
+  .schedule-chip { background:white; border-radius:20px; padding:5px 12px; font-size:11px; white-space:nowrap; color:var(--brown); font-weight:600; box-shadow:0 2px 8px rgba(0,0,0,0.08); flex-shrink:0; display:flex; align-items:center; gap:6px; cursor:pointer; transition:all 0.2s; }
+  .schedule-chip .check-btn { width:18px; height:18px; border-radius:50%; border:2px solid var(--pink); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; color:transparent; transition:all 0.2s; }
+  .schedule-chip:hover .check-btn, .schedule-chip:active .check-btn { background:var(--pink); color:white; }
+  @keyframes chipComplete { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.1)} 100%{transform:scale(0);opacity:0;width:0;padding:0;margin:0} }
+  .schedule-chip.completing { animation:chipComplete 0.4s ease forwards; }
   .chat-area { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; scroll-behavior:smooth; }
   .chat-area::-webkit-scrollbar { display:none; }
   .message { display:flex; gap:8px; max-width:85%; animation:slideIn 0.3s ease; }
@@ -322,16 +325,37 @@
     renderScheduleBanner();
   }
 
-  function renderScheduleBanner() {
+function renderScheduleBanner() {
     const icons = { '予定':'📅', '宿題':'📚', 'イベント':'🎉' };
-    document.getElementById('scheduleBanner').innerHTML = schedules.length === 0
-      ? '<div class="schedule-chip">📅 予定なし</div>'
-      : schedules.map(s => {
-          const date = s.event_date ? s.event_date.slice(5).replace('-','/') + ' ' : '';
-          return `<div class="schedule-chip">${icons[s.category]||'📅'} ${date}${s.title}</div>`;
-        }).join('');
+    const banner = document.getElementById('scheduleBanner');
+    if (schedules.length === 0) {
+      banner.innerHTML = '<div class="schedule-chip">🎉 予定なし！のんびりしてね</div>';
+      return;
+    }
+    banner.innerHTML = schedules.map(s => {
+      const date = s.event_date ? s.event_date.slice(5).replace('-','/') + ' ' : '';
+      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}', '${s.title}', this)">
+        <div class="check-btn">✓</div>
+        <span>${icons[s.category]||'📅'} ${date}${s.title}</span>
+      </div>`;
+    }).join('');
   }
 
+  async function completeSchedule(id, title, chipEl) {
+    chipEl.classList.add('completing');
+    await sb.from('schedules').update({ is_done: true }).eq('id', id);
+    schedules = schedules.filter(s => s.id !== id);
+    setTimeout(() => {
+      renderScheduleBanner();
+      const praise = [
+        `「${title}」おわったね！えらい！✨🐰`,
+        `やったね！「${title}」かんりょう！💕`,
+        `「${title}」ばっちり！すごいすごい！🌸`,
+        `わあ！「${title}」できたね！おつかれさま🎉`
+      ];
+      addMessageToUI(praise[Math.floor(Math.random() * praise.length)], 'ai');
+    }, 400);
+  }
   async function addSchedule() {
     const title = document.getElementById('scheduleTitle').value.trim();
     if (!title) return;
