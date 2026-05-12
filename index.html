@@ -506,8 +506,9 @@
     document.getElementById('chatArea').scrollTop = 99999;
 
     const memberNames = members.map(m => m.display_name).join('、');
-    const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}`;
-
+    const todayStr = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
+    const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。今日の日付：${todayStr}。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}`;
+    
     let reply;
     try {
       const res = await fetch('https://poppo-api.onoshin2.workers.dev', {
@@ -661,20 +662,20 @@
     try {
       addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
 
-      const today = new Date().toISOString();
-      const oneMonthLater = new Date();
-      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+      const today = new Date();
+      const oneWeekLater = new Date();
+      oneWeekLater.setDate(today.getDate() + 7);
 
-      // カレンダーイベント取得
+      // カレンダーイベント取得（直近1週間）
       const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today}&timeMax=${oneMonthLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=20`,
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneWeekLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=20`,
         { headers: { Authorization: `Bearer ${googleAccessToken}` } }
       );
       const data = await res.json();
       const events = data.items || [];
 
       if (events.length === 0) {
-        addMessageToUI('Googleカレンダーに今後1ヶ月の予定が見つからなかったよ😊', 'ai');
+        addMessageToUI('Googleカレンダーに今後1週間の予定が見つからなかったよ😊', 'ai');
         return;
       }
 
@@ -684,6 +685,15 @@
         const title = event.summary;
         const eventDate = event.start?.date || event.start?.dateTime?.split('T')[0];
         if (!title) continue;
+
+        // 重複チェック
+        const { data: existing } = await sb.from('schedules')
+          .select('id')
+          .eq('family_id', familyId)
+          .eq('title', title)
+          .eq('event_date', eventDate || null)
+          .single();
+        if (existing) continue;
 
         const { error } = await sb.from('schedules').insert({
           family_id: familyId,
@@ -730,6 +740,14 @@
 
           // 期日があれば取得
           const dueDate = task.due ? task.due.split('T')[0] : null;
+
+          // 重複チェック
+          const { data: existing } = await sb.from('schedules')
+            .select('id')
+            .eq('family_id', familyId)
+            .eq('title', task.title)
+            .single();
+          if (existing) continue;
 
           const { error } = await sb.from('schedules').insert({
             family_id: familyId,
