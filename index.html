@@ -662,13 +662,16 @@
     try {
       addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
 
+    // 今日の0時から1週間後の23:59まで
       const today = new Date();
-      const oneWeekLater = new Date();
+      today.setHours(0, 0, 0, 0);
+      const oneWeekLater = new Date(today);
       oneWeekLater.setDate(today.getDate() + 7);
+      oneWeekLater.setHours(23, 59, 59, 999);
 
       // カレンダーイベント取得（直近1週間）
       const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneWeekLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=20`,
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneWeekLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`,
         { headers: { Authorization: `Bearer ${googleAccessToken}` } }
       );
       const data = await res.json();
