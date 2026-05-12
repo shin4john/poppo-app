@@ -629,7 +629,7 @@
 
   // ===== Googleカレンダー連携 =====
   const GOOGLE_CLIENT_ID = '791931272330-u8inhpjmnvosol4ul3gm2q9sslgjaqfp.apps.googleusercontent.com'; // ←書き換えてください
-  const CALENDAR_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+  const CALENDAR_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks.readonly';
   let googleTokenClient = null;
   let googleAccessToken = null;
 
@@ -695,11 +695,56 @@
         if (!error) addedCount++;
       }
 
+      // Google Tasksも取得
+      const taskCount = await fetchGoogleTasks();
       await loadSchedules();
-      addMessageToUI(`Googleカレンダーから${addedCount}件の予定を取り込んだよ！📅✨`, 'ai');
+      addMessageToUI(`Googleカレンダーから${addedCount}件の予定と、Todoリストから${taskCount}件のタスクを取り込んだよ！📅✨`, 'ai');
 
     } catch(e) {
       addMessageToUI(`カレンダーの取得に失敗したよ😢 ${e.message}`, 'ai');
+    }
+  }
+
+  async function fetchGoogleTasks() {
+    try {
+      // タスクリスト一覧を取得
+      const listsRes = await fetch(
+        'https://www.googleapis.com/tasks/v1/users/@me/lists',
+        { headers: { Authorization: `Bearer ${googleAccessToken}` } }
+      );
+      const listsData = await listsRes.json();
+      const taskLists = listsData.items || [];
+
+      let addedCount = 0;
+      for (const list of taskLists) {
+        // 各リストのタスクを取得（未完了のみ）
+        const tasksRes = await fetch(
+          `https://www.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=20`,
+          { headers: { Authorization: `Bearer ${googleAccessToken}` } }
+        );
+        const tasksData = await tasksRes.json();
+        const tasks = tasksData.items || [];
+
+        for (const task of tasks) {
+          if (!task.title || task.status === 'completed') continue;
+
+          // 期日があれば取得
+          const dueDate = task.due ? task.due.split('T')[0] : null;
+
+          const { error } = await sb.from('schedules').insert({
+            family_id: familyId,
+            title: task.title,
+            event_date: dueDate,
+            category: '宿題',
+            assigned_to: null
+          });
+          if (!error) addedCount++;
+        }
+      }
+      return addedCount;
+    } catch(e) {
+      console.error('Tasks取得エラー:', e);
+      return 0;
     }
   }
 
