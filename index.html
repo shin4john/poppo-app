@@ -687,16 +687,12 @@
         if (!title) continue;
 
         // 重複チェック
-        // 重複チェック（nullを正しく扱う）
-        let dupQuery = sb.from('schedules')
+        const { data: existingList } = await sb.from('schedules')
           .select('id')
           .eq('family_id', familyId)
           .eq('title', title);
-        dupQuery = eventDate
-          ? dupQuery.eq('event_date', eventDate)
-          : dupQuery.is('event_date', null);
-        const { data: existing } = await dupQuery.single();
-        if (existing) continue;
+        if (existingList && existingList.length > 0) continue;
+        
 
         const { error } = await sb.from('schedules').insert({
           family_id: familyId,
@@ -748,16 +744,13 @@
 
           const dueDate = task.due ? task.due.split('T')[0] : null;
 
-          // 重複チェック（nullを正しく扱う）
-          let dupQuery = sb.from('schedules')
+          // 重複チェック
+          const { data: existingList } = await sb.from('schedules')
             .select('id')
             .eq('family_id', familyId)
             .eq('title', task.title);
-          dupQuery = dueDate
-            ? dupQuery.eq('event_date', dueDate)
-            : dupQuery.is('event_date', null);
-          const { data: existing } = await dupQuery.single();
-          if (existing) continue;
+          if (existingList && existingList.length > 0) continue;
+          
 
           const { error } = await sb.from('schedules').insert({
             family_id: familyId,
