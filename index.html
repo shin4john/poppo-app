@@ -18,8 +18,6 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Zen Maru Gothic',sans-serif;background:var(--cream);height:100dvh;display:flex;flex-direction:column;overflow:hidden;background-image:radial-gradient(circle at 20% 10%,rgba(255,181,200,0.25) 0%,transparent 50%),radial-gradient(circle at 80% 90%,rgba(200,168,255,0.2) 0%,transparent 50%);}
   .hidden{display:none !important;}
-
-  /* 共通 */
   .screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px;}
   .login-bunny svg{width:100px;height:100px;animation:float 3s ease-in-out infinite;}
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -46,8 +44,6 @@
   .error-msg.show{display:block;}
   .success-msg{background:#E8FFE8;color:#2A7;border-radius:10px;padding:8px 12px;font-size:12px;display:none;}
   .success-msg.show{display:block;}
-
-  /* 招待コード表示 */
   .invite-code-box{background:var(--lavender);border-radius:16px;padding:16px;text-align:center;}
   .invite-code-box .code{font-family:'Nunito',sans-serif;font-size:28px;font-weight:800;color:var(--brown);letter-spacing:4px;}
   .invite-code-box .hint{font-size:11px;color:#888;margin-top:4px;}
@@ -63,13 +59,18 @@
   .header-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
   .icon-btn{background:var(--lavender);border:none;border-radius:20px;padding:5px 12px;font-size:11px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:600;cursor:pointer;white-space:nowrap;}
 
-  .schedule-banner{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:8px 16px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
-  .schedule-banner::-webkit-scrollbar{display:none;}
-  .schedule-chip{background:white;border-radius:20px;padding:5px 12px;font-size:11px;white-space:nowrap;color:var(--brown);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all 0.2s;}
-  .schedule-chip .check-btn{width:18px;height:18px;border-radius:50%;border:2px solid var(--pink);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:transparent;transition:all 0.2s;}
+  /* ===== 3セクションバナー ===== */
+  .schedule-sections{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:6px 0;overflow-x:auto;scrollbar-width:none;}
+  .schedule-sections::-webkit-scrollbar{display:none;}
+  .schedule-section{display:flex;align-items:center;gap:6px;padding:3px 12px;flex-shrink:0;}
+  .section-label{font-size:10px;font-weight:800;color:white;background:rgba(255,255,255,0.3);border-radius:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0;}
+  .schedule-chip{background:white;border-radius:20px;padding:4px 10px;font-size:11px;white-space:nowrap;color:var(--brown);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;display:flex;align-items:center;gap:5px;cursor:pointer;transition:all 0.2s;}
+  .schedule-chip .check-btn{width:16px;height:16px;border-radius:50%;border:2px solid var(--pink);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:transparent;transition:all 0.2s;}
   .schedule-chip:active .check-btn{background:var(--pink);color:white;}
+  .schedule-chip .assignee{font-size:10px;color:var(--pink-dark);font-weight:700;}
   @keyframes chipComplete{0%{transform:scale(1);opacity:1}50%{transform:scale(1.1)}100%{transform:scale(0);opacity:0;width:0;padding:0;margin:0}}
   .schedule-chip.completing{animation:chipComplete 0.4s ease forwards;}
+  .no-schedule{font-size:11px;color:rgba(255,255,255,0.8);padding:2px 4px;}
 
   .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
   .chat-area::-webkit-scrollbar{display:none;}
@@ -82,19 +83,16 @@
   .bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.6;color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,0.07);}
   .message.ai .bubble{background:white;border-bottom-left-radius:4px;}
   .message.user .bubble{background:var(--pink);color:var(--brown);border-bottom-right-radius:4px;}
-
   .typing{display:none;align-self:flex-start;align-items:center;gap:8px;}
   .typing.active{display:flex;animation:slideIn 0.3s ease;}
   .typing-bubble{background:white;border-radius:18px;border-bottom-left-radius:4px;padding:12px 16px;display:flex;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,0.07);}
   .typing-dot{width:7px;height:7px;background:var(--pink-dark);border-radius:50%;animation:bounce 1.2s infinite;}
   .typing-dot:nth-child(2){animation-delay:0.2s}.typing-dot:nth-child(3){animation-delay:0.4s}
   @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-
   .quick-replies{display:flex;gap:8px;overflow-x:auto;padding:0 16px 8px;scrollbar-width:none;}
   .quick-replies::-webkit-scrollbar{display:none;}
   .qr-btn{background:white;border:2px solid var(--pink);border-radius:20px;padding:7px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--pink-dark);font-weight:600;white-space:nowrap;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
   .qr-btn:active{background:var(--pink);color:white;transform:scale(0.97);}
-
   .input-area{background:white;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;box-shadow:0 -2px 16px rgba(180,100,130,0.1);}
   .input-wrap{flex:1;background:var(--cream);border-radius:24px;display:flex;align-items:center;padding:8px 16px;border:2px solid transparent;transition:border-color 0.2s;}
   .input-wrap:focus-within{border-color:var(--pink);}
@@ -103,15 +101,12 @@
   .send-btn{width:44px;height:44px;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s,opacity 0.15s;box-shadow:0 4px 12px rgba(255,100,150,0.3);}
   .send-btn:active{transform:scale(0.93);}
   .send-btn:disabled{opacity:0.5;}
-
   .modal-overlay{position:fixed;inset:0;background:rgba(60,30,40,0.5);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
   .modal-overlay.hidden{display:none;}
   .modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));width:100%;animation:slideUp 0.3s ease;display:flex;flex-direction:column;gap:12px;}
   @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .modal h2{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);}
   .modal select{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);background:white;}
-
-  /* メンバー一覧 */
   .member-list{display:flex;flex-direction:column;gap:8px;}
   .member-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--cream);border-radius:12px;}
   .member-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
@@ -186,8 +181,9 @@
     </div>
   </div>
 
-  <div class="schedule-banner" id="scheduleBanner">
-    <div class="schedule-chip">📅 読み込み中...</div>
+  <!-- 3セクションバナー -->
+  <div class="schedule-sections" id="scheduleSections">
+    <div class="schedule-section"><span class="no-schedule">読み込み中...</span></div>
   </div>
 
   <div class="chat-area" id="chatArea"></div>
@@ -273,32 +269,15 @@
 
   async function onLogin(user) {
     currentUser = user;
-
-    // family_membersから家族を検索
     const { data: memberData } = await sb.from('family_members')
-      .select('family_id, role, display_name')
-      .eq('user_id', currentUser.id)
-      .single();
-
-    if (!memberData) {
-      // 家族未設定→家族設定画面へ
-      showScreen('family');
-      return;
-    }
-
+      .select('family_id, role, display_name').eq('user_id', currentUser.id).single();
+    if (!memberData) { showScreen('family'); return; }
     familyId = memberData.family_id;
-
-    // familyデータ取得
     const { data: fData } = await sb.from('families')
-      .select('id, family_name, invite_code')
-      .eq('id', familyId)
-      .single();
+      .select('id, family_name, invite_code').eq('id', familyId).single();
     familyData = fData;
-
-    // APIキー確認
     const { data: settings } = await sb.from('user_settings')
       .select('claude_api_key').eq('user_id', currentUser.id).single();
-
     if (settings?.claude_api_key) {
       claudeApiKey = settings.claude_api_key;
       await loadMembers();
@@ -311,139 +290,124 @@
     }
   }
 
-  // ===== 家族グループ作成 =====
   async function createFamily() {
     const displayName = document.getElementById('displayNameInput').value.trim();
     const errEl = document.getElementById('familyError');
     errEl.classList.remove('show');
-    if (!displayName) { errEl.textContent = '名前を入力してください'; errEl.classList.add('show'); return; }
-
-    // ランダムな6文字の招待コード生成
+    if (!displayName) { errEl.textContent='名前を入力してください'; errEl.classList.add('show'); return; }
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
     const { data: newFamily, error } = await sb.from('families')
-      .insert({ name: displayName + 'の家族', family_name: displayName + 'の家族', invite_code: code })
+      .insert({ name: displayName+'の家族', family_name: displayName+'の家族', invite_code: code })
       .select('id, invite_code, family_name').single();
-    if (error) { errEl.textContent = '作成失敗: ' + error.message; errEl.classList.add('show'); return; }
-
-    // family_membersに追加
-    await sb.from('family_members').insert({
-      family_id: newFamily.id,
-      user_id: currentUser.id,
-      role: 'owner',
-      display_name: displayName
-    });
-
-    familyId = newFamily.id;
-    familyData = newFamily;
-
-    // APIキー設定へ
+    if (error) { errEl.textContent='作成失敗: '+error.message; errEl.classList.add('show'); return; }
+    await sb.from('family_members').insert({ family_id: newFamily.id, user_id: currentUser.id, role: 'owner', display_name: displayName });
+    familyId = newFamily.id; familyData = newFamily;
     showScreen('apiKey');
   }
 
-  // ===== 招待コードで参加 =====
   async function joinFamily() {
     const displayName = document.getElementById('displayNameInput').value.trim();
     const code = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
     const errEl = document.getElementById('familyError');
     const succEl = document.getElementById('familySuccess');
     errEl.classList.remove('show'); succEl.classList.remove('show');
-
-    if (!displayName) { errEl.textContent = '名前を入力してください'; errEl.classList.add('show'); return; }
-    if (!code) { errEl.textContent = '招待コードを入力してください'; errEl.classList.add('show'); return; }
-
-    // 招待コードで家族を検索
-    const { data: family, error } = await sb.from('families')
-      .select('id, family_name').eq('invite_code', code).single();
-
-    if (error || !family) { errEl.textContent = '招待コードが見つかりません😢'; errEl.classList.add('show'); return; }
-
-    // すでに参加済みか確認
-    const { data: existing } = await sb.from('family_members')
-      .select('id').eq('family_id', family.id).eq('user_id', currentUser.id).single();
-
-    if (existing) { errEl.textContent = 'すでにこの家族に参加しています'; errEl.classList.add('show'); return; }
-
-    // family_membersに追加
-    const { error: joinError } = await sb.from('family_members').insert({
-      family_id: family.id,
-      user_id: currentUser.id,
-      role: 'member',
-      display_name: displayName
-    });
-
-    if (joinError) { errEl.textContent = '参加失敗: ' + joinError.message; errEl.classList.add('show'); return; }
-
-    familyId = family.id;
-    familyData = family;
-    succEl.textContent = `「${family.family_name}」に参加したよ！🎉`;
-    succEl.classList.add('show');
-
+    if (!displayName) { errEl.textContent='名前を入力してください'; errEl.classList.add('show'); return; }
+    if (!code) { errEl.textContent='招待コードを入力してください'; errEl.classList.add('show'); return; }
+    const { data: family, error } = await sb.from('families').select('id, family_name').eq('invite_code', code).single();
+    if (error || !family) { errEl.textContent='招待コードが見つかりません😢'; errEl.classList.add('show'); return; }
+    const { data: existing } = await sb.from('family_members').select('id').eq('family_id', family.id).eq('user_id', currentUser.id).single();
+    if (existing) { errEl.textContent='すでにこの家族に参加しています'; errEl.classList.add('show'); return; }
+    const { error: joinError } = await sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id, role: 'member', display_name: displayName });
+    if (joinError) { errEl.textContent='参加失敗: '+joinError.message; errEl.classList.add('show'); return; }
+    familyId = family.id; familyData = family;
+    succEl.textContent=`「${family.family_name}」に参加したよ！🎉`; succEl.classList.add('show');
     setTimeout(() => showScreen('apiKey'), 1500);
   }
 
-  // ===== メンバー読み込み =====
   async function loadMembers() {
-    const { data } = await sb.from('family_members')
-      .select('display_name, role').eq('family_id', familyId);
+    const { data } = await sb.from('family_members').select('display_name, role').eq('family_id', familyId);
     members = data || [];
   }
 
   function updateFamilyHeader() {
-    if (familyData?.family_name) {
-      document.getElementById('familyNameHeader').textContent = familyData.family_name + ' 🌸';
-    }
-    document.getElementById('memberCountText').textContent =
-      `👨‍👩‍👧 ${members.length}人のメンバー`;
+    if (familyData?.family_name) document.getElementById('familyNameHeader').textContent = familyData.family_name + ' 🌸';
+    document.getElementById('memberCountText').textContent = `👨‍👩‍👧 ${members.length}人のメンバー`;
   }
 
-  // ===== APIキー保存 =====
   async function saveApiKey() {
     const key = document.getElementById('apiKeyInput').value.trim();
     const errEl = document.getElementById('apiKeyError');
     errEl.style.display = 'none';
-    if (!key.startsWith('sk-ant-')) {
-      errEl.textContent = 'APIキーは sk-ant- で始まる文字列です';
-      errEl.style.display = 'block'; return;
-    }
-    const { error } = await sb.from('user_settings').upsert({
-      user_id: currentUser.id, claude_api_key: key,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id' });
-    if (error) { errEl.textContent = '保存に失敗: ' + error.message; errEl.style.display = 'block'; return; }
+    if (!key.startsWith('sk-ant-')) { errEl.textContent='APIキーは sk-ant- で始まる文字列です'; errEl.style.display='block'; return; }
+    const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers();
-    await loadSchedules();
-    await loadConversationHistory();
-    updateFamilyHeader();
+    await loadMembers(); await loadSchedules(); await loadConversationHistory(); updateFamilyHeader();
     showScreen('app');
   }
 
-  // ===== 予定 =====
+  // ===== 予定読み込み =====
   async function loadSchedules() {
     const today = new Date().toISOString().split('T')[0];
     const { data, error } = await sb.from('schedules').select('*')
       .eq('family_id', familyId).eq('is_done', false)
       .or(`event_date.gte.${today},event_date.is.null`)
-      .order('event_date', { ascending: true, nullsFirst: false }).limit(10);
+      .order('event_date', { ascending: true, nullsFirst: false }).limit(50);
     if (error) console.error('schedules取得エラー:', error);
     schedules = data || [];
-    renderScheduleBanner();
+    renderScheduleSections();
   }
 
-  function renderScheduleBanner() {
+  // ===== 3セクションバナー =====
+  function renderScheduleSections() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const weekLater = new Date(today); weekLater.setDate(today.getDate()+7);
+    const weekLaterStr = weekLater.toISOString().split('T')[0];
+
+    const memberEmojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
+    const memberEmojiMap = {};
+    members.forEach((m, i) => { memberEmojiMap[m.display_name] = memberEmojis[i % memberEmojis.length]; });
+
     const icons = { '予定':'📅','宿題':'📚','イベント':'🎉' };
-    const banner = document.getElementById('scheduleBanner');
-    if (schedules.length === 0) {
-      banner.innerHTML = '<div class="schedule-chip">🎉 予定なし！のんびりしてね</div>'; return;
-    }
-    banner.innerHTML = schedules.map(s => {
-      const date = s.event_date ? s.event_date.slice(5).replace('-','/') + ' ' : '';
-      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}','${s.title.replace(/'/g,"\\'")}',this)">
+
+    function makeChip(s) {
+      const icon = icons[s.category] || '📅';
+      const assigneeEmoji = s.assigned_to ? (memberEmojiMap[s.assigned_to] || '') : '';
+      const assigneeLabel = s.assigned_to ? `<span class="assignee">${assigneeEmoji}${s.assigned_to}</span>` : '';
+      const safeTitle = s.title.replace(/'/g,"\\'");
+      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}','${safeTitle}',this)">
         <div class="check-btn">✓</div>
-        <span>${icons[s.category]||'📅'} ${date}${s.title}</span>
+        ${assigneeLabel}
+        <span>${icon} ${s.title}</span>
       </div>`;
-    }).join('');
+    }
+
+    // セクション分類
+    const todayItems = schedules.filter(s => s.event_date === todayStr || !s.event_date);
+    const tomorrowItems = schedules.filter(s => s.event_date === tomorrowStr);
+    const weekItems = schedules.filter(s => s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
+
+    const container = document.getElementById('scheduleSections');
+    let html = '';
+
+    if (todayItems.length === 0 && tomorrowItems.length === 0 && weekItems.length === 0) {
+      html = '<div class="schedule-section"><span class="no-schedule">🎉 今週の予定なし！のんびりしてね</span></div>';
+    } else {
+      if (todayItems.length > 0) {
+        html += `<div class="schedule-section"><span class="section-label">今日</span>${todayItems.map(makeChip).join('')}</div>`;
+      }
+      if (tomorrowItems.length > 0) {
+        html += `<div class="schedule-section"><span class="section-label">明日</span>${tomorrowItems.map(makeChip).join('')}</div>`;
+      }
+      if (weekItems.length > 0) {
+        html += `<div class="schedule-section"><span class="section-label">今週</span>${weekItems.map(makeChip).join('')}</div>`;
+      }
+    }
+    container.innerHTML = html;
   }
 
   async function completeSchedule(id, title, chipEl) {
@@ -451,7 +415,7 @@
     await sb.from('schedules').update({ is_done: true }).eq('id', id);
     schedules = schedules.filter(s => s.id !== id);
     setTimeout(() => {
-      renderScheduleBanner();
+      renderScheduleSections();
       const praise = [
         `「${title}」おわったね！えらい！✨🐰`,
         `やったね！「${title}」かんりょう！💕`,
@@ -471,7 +435,7 @@
       category: document.getElementById('scheduleCategory').value,
       assigned_to: document.getElementById('scheduleAssigned').value.trim() || null
     });
-    if (error) { alert('予定の保存に失敗: ' + error.message); return; }
+    if (error) { alert('予定の保存に失敗: '+error.message); return; }
     hideScheduleModal();
     await loadSchedules();
     addMessageToUI(`「${title}」を予定に追加したよ！🐰✨`, 'ai');
@@ -497,34 +461,30 @@
     if (!text) return;
     input.value = ''; input.style.height = 'auto';
     document.getElementById('sendBtn').disabled = true;
-
     addMessageToUI(text, 'user');
     conversationHistory.push({ role: 'user', content: text });
     await sb.from('conversations').insert({ family_id: familyId, role: 'user', content: text });
-
     document.getElementById('typing').classList.add('active');
     document.getElementById('chatArea').scrollTop = 99999;
 
     const memberNames = members.map(m => m.display_name).join('、');
     const todayStr = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
     const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。今日の日付：${todayStr}。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}`;
-    
+
     let reply;
     try {
       const res = await fetch('https://poppo-api.onoshin2.workers.dev', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5', max_tokens: 500,
           system: systemPrompt,
-          messages: conversationHistory.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }))
+          messages: conversationHistory.map(m => ({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
         })
       });
       const data = await res.json();
-      reply = res.ok ? (data.content?.[0]?.text || 'ごめんね😢') : `エラー ${res.status}: ${data.error?.message||''}`;
-    } catch(e) { reply = `通信エラー: ${e.message}`; }
+      reply = res.ok ? (data.content?.[0]?.text||'ごめんね😢') : `エラー ${res.status}: ${data.error?.message||''}`;
+    } catch(e) { reply=`通信エラー: ${e.message}`; }
 
     document.getElementById('typing').classList.remove('active');
     addMessageToUI(reply, 'ai');
@@ -533,50 +493,39 @@
     document.getElementById('sendBtn').disabled = false;
   }
 
-  // ===== UI =====
   function addMessageToUI(text, role) {
     const area = document.getElementById('chatArea');
     const div = document.createElement('div');
     div.className = `message ${role}`;
     const avatar = `<div class="msg-avatar"><svg viewBox="0 0 60 60"><ellipse cx="22" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="22" cy="18" rx="4" ry="9" fill="#FFB5C8"/><ellipse cx="38" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="38" cy="18" rx="4" ry="9" fill="#FFB5C8"/><circle cx="30" cy="38" r="18" fill="#FDE8F0"/><circle cx="24" cy="36" r="3" fill="#3D2B1F"/><circle cx="36" cy="36" r="3" fill="#3D2B1F"/><ellipse cx="30" cy="42" rx="2" ry="1.5" fill="#FF8FAD"/></svg></div>`;
-    div.innerHTML = role === 'ai'
-      ? `${avatar}<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`
-      : `<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+    div.innerHTML = role==='ai' ? `${avatar}<div class="bubble">${text.replace(/\n/g,'<br>')}</div>` : `<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
     area.appendChild(div);
     area.scrollTop = area.scrollHeight;
   }
 
   function showFamilyModal() {
-    // 招待コード表示
     document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
-    // メンバー一覧
     const emojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
-    document.getElementById('memberList').innerHTML = members.map((m, i) => `
+    document.getElementById('memberList').innerHTML = members.map((m,i) => `
       <div class="member-item">
-        <div class="member-avatar">${emojis[i % emojis.length]}</div>
-        <div>
-          <div class="member-name">${m.display_name}</div>
-          <div class="member-role">${m.role === 'owner' ? '👑 オーナー' : 'メンバー'}</div>
-        </div>
+        <div class="member-avatar">${emojis[i%emojis.length]}</div>
+        <div><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
       </div>`).join('');
     document.getElementById('familyModal').classList.remove('hidden');
   }
-
   function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
 
   function showScreen(name) {
     ['loginScreen','apiKeyScreen','familyScreen','appScreen'].forEach(id => {
       const el = document.getElementById(id);
-      if (id === name + 'Screen' || (name === 'app' && id === 'appScreen')) {
-        el.classList.remove('hidden');
-      } else {
-        el.classList.add('hidden');
-      }
+      if (id===name+'Screen'||(name==='app'&&id==='appScreen')) el.classList.remove('hidden');
+      else el.classList.add('hidden');
     });
   }
 
   function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
-  function handleKey(e) { if(e.key==='Enter'&&e.shiftKey){e.preventDefault();sendMessage();} }function sendQuick(text) { document.getElementById('msgInput').value=text; sendMessage(); }
+  function handleKey(e) { if(e.key==='Enter'&&e.shiftKey){e.preventDefault();sendMessage();} }
+  function sendQuick(text) { document.getElementById('msgInput').value=text; sendMessage(); }
   function showScheduleModal() { document.getElementById('scheduleModal').classList.remove('hidden'); }
   function hideScheduleModal() {
     document.getElementById('scheduleModal').classList.add('hidden');
@@ -587,8 +536,8 @@
 
   function toggleMode() {
     isSignUp = !isSignUp;
-    document.getElementById('loginTitle').textContent = isSignUp ? '新規登録' : 'ログイン';
-    document.getElementById('emailBtn').textContent = isSignUp ? 'アカウントを作成' : 'ログイン';
+    document.getElementById('loginTitle').textContent = isSignUp?'新規登録':'ログイン';
+    document.getElementById('emailBtn').textContent = isSignUp?'アカウントを作成':'ログイン';
     document.querySelector('.toggle-mode').innerHTML = isSignUp
       ? 'すでにアカウントがある方は <span onclick="toggleMode()">ログイン</span>'
       : 'アカウントがない方は <span onclick="toggleMode()">新規登録</span>';
@@ -629,7 +578,7 @@
   }
 
   // ===== Googleカレンダー連携 =====
-  const GOOGLE_CLIENT_ID = '791931272330-u8inhpjmnvosol4ul3gm2q9sslgjaqfp.apps.googleusercontent.com'; // ←書き換えてください
+  const GOOGLE_CLIENT_ID = '791931272330-u8inhpjmnvosol4ul3gm2q9sslgjaqfp.apps.googleusercontent.com';
   const CALENDAR_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks.readonly';
   let googleTokenClient = null;
   let googleAccessToken = null;
@@ -639,10 +588,7 @@
       client_id: GOOGLE_CLIENT_ID,
       scope: CALENDAR_SCOPES,
       callback: async (response) => {
-        if (response.error) {
-          addMessageToUI('Googleカレンダーの認証に失敗しました😢', 'ai');
-          return;
-        }
+        if (response.error) { addMessageToUI('Googleカレンダーの認証に失敗しました😢', 'ai'); return; }
         googleAccessToken = response.access_token;
         await fetchGoogleCalendarEvents();
       }
@@ -650,10 +596,7 @@
   }
 
   async function syncGoogleCalendar() {
-    if (!googleTokenClient) {
-      addMessageToUI('Googleカレンダーの初期化中です。少し待ってからもう一度試してね🐰', 'ai');
-      return;
-    }
+    if (!googleTokenClient) { addMessageToUI('Googleカレンダーの初期化中です。少し待ってからもう一度試してね🐰', 'ai'); return; }
     addMessageToUI('Googleカレンダーに接続するよ！認証画面が開いたら許可してね📅', 'ai');
     googleTokenClient.requestAccessToken();
   }
@@ -662,56 +605,39 @@
     try {
       addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
 
-    // 今日の0時から1週間後の23:59まで
+      // 今日から1ヶ月
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const oneWeekLater = new Date(today);
-      oneWeekLater.setDate(today.getDate() + 7);
-      oneWeekLater.setHours(23, 59, 59, 999);
+      today.setHours(0,0,0,0);
+      const oneMonthLater = new Date(today);
+      oneMonthLater.setMonth(today.getMonth()+1);
+      oneMonthLater.setHours(23,59,59,999);
 
-      // カレンダーイベント取得（直近1週間）
       const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneWeekLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`,
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneMonthLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`,
         { headers: { Authorization: `Bearer ${googleAccessToken}` } }
       );
       const data = await res.json();
       const events = data.items || [];
 
-      if (events.length === 0) {
-        addMessageToUI('Googleカレンダーに今後1週間の予定が見つからなかったよ😊', 'ai');
-        return;
-      }
-
-      // schedulesに追加
       let addedCount = 0;
       for (const event of events) {
         const title = event.summary;
         const eventDate = event.start?.date || event.start?.dateTime?.split('T')[0];
         if (!title) continue;
-
-        // 重複チェック
-        const { data: existingList } = await sb.from('schedules')
-          .select('id')
-          .eq('family_id', familyId)
-          .eq('title', title);
+        // 重複チェック（同タイトル・同日付）
+        const { data: existingList } = await sb.from('schedules').select('id')
+          .eq('family_id', familyId).eq('title', title).eq('event_date', eventDate);
         if (existingList && existingList.length > 0) continue;
-        
-
         const { error } = await sb.from('schedules').insert({
-          family_id: familyId,
-          title: title,
-          event_date: eventDate || null,
-          category: '予定',
-          assigned_to: null
+          family_id: familyId, title, event_date: eventDate||null, category: '予定', assigned_to: null
         });
         if (!error) addedCount++;
       }
 
-      // Google Tasksも取得
+      // Tasks取得
       const taskCount = await fetchGoogleTasks();
       await loadSchedules();
       addMessageToUI(`Googleカレンダーから${addedCount}件の予定と、Todoリストから${taskCount}件のタスクを取り込んだよ！📅✨`, 'ai');
-
     } catch(e) {
       addMessageToUI(`カレンダーの取得に失敗したよ😢 ${e.message}`, 'ai');
     }
@@ -719,63 +645,69 @@
 
   async function fetchGoogleTasks() {
     try {
-      // タスクリスト一覧を取得
-      const listsRes = await fetch(
-        'https://tasks.googleapis.com/tasks/v1/users/@me/lists',
-        { headers: { Authorization: `Bearer ${googleAccessToken}` } }
-      );
+      const listsRes = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists',
+        { headers: { Authorization: `Bearer ${googleAccessToken}` } });
       const listsData = await listsRes.json();
       const taskLists = listsData.items || [];
+      if (taskLists.length === 0) return 0;
 
-      console.log('タスクリスト:', JSON.stringify(taskLists));
-      if (taskLists.length === 0) {
-        console.log('タスクリストが見つかりません');
-        return 0;
-      }
+      // 今日から1ヶ月の範囲
+      const today = new Date(); today.setHours(0,0,0,0);
+      const todayStr = today.toISOString().split('T')[0];
+      const oneMonthLater = new Date(today);
+      oneMonthLater.setMonth(today.getMonth()+1);
+      const oneMonthStr = oneMonthLater.toISOString().split('T')[0];
 
       let addedCount = 0;
       for (const list of taskLists) {
-        // 各リストのタスクを取得（未完了のみ）
         const tasksRes = await fetch(
-          `https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=20`,
-          { headers: { Authorization: `Bearer ${googleAccessToken}` } }
-        );
+          `https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=50`,
+          { headers: { Authorization: `Bearer ${googleAccessToken}` } });
         const tasksData = await tasksRes.json();
         const tasks = tasksData.items || [];
-        console.log(`リスト「${list.title}」のタスク:`, JSON.stringify(tasks));
 
         for (const task of tasks) {
-          if (!task.title || task.status === 'completed') continue;
-
+          if (!task.title || task.status==='completed') continue;
           const dueDate = task.due ? task.due.split('T')[0] : null;
 
-          // 重複チェック
-          const { data: existingList } = await sb.from('schedules')
-            .select('id')
-            .eq('family_id', familyId)
-            .eq('title', task.title);
-          if (existingList && existingList.length > 0) continue;
-          
+          // 1ヶ月以内のタスクのみ
+          if (dueDate && dueDate > oneMonthStr) continue;
 
-          const { error } = await sb.from('schedules').insert({
-            family_id: familyId,
-            title: task.title,
-            event_date: dueDate,
-            category: '宿題',
-            assigned_to: null
-          });
-          if (!error) addedCount++;
+          // 繰り返しタスク：日付がある場合は今日〜1週間分を展開
+          const isRecurring = task.notes?.includes('毎日') || task.notes?.includes('繰り返し');
+          if (isRecurring && dueDate) {
+            // 今日から7日分を生成
+            for (let i = 0; i < 7; i++) {
+              const d = new Date(today);
+              d.setDate(today.getDate() + i);
+              const ds = d.toISOString().split('T')[0];
+              const { data: ex } = await sb.from('schedules').select('id')
+                .eq('family_id', familyId).eq('title', task.title).eq('event_date', ds);
+              if (ex && ex.length > 0) continue;
+              const { error } = await sb.from('schedules').insert({
+                family_id: familyId, title: task.title, event_date: ds, category: '宿題', assigned_to: null
+              });
+              if (!error) addedCount++;
+            }
+          } else {
+            // 通常タスク：重複チェック（タイトルのみ）
+            const { data: existingList } = await sb.from('schedules').select('id')
+              .eq('family_id', familyId).eq('title', task.title);
+            if (existingList && existingList.length > 0) continue;
+            const { error } = await sb.from('schedules').insert({
+              family_id: familyId, title: task.title, event_date: dueDate, category: '宿題', assigned_to: null
+            });
+            if (!error) addedCount++;
+          }
         }
       }
       return addedCount;
     } catch(e) {
       console.error('Tasks取得エラー:', e);
-      addMessageToUI(`Tasksエラー: ${e.message}`, 'ai');
       return 0;
     }
   }
 
-  // Google APIロード
   window.addEventListener('load', () => {
     google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID });
     initGoogleAuth();
