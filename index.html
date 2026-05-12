@@ -687,12 +687,15 @@
         if (!title) continue;
 
         // 重複チェック
-        const { data: existing } = await sb.from('schedules')
+        // 重複チェック（nullを正しく扱う）
+        let dupQuery = sb.from('schedules')
           .select('id')
           .eq('family_id', familyId)
-          .eq('title', title)
-          .eq('event_date', eventDate || null)
-          .single();
+          .eq('title', title);
+        dupQuery = eventDate
+          ? dupQuery.eq('event_date', eventDate)
+          : dupQuery.is('event_date', null);
+        const { data: existing } = await dupQuery.single();
         if (existing) continue;
 
         const { error } = await sb.from('schedules').insert({
@@ -719,17 +722,22 @@
     try {
       // タスクリスト一覧を取得
       const listsRes = await fetch(
-        'https://www.googleapis.com/tasks/v1/users/@me/lists',
+        'https://tasks.googleapis.com/tasks/v1/users/@me/lists',
         { headers: { Authorization: `Bearer ${googleAccessToken}` } }
       );
       const listsData = await listsRes.json();
       const taskLists = listsData.items || [];
 
+      if (taskLists.length === 0) {
+        console.log('タスクリストが見つかりません');
+        return 0;
+      }
+
       let addedCount = 0;
       for (const list of taskLists) {
         // 各リストのタスクを取得（未完了のみ）
         const tasksRes = await fetch(
-          `https://www.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=20`,
+          `https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=20`,
           { headers: { Authorization: `Bearer ${googleAccessToken}` } }
         );
         const tasksData = await tasksRes.json();
@@ -738,15 +746,17 @@
         for (const task of tasks) {
           if (!task.title || task.status === 'completed') continue;
 
-          // 期日があれば取得
           const dueDate = task.due ? task.due.split('T')[0] : null;
 
-          // 重複チェック
-          const { data: existing } = await sb.from('schedules')
+          // 重複チェック（nullを正しく扱う）
+          let dupQuery = sb.from('schedules')
             .select('id')
             .eq('family_id', familyId)
-            .eq('title', task.title)
-            .single();
+            .eq('title', task.title);
+          dupQuery = dueDate
+            ? dupQuery.eq('event_date', dueDate)
+            : dupQuery.is('event_date', null);
+          const { data: existing } = await dupQuery.single();
           if (existing) continue;
 
           const { error } = await sb.from('schedules').insert({
@@ -762,6 +772,7 @@
       return addedCount;
     } catch(e) {
       console.error('Tasks取得エラー:', e);
+      addMessageToUI(`Tasksエラー: ${e.message}`, 'ai');
       return 0;
     }
   }
