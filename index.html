@@ -727,6 +727,7 @@
       const listsData = await listsRes.json();
       const taskLists = listsData.items || [];
 
+      console.log('タスクリスト:', JSON.stringify(taskLists));
       if (taskLists.length === 0) {
         console.log('タスクリストが見つかりません');
         return 0;
@@ -741,6 +742,7 @@
         );
         const tasksData = await tasksRes.json();
         const tasks = tasksData.items || [];
+        console.log(`リスト「${list.title}」のタスク:`, JSON.stringify(tasks));
 
         for (const task of tasks) {
           if (!task.title || task.status === 'completed') continue;
