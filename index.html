@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ぽぽちゃん - 家族のAIアシスタント</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -178,6 +180,7 @@
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="showScheduleModal()">➕ 予定</button>
+      <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
       <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧</button>
       <button class="icon-btn" onclick="logout()">ログアウト</button>
     </div>
@@ -623,6 +626,88 @@
     conversationHistory=[]; schedules=[]; claudeApiKey=''; familyId=null; familyData=null; members=[];
     showScreen('login');
   }
+
+  // ===== Googleカレンダー連携 =====
+  const GOOGLE_CLIENT_ID = '791931272330-u8inhpjmnvosol4ul3gm2q9sslgjaqfp.apps.googleusercontent.com'; // ←書き換えてください
+  const CALENDAR_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+  let googleTokenClient = null;
+  let googleAccessToken = null;
+
+  function initGoogleAuth() {
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: CALENDAR_SCOPES,
+      callback: async (response) => {
+        if (response.error) {
+          addMessageToUI('Googleカレンダーの認証に失敗しました😢', 'ai');
+          return;
+        }
+        googleAccessToken = response.access_token;
+        await fetchGoogleCalendarEvents();
+      }
+    });
+  }
+
+  async function syncGoogleCalendar() {
+    if (!googleTokenClient) {
+      addMessageToUI('Googleカレンダーの初期化中です。少し待ってからもう一度試してね🐰', 'ai');
+      return;
+    }
+    addMessageToUI('Googleカレンダーに接続するよ！認証画面が開いたら許可してね📅', 'ai');
+    googleTokenClient.requestAccessToken();
+  }
+
+  async function fetchGoogleCalendarEvents() {
+    try {
+      addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
+
+      const today = new Date().toISOString();
+      const oneMonthLater = new Date();
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+      // カレンダーイベント取得
+      const res = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today}&timeMax=${oneMonthLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=20`,
+        { headers: { Authorization: `Bearer ${googleAccessToken}` } }
+      );
+      const data = await res.json();
+      const events = data.items || [];
+
+      if (events.length === 0) {
+        addMessageToUI('Googleカレンダーに今後1ヶ月の予定が見つからなかったよ😊', 'ai');
+        return;
+      }
+
+      // schedulesに追加
+      let addedCount = 0;
+      for (const event of events) {
+        const title = event.summary;
+        const eventDate = event.start?.date || event.start?.dateTime?.split('T')[0];
+        if (!title) continue;
+
+        const { error } = await sb.from('schedules').insert({
+          family_id: familyId,
+          title: title,
+          event_date: eventDate || null,
+          category: '予定',
+          assigned_to: null
+        });
+        if (!error) addedCount++;
+      }
+
+      await loadSchedules();
+      addMessageToUI(`Googleカレンダーから${addedCount}件の予定を取り込んだよ！📅✨`, 'ai');
+
+    } catch(e) {
+      addMessageToUI(`カレンダーの取得に失敗したよ😢 ${e.message}`, 'ai');
+    }
+  }
+
+  // Google APIロード
+  window.addEventListener('load', () => {
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID });
+    initGoogleAuth();
+  });
 
   init();
 </script>
