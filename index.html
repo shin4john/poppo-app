@@ -609,7 +609,14 @@
   }
 
   async function handleGoogleLogin() {
-    await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: window.location.href } });
+    await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://shin4john.github.io/poppo-app/',
+        skipBrowserRedirect: false,
+        scopes: 'email profile'
+      }
+    });
   }
 
   async function logout() {
