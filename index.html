@@ -54,12 +54,12 @@
   .bunny-svg{width:52px;height:52px;animation:float 3s ease-in-out infinite;flex-shrink:0;}
   .header-info{min-width:0;flex:1;overflow:hidden;}
   .header-info h1{font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;white-space:nowrap;}
   .status-dot{width:8px;height:8px;background:#5CE65C;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-  .header-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
-  .icon-btn{background:var(--lavender);border:none;border-radius:20px;padding:5px 12px;font-size:11px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:600;cursor:pointer;white-space:nowrap;}
-
+  .header-actions{display:flex;gap:6px;flex-shrink:0;}
+  .icon-btn{background:var(--lavender);border:none;border-radius:20px;padding:5px 10px;font-size:11px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:600;cursor:pointer;white-space:nowrap;}
+  
   /* ===== 3セクションバナー ===== */
   .schedule-sections{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:6px 0;overflow-x:auto;scrollbar-width:none;}
   .schedule-sections::-webkit-scrollbar{display:none;}
@@ -168,17 +168,19 @@
 
 <!-- アプリ画面 -->
 <div id="appScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-  <div class="header">
-    <svg class="bunny-svg" viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
-    <div class="header-info">
-      <h1 id="familyNameHeader">ぽぽちゃん 🌸</h1>
-      <p><span class="status-dot"></span><span id="memberCountText">家族のAIアシスタント</span></p>
+  <div class="header" style="flex-direction:column;align-items:stretch;padding:8px 16px;gap:6px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg class="bunny-svg" style="width:36px;height:36px;" viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      <div class="header-info">
+        <h1 id="familyNameHeader">ぽぽちゃん 🌸</h1>
+        <p><span class="status-dot"></span><span id="memberCountText">家族のAIアシスタント</span></p>
+      </div>
+      <button class="icon-btn" onclick="logout()" style="margin-left:auto;">ログアウト</button>
     </div>
-    <div class="header-actions">
+    <div class="header-actions" style="justify-content:flex-start;">
       <button class="icon-btn" onclick="showScheduleModal()">➕ 予定</button>
       <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
-      <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧</button>
-      <button class="icon-btn" onclick="logout()">ログアウト</button>
+      <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧 メンバー</button>
     </div>
   </div>
 
