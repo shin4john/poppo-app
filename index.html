@@ -320,6 +320,14 @@
     const { error: joinError } = await sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id, role: 'member', display_name: displayName });
     if (joinError) { errEl.textContent='参加失敗: '+joinError.message; errEl.classList.add('show'); return; }
     familyId = family.id; familyData = family;
+
+    // 参加通知をconversationsに保存（既存メンバーが次回ログイン時に見られる）
+    await sb.from('conversations').insert({
+      family_id: family.id,
+      role: 'assistant',
+      content: `🎉 ${displayName}さんが家族グループに参加したよ！みんなで仲良くしてね🐰💕`
+    });
+
     succEl.textContent=`「${family.family_name}」に参加したよ！🎉`; succEl.classList.add('show');
     setTimeout(() => showScreen('apiKey'), 1500);
   }
