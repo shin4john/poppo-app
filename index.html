@@ -615,6 +615,11 @@
   async function fetchGoogleCalendarEvents() {
     try {
       addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
+      // ログイン中のユーザーの表示名を取得
+      const myMember = members.find(m => m.display_name !== null);
+      const { data: myData } = await sb.from('family_members')
+        .select('display_name').eq('user_id', currentUser.id).single();
+      const myDisplayName = myData?.display_name || null;
 
       // 今日から1ヶ月
       const today = new Date();
@@ -640,7 +645,7 @@
           .eq('family_id', familyId).eq('title', title).eq('event_date', eventDate);
         if (existingList && existingList.length > 0) continue;
         const { error } = await sb.from('schedules').insert({
-          family_id: familyId, title, event_date: eventDate||null, category: '予定', assigned_to: null
+          family_id: familyId, title, event_date: eventDate||null, category: '予定', assigned_to: myDisplayName
         });
         if (!error) addedCount++;
       }
@@ -696,7 +701,7 @@
                 .eq('family_id', familyId).eq('title', task.title).eq('event_date', ds);
               if (ex && ex.length > 0) continue;
               const { error } = await sb.from('schedules').insert({
-                family_id: familyId, title: task.title, event_date: ds, category: '宿題', assigned_to: null
+                family_id: familyId, title: task.title, event_date: ds, category: '宿題', assigned_to: myDisplayName
               });
               if (!error) addedCount++;
             }
@@ -706,7 +711,7 @@
               .eq('family_id', familyId).eq('title', task.title);
             if (existingList && existingList.length > 0) continue;
             const { error } = await sb.from('schedules').insert({
-              family_id: familyId, title: task.title, event_date: dueDate, category: '宿題', assigned_to: null
+              family_id: familyId, title: task.title, event_date: dueDate, category: '宿題', assigned_to: myDisplayName
             });
             if (!error) addedCount++;
           }
