@@ -52,8 +52,9 @@
   #appScreen{flex:1;display:flex;flex-direction:column;overflow:hidden;}
   .header{background:white;padding:10px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(180,100,130,0.1);z-index:10;}
   .bunny-svg{width:52px;height:52px;animation:float 3s ease-in-out infinite;flex-shrink:0;}
-  .header-info h1{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--brown);}
-  .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;}
+  .header-info{min-width:0;flex:1;overflow:hidden;}
+  .header-info h1{font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .status-dot{width:8px;height:8px;background:#5CE65C;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
   .header-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
