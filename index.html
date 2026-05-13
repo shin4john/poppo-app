@@ -232,6 +232,11 @@
   <div class="modal">
     <h2>👨‍👩‍👧 家族メンバー</h2>
     <div class="member-list" id="memberList"></div>
+    <div id="familyNameEdit" style="display:none;flex-direction:column;gap:8px;">
+      <div class="divider">家族名の変更</div>
+      <input class="input-field" type="text" id="familyNameEditInput" placeholder="家族の名前"/>
+      <button class="btn btn-primary" onclick="updateFamilyName()">変更する ✨</button>
+    </div>
     <div class="divider">招待コード</div>
     <div class="invite-code-box">
       <div class="code" id="inviteCodeDisplay">------</div>
@@ -522,10 +527,35 @@
         <div class="member-avatar">${emojis[i%emojis.length]}</div>
         <div><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
       </div>`).join('');
+
+    // オーナーだけ家族名変更UIを表示
+    const { data: myData } = await sb.from('family_members')
+      .select('role').eq('user_id', currentUser.id).eq('family_id', familyId).single();
+    const isOwner = myData?.role === 'owner';
+    const editSection = document.getElementById('familyNameEdit');
+    if (isOwner) {
+      document.getElementById('familyNameEditInput').value = familyData?.family_name || '';
+      editSection.style.display = 'block';
+    } else {
+      editSection.style.display = 'none';
+    }
+
     document.getElementById('familyModal').classList.remove('hidden');
   }
   function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
 
+  async function updateFamilyName() {
+    const newName = document.getElementById('familyNameEditInput').value.trim();
+    if (!newName) return;
+    const { error } = await sb.from('families')
+      .update({ family_name: newName, name: newName })
+      .eq('id', familyId);
+    if (error) { alert('変更に失敗: '+error.message); return; }
+    familyData.family_name = newName;
+    updateFamilyHeader();
+    hideFamilyModal();
+    addMessageToUI(`家族名を「${newName}」に変更したよ！🌸🐰`, 'ai');
+  }
   function showScreen(name) {
     ['loginScreen','apiKeyScreen','familyScreen','appScreen'].forEach(id => {
       const el = document.getElementById(id);
