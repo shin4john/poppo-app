@@ -503,7 +503,10 @@
     area.scrollTop = area.scrollHeight;
   }
 
-  function showFamilyModal() {
+  async function showFamilyModal() {
+    // モーダルを開くたびに最新メンバーを取得
+    await loadMembers();
+    updateFamilyHeader();
     document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
     const emojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
     document.getElementById('memberList').innerHTML = members.map((m,i) => `
