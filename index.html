@@ -14,6 +14,7 @@
     --lavender:#E8D5FF;--lavender-dark:#C9A8FF;
     --brown:#6B4C3B;--text:#3D2B1F;
     --shadow:0 8px 32px rgba(180,100,130,0.12);
+    --gold:#FFD700;--fire:#FF6B2B;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Zen Maru Gothic',sans-serif;background:var(--cream);height:100dvh;display:flex;flex-direction:column;overflow:hidden;background-image:radial-gradient(circle at 20% 10%,rgba(255,181,200,0.25) 0%,transparent 50%),radial-gradient(circle at 80% 90%,rgba(200,168,255,0.2) 0%,transparent 50%);}
@@ -57,9 +58,13 @@
   .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;white-space:nowrap;}
   .status-dot{width:8px;height:8px;background:#5CE65C;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-  .header-actions{display:flex;gap:6px;flex-shrink:0;}
+  .header-actions{display:flex;gap:6px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
   .icon-btn{background:var(--lavender);border:none;border-radius:20px;padding:5px 10px;font-size:11px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:600;cursor:pointer;white-space:nowrap;}
-  
+
+  /* スタンプ＆ストリークバッジ */
+  .stamp-badge{background:linear-gradient(135deg,#FFF3CD,#FFE58A);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:#8B6914;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;box-shadow:0 2px 8px rgba(255,193,7,0.3);}
+  .streak-badge{background:linear-gradient(135deg,#FFE4D6,#FFBDA0);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:#8B3000;white-space:nowrap;display:flex;align-items:center;gap:3px;}
+
   /* ===== 3セクションバナー ===== */
   .schedule-sections{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:6px 0;overflow-x:auto;scrollbar-width:none;}
   .schedule-sections::-webkit-scrollbar{display:none;}
@@ -102,9 +107,11 @@
   .send-btn{width:44px;height:44px;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s,opacity 0.15s;box-shadow:0 4px 12px rgba(255,100,150,0.3);}
   .send-btn:active{transform:scale(0.93);}
   .send-btn:disabled{opacity:0.5;}
+
+  /* モーダル共通 */
   .modal-overlay{position:fixed;inset:0;background:rgba(60,30,40,0.5);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
   .modal-overlay.hidden{display:none;}
-  .modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));width:100%;animation:slideUp 0.3s ease;display:flex;flex-direction:column;gap:12px;}
+  .modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));width:100%;animation:slideUp 0.3s ease;display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow-y:auto;}
   @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .modal h2{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);}
   .modal select{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);background:white;}
@@ -113,6 +120,28 @@
   .member-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
   .member-name{font-size:14px;font-weight:600;color:var(--brown);}
   .member-role{font-size:11px;color:#aaa;}
+
+  /* スタンプ画面 */
+  .stamp-member-card{background:var(--cream);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;}
+  .stamp-member-header{display:flex;align-items:center;gap:10px;}
+  .stamp-member-name{font-size:15px;font-weight:700;color:var(--brown);}
+  .stamp-count-big{font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;color:var(--brown);margin-left:auto;}
+  .stamp-icons{display:flex;flex-wrap:wrap;gap:4px;min-height:28px;}
+  .streak-row{display:flex;align-items:center;gap:6px;font-size:12px;color:#888;}
+  .streak-count{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--fire);}
+
+  /* ご褒美 */
+  .reward-card{background:white;border:2px solid var(--lavender);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
+  .reward-title{font-size:14px;font-weight:700;color:var(--brown);}
+  .reward-progress-bar{background:#F0E8FF;border-radius:10px;height:10px;overflow:hidden;}
+  .reward-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink),var(--lavender-dark));border-radius:10px;transition:width 0.5s ease;}
+  .reward-label{font-size:11px;color:#888;display:flex;justify-content:space-between;}
+  .reward-achieved{border-color:var(--gold);background:linear-gradient(135deg,#FFFDE7,#FFF9C4);}
+  .reward-achieved .reward-title::before{content:'🏆 ';}
+
+  /* スタンプ飛ぶアニメ */
+  .stamp-float{position:fixed;font-size:32px;pointer-events:none;z-index:999;animation:stampFly 0.8s ease forwards;}
+  @keyframes stampFly{0%{transform:scale(0) translateY(0);opacity:1}60%{transform:scale(1.4) translateY(-40px);opacity:1}100%{transform:scale(0.8) translateY(-80px);opacity:0}}
 </style>
 </head>
 <body>
@@ -181,6 +210,8 @@
       <button class="icon-btn" onclick="showScheduleModal()">➕ 予定</button>
       <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
       <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧 メンバー</button>
+      <div class="stamp-badge" id="stampBadge" onclick="showStampModal()" style="display:none;">🌟<span id="myStampCount">0</span></div>
+      <div class="streak-badge" id="streakBadge" style="display:none;">🔥<span id="myStreakCount">0</span></div>
     </div>
   </div>
 
@@ -199,6 +230,7 @@
   <div class="quick-replies">
     <button class="qr-btn" onclick="sendQuick('今日の予定を教えて！')">📅 今日の予定</button>
     <button class="qr-btn" onclick="sendQuick('今週の宿題は何？')">📚 宿題確認</button>
+    <button class="qr-btn" onclick="showStampModal()">🌟 スタンプ帳</button>
     <button class="qr-btn" onclick="sendQuick('今週のイベントは？')">🎉 イベント</button>
     <button class="qr-btn" onclick="sendQuick('予定を全部見せて')">📋 一覧</button>
   </div>
@@ -249,6 +281,23 @@
   </div>
 </div>
 
+<!-- スタンプ帳モーダル -->
+<div class="modal-overlay hidden" id="stampModal">
+  <div class="modal">
+    <h2>🌟 スタンプ帳</h2>
+    <div id="stampMemberCards" style="display:flex;flex-direction:column;gap:12px;"></div>
+    <div class="divider">🏆 ご褒美リスト</div>
+    <div id="rewardCards" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="addRewardSection" class="hidden" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="divider">➕ ご褒美を追加（おや専用）</div>
+      <input class="input-field" id="rewardTitleInput" placeholder="ご褒美の内容（例：好きなお菓子）"/>
+      <input class="input-field" type="number" id="rewardStampsInput" placeholder="必要スタンプ数（例：10）" min="1"/>
+      <button class="btn btn-outline" onclick="addReward()">ご褒美を追加 🎁</button>
+    </div>
+    <button class="btn btn-secondary" onclick="hideStampModal()">とじる</button>
+  </div>
+</div>
+
 <script>
   const SUPABASE_URL = 'https://svuzjqwumfcidoqfwqqm.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dXpqcXd1bWZjaWRvcWZ3cXFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTQ1NjEsImV4cCI6MjA5Mzc5MDU2MX0.k7YTiXqZgFY9CY5R5cX9ldp7YLBO7HV5ic7E8AfQ7SM';
@@ -257,6 +306,7 @@
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let currentUser = null;
+  let currentMember = null; // { display_name, role }
   let familyId = null;
   let familyData = null;
   let claudeApiKey = '';
@@ -264,6 +314,14 @@
   let schedules = [];
   let members = [];
   let isSignUp = false;
+  let myDisplayName = null; // GCal取込時の担当者（モジュールスコープで共有）
+
+  // やる気機能
+  let stampData = {};
+  let streakData = {};
+  let rewardsData = [];
+  const COMPLETION_KEYWORDS = ['終わった','おわった','できた','やった','かんりょう','完了','おわり','すんだ','できたよ','おわったよ'];
+  const NON_COMPLETION = ['？','?','なに','何','どうする','どうやって','教えて','おしえて','できない','わからない'];
 
   // ===== 初期化 =====
   async function init() {
@@ -280,6 +338,8 @@
     const { data: memberData } = await sb.from('family_members')
       .select('family_id, role, display_name').eq('user_id', currentUser.id).single();
     if (!memberData) { showScreen('family'); return; }
+    currentMember = { display_name: memberData.display_name, role: memberData.role };
+    myDisplayName = memberData.display_name;
     familyId = memberData.family_id;
     const { data: fData } = await sb.from('families')
       .select('id, family_name, invite_code').eq('id', familyId).single();
@@ -291,6 +351,7 @@
       await loadMembers();
       await loadSchedules();
       await loadConversationHistory();
+      await loadStampData();
       updateFamilyHeader();
       showScreen('app');
     } else {
@@ -328,14 +389,11 @@
     const { error: joinError } = await sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id, role: 'member', display_name: displayName });
     if (joinError) { errEl.textContent='参加失敗: '+joinError.message; errEl.classList.add('show'); return; }
     familyId = family.id; familyData = family;
-
-    // 参加通知をconversationsに保存（既存メンバーが次回ログイン時に見られる）
     await sb.from('conversations').insert({
       family_id: family.id,
       role: 'assistant',
       content: `🎉 ${displayName}さんが家族グループに参加したよ！みんなで仲良くしてね🐰💕`
     });
-
     succEl.textContent=`「${family.family_name}」に参加したよ！🎉`; succEl.classList.add('show');
     setTimeout(() => showScreen('apiKey'), 1500);
   }
@@ -358,7 +416,9 @@
     const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers(); await loadSchedules(); await loadConversationHistory(); updateFamilyHeader();
+    await loadMembers(); await loadSchedules(); await loadConversationHistory();
+    await loadStampData();
+    updateFamilyHeader();
     showScreen('app');
   }
 
@@ -395,14 +455,14 @@
       const assigneeEmoji = s.assigned_to ? (memberEmojiMap[s.assigned_to] || '') : '';
       const assigneeLabel = s.assigned_to ? `<span class="assignee">${assigneeEmoji}${s.assigned_to}</span>` : '';
       const safeTitle = s.title.replace(/'/g,"\\'");
-      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}','${safeTitle}',this)">
+      const safeAssignee = (s.assigned_to || '').replace(/'/g,"\\'");
+      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}','${safeTitle}','${safeAssignee}',this)">
         <div class="check-btn">✓</div>
         ${assigneeLabel}
         <span>${icon} ${s.title}</span>
       </div>`;
     }
 
-    // セクション分類
     const todayItems = schedules.filter(s => s.event_date === todayStr || !s.event_date);
     const tomorrowItems = schedules.filter(s => s.event_date === tomorrowStr);
     const weekItems = schedules.filter(s => s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
@@ -413,30 +473,31 @@
     if (todayItems.length === 0 && tomorrowItems.length === 0 && weekItems.length === 0) {
       html = '<div class="schedule-section"><span class="no-schedule">🎉 今週の予定なし！のんびりしてね</span></div>';
     } else {
-      if (todayItems.length > 0) {
-        html += `<div class="schedule-section"><span class="section-label">今日</span>${todayItems.map(makeChip).join('')}</div>`;
-      }
-      if (tomorrowItems.length > 0) {
-        html += `<div class="schedule-section"><span class="section-label">明日</span>${tomorrowItems.map(makeChip).join('')}</div>`;
-      }
-      if (weekItems.length > 0) {
-        html += `<div class="schedule-section"><span class="section-label">今週</span>${weekItems.map(makeChip).join('')}</div>`;
-      }
+      if (todayItems.length > 0) html += `<div class="schedule-section"><span class="section-label">今日</span>${todayItems.map(makeChip).join('')}</div>`;
+      if (tomorrowItems.length > 0) html += `<div class="schedule-section"><span class="section-label">明日</span>${tomorrowItems.map(makeChip).join('')}</div>`;
+      if (weekItems.length > 0) html += `<div class="schedule-section"><span class="section-label">今週</span>${weekItems.map(makeChip).join('')}</div>`;
     }
     container.innerHTML = html;
   }
 
-  async function completeSchedule(id, title, chipEl) {
+  async function completeSchedule(id, title, assignedTo, chipEl) {
     chipEl.classList.add('completing');
     await sb.from('schedules').update({ is_done: true }).eq('id', id);
     schedules = schedules.filter(s => s.id !== id);
+
+    // スタンプ付与: assigned_to があればその人、なければ自分
+    const stampTarget = assignedTo || currentMember?.display_name;
+    if (stampTarget) await addStamp(stampTarget, title);
+
     setTimeout(() => {
       renderScheduleSections();
+      const count = stampData[stampTarget] || 0;
+      const streak = streakData[stampTarget]?.current || 0;
       const praise = [
-        `「${title}」おわったね！えらい！✨🐰`,
-        `やったね！「${title}」かんりょう！💕`,
-        `「${title}」ばっちり！すごいすごい！🌸`,
-        `わあ！「${title}」できたね！おつかれさま🎉`
+        `「${title}」おわったね！えらい！🌟スタンプ${count}こ・🔥${streak}日れんぞく！`,
+        `やったね！「${title}」かんりょう！💕スタンプが${count}こになったよ✨`,
+        `「${title}」ばっちり！すごいすごい！🌸れんぞく${streak}日！`,
+        `わあ！「${title}」できたね！おつかれさま🎉スタンプ${count}こゲット！`
       ];
       addMessageToUI(praise[Math.floor(Math.random()*praise.length)], 'ai');
     }, 400);
@@ -457,6 +518,143 @@
     addMessageToUI(`「${title}」を予定に追加したよ！🐰✨`, 'ai');
   }
 
+  // ===== スタンプ・ストリーク機能 =====
+  async function loadStampData() {
+    const { data: stamps } = await sb.from('stamps').select('member_name').eq('family_id', familyId);
+    stampData = {};
+    (stamps || []).forEach(s => { stampData[s.member_name] = (stampData[s.member_name] || 0) + 1; });
+
+    const { data: streaks } = await sb.from('streaks').select('*').eq('family_id', familyId);
+    streakData = {};
+    (streaks || []).forEach(s => {
+      streakData[s.member_name] = { current: s.current_streak, longest: s.longest_streak, last_date: s.last_completed_date };
+    });
+
+    const { data: rewards } = await sb.from('rewards').select('*').eq('family_id', familyId).eq('is_active', true).order('required_stamps');
+    rewardsData = rewards || [];
+
+    updateStampBadge();
+  }
+
+  async function addStamp(memberName, taskTitle) {
+    await sb.from('stamps').insert({ family_id: familyId, member_name: memberName, task_title: taskTitle, stamp_type: 'star' });
+    stampData[memberName] = (stampData[memberName] || 0) + 1;
+    await updateStreak(memberName);
+    showStampAnimation();
+    updateStampBadge();
+    checkRewards(memberName);
+  }
+
+  async function updateStreak(memberName) {
+    const today = new Date().toISOString().split('T')[0];
+    const existing = streakData[memberName];
+    if (existing?.last_date === today) return;
+
+    let newStreak = 1;
+    if (existing?.last_date) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (existing.last_date === yesterday.toISOString().split('T')[0]) {
+        newStreak = (existing.current || 0) + 1;
+      }
+    }
+    const longest = Math.max(existing?.longest || 0, newStreak);
+    streakData[memberName] = { current: newStreak, longest, last_date: today };
+
+    await sb.from('streaks').upsert({
+      family_id: familyId, member_name: memberName,
+      current_streak: newStreak, longest_streak: longest,
+      last_completed_date: today, updated_at: new Date().toISOString()
+    }, { onConflict: 'family_id,member_name' });
+  }
+
+  function checkRewards(memberName) {
+    const count = stampData[memberName] || 0;
+    const hit = rewardsData.find(r => r.required_stamps === count);
+    if (hit) {
+      setTimeout(() => {
+        addMessageToUI(`🎊 すごい！スタンプが${count}こになって「${hit.title}」のご褒美がもらえるよ！おめでとう🎉✨`, 'ai');
+      }, 600);
+    }
+  }
+
+  function updateStampBadge() {
+    if (!currentMember) return;
+    const count = stampData[currentMember.display_name] || 0;
+    const streak = streakData[currentMember.display_name]?.current || 0;
+    document.getElementById('myStampCount').textContent = count;
+    document.getElementById('myStreakCount').textContent = streak;
+    document.getElementById('stampBadge').style.display = 'flex';
+    document.getElementById('streakBadge').style.display = streak > 0 ? 'flex' : 'none';
+  }
+
+  function showStampAnimation() {
+    const el = document.createElement('div');
+    el.className = 'stamp-float';
+    el.textContent = '🌟';
+    el.style.left = (Math.random() * 60 + 20) + '%';
+    el.style.top = '40%';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+
+  function showStampModal() {
+    const emojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
+    const cards = members.map((m, i) => {
+      const count = stampData[m.display_name] || 0;
+      const streak = streakData[m.display_name] || {};
+      const stampIcons = '🌟'.repeat(Math.min(count, 20)) + (count > 20 ? `<span style="font-size:11px;color:#888;">+${count-20}</span>` : '');
+      return `<div class="stamp-member-card">
+        <div class="stamp-member-header">
+          <div class="member-avatar" style="font-size:18px;">${emojis[i%emojis.length]}</div>
+          <span class="stamp-member-name">${m.display_name}</span>
+          <span class="stamp-count-big">🌟${count}</span>
+        </div>
+        <div class="stamp-icons">${stampIcons || '<span style="color:#ccc;font-size:12px;">まだスタンプなし</span>'}</div>
+        <div class="streak-row">
+          🔥れんぞく <span class="streak-count">${streak.current||0}日</span>
+          　さいちょう <span class="streak-count">${streak.longest||0}日</span>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('stampMemberCards').innerHTML = cards || '<p style="color:#aaa;font-size:13px;">メンバーを読み込み中...</p>';
+
+    const myCount = stampData[currentMember?.display_name] || 0;
+    if (rewardsData.length === 0) {
+      document.getElementById('rewardCards').innerHTML = '<p style="color:#aaa;font-size:13px;">ご褒美がまだ設定されていないよ</p>';
+    } else {
+      document.getElementById('rewardCards').innerHTML = rewardsData.map(r => {
+        const ratio = Math.min(myCount / r.required_stamps, 1);
+        const achieved = myCount >= r.required_stamps;
+        return `<div class="reward-card ${achieved ? 'reward-achieved' : ''}">
+          <div class="reward-title">${r.title}</div>
+          <div class="reward-progress-bar"><div class="reward-progress-fill" style="width:${ratio*100}%"></div></div>
+          <div class="reward-label"><span>🌟${myCount} / ${r.required_stamps}こ</span><span>${achieved ? '✅ たっせい！' : `あと${r.required_stamps - myCount}こ`}</span></div>
+        </div>`;
+      }).join('');
+    }
+
+    if (currentMember?.role === 'owner') {
+      document.getElementById('addRewardSection').classList.remove('hidden');
+    }
+    document.getElementById('stampModal').classList.remove('hidden');
+  }
+
+  function hideStampModal() { document.getElementById('stampModal').classList.add('hidden'); }
+
+  async function addReward() {
+    const title = document.getElementById('rewardTitleInput').value.trim();
+    const stamps = parseInt(document.getElementById('rewardStampsInput').value);
+    if (!title || !stamps || stamps < 1) { alert('ご褒美の内容とスタンプ数を入力してね！'); return; }
+    const { error } = await sb.from('rewards').insert({ family_id: familyId, title, required_stamps: stamps });
+    if (error) { alert('保存に失敗: '+error.message); return; }
+    document.getElementById('rewardTitleInput').value = '';
+    document.getElementById('rewardStampsInput').value = '';
+    await loadStampData();
+    hideStampModal();
+    addMessageToUI(`ご褒美「${title}」を追加したよ！🎁 スタンプ${stamps}こでゲットできるよ✨`, 'ai');
+  }
+
   // ===== 会話 =====
   async function loadConversationHistory() {
     const { data } = await sb.from('conversations').select('role,content')
@@ -465,10 +663,16 @@
     document.getElementById('chatArea').innerHTML = '';
     if (conversationHistory.length === 0) {
       const name = familyData?.family_name || 'みんな';
-      addMessageToUI(`こんにちは！ぽぽちゃんだよ🐰💕\n${name}のこと、なんでも相談してね！\n予定のチップをタップすると完了にできるよ✅`, 'ai');
+      addMessageToUI(`こんにちは！ぽぽちゃんだよ🐰💕\n${name}のこと、なんでも相談してね！\n予定のチップをタップすると完了にできるよ✅\nタスクが終わったら「算数おわったよ！」って話しかけてね🌟`, 'ai');
     } else {
       conversationHistory.forEach(m => addMessageToUI(m.content, m.role === 'assistant' ? 'ai' : 'user'));
     }
+  }
+
+  function detectTaskCompletion(text) {
+    const hasCompletion = COMPLETION_KEYWORDS.some(k => text.includes(k));
+    const hasNonCompletion = NON_COMPLETION.some(k => text.includes(k));
+    return hasCompletion && !hasNonCompletion;
   }
 
   async function sendMessage() {
@@ -483,9 +687,20 @@
     document.getElementById('typing').classList.add('active');
     document.getElementById('chatArea').scrollTop = 99999;
 
+    // 案C: 完了報告を検出してスタンプ付与
+    if (detectTaskCompletion(text) && currentMember) {
+      const taskHint = text.length > 30 ? text.substring(0, 30) + '...' : text;
+      await addStamp(currentMember.display_name, taskHint);
+    }
+
     const memberNames = members.map(m => m.display_name).join('、');
     const todayStr = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
-    const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。今日の日付：${todayStr}。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}`;
+    const myCount = stampData[currentMember?.display_name] || 0;
+    const myStreak = streakData[currentMember?.display_name]?.current || 0;
+    const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。今日の日付：${todayStr}。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}。
+
+話しかけているのは「${currentMember?.display_name||'ユーザー'}」さんです。スタンプ数：${myCount}個、連続達成：${myStreak}日。
+タスク完了の報告（「おわったよ」「できた」など）を受けたときは、その人のがんばりを具体的に褒めて、スタンプとれんぞくについて嬉しそうに言及してください。`;
 
     let reply;
     try {
@@ -520,7 +735,6 @@
   }
 
   async function showFamilyModal() {
-    // モーダルを開くたびに最新メンバーを取得
     await loadMembers();
     updateFamilyHeader();
     document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
@@ -531,18 +745,16 @@
         <div><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
       </div>`).join('');
 
-    // オーナーだけ家族名変更UIを表示
     const { data: myData } = await sb.from('family_members')
       .select('role').eq('user_id', currentUser.id).eq('family_id', familyId).single();
     const isOwner = myData?.role === 'owner';
     const editSection = document.getElementById('familyNameEdit');
     if (isOwner) {
       document.getElementById('familyNameEditInput').value = familyData?.family_name || '';
-      editSection.style.display = 'block';
+      editSection.style.display = 'flex';
     } else {
       editSection.style.display = 'none';
     }
-
     document.getElementById('familyModal').classList.remove('hidden');
   }
   function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
@@ -550,15 +762,14 @@
   async function updateFamilyName() {
     const newName = document.getElementById('familyNameEditInput').value.trim();
     if (!newName) return;
-    const { error } = await sb.from('families')
-      .update({ family_name: newName, name: newName })
-      .eq('id', familyId);
+    const { error } = await sb.from('families').update({ family_name: newName, name: newName }).eq('id', familyId);
     if (error) { alert('変更に失敗: '+error.message); return; }
     familyData.family_name = newName;
     updateFamilyHeader();
     hideFamilyModal();
     addMessageToUI(`家族名を「${newName}」に変更したよ！🌸🐰`, 'ai');
   }
+
   function showScreen(name) {
     ['loginScreen','apiKeyScreen','familyScreen','appScreen'].forEach(id => {
       const el = document.getElementById(id);
@@ -577,6 +788,7 @@
   }
   document.getElementById('scheduleModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideScheduleModal(); });
   document.getElementById('familyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideFamilyModal(); });
+  document.getElementById('stampModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideStampModal(); });
 
   function toggleMode() {
     isSignUp = !isSignUp;
@@ -625,6 +837,7 @@
   async function logout() {
     await sb.auth.signOut();
     conversationHistory=[]; schedules=[]; claudeApiKey=''; familyId=null; familyData=null; members=[];
+    currentMember=null; myDisplayName=null; stampData={}; streakData={}; rewardsData=[];
     showScreen('login');
   }
 
@@ -655,32 +868,19 @@
   async function fetchGoogleCalendarEvents() {
     try {
       addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
-      // ログイン中のユーザーの表示名を取得
-      const myMember = members.find(m => m.display_name !== null);
-      const { data: myData } = await sb.from('family_members')
-        .select('display_name').eq('user_id', currentUser.id).single();
-      const myDisplayName = myData?.display_name || null;
-
-      // 今日から1ヶ月
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const oneMonthLater = new Date(today);
-      oneMonthLater.setMonth(today.getMonth()+1);
-      oneMonthLater.setHours(23,59,59,999);
+      const today = new Date(); today.setHours(0,0,0,0);
+      const oneMonthLater = new Date(today); oneMonthLater.setMonth(today.getMonth()+1); oneMonthLater.setHours(23,59,59,999);
 
       const res = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneMonthLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`,
         { headers: { Authorization: `Bearer ${googleAccessToken}` } }
       );
       const data = await res.json();
-      const events = data.items || [];
-
       let addedCount = 0;
-      for (const event of events) {
+      for (const event of (data.items || [])) {
         const title = event.summary;
         const eventDate = event.start?.date || event.start?.dateTime?.split('T')[0];
         if (!title) continue;
-        // 重複チェック（同タイトル・同日付）
         const { data: existingList } = await sb.from('schedules').select('id')
           .eq('family_id', familyId).eq('title', title).eq('event_date', eventDate);
         if (existingList && existingList.length > 0) continue;
@@ -689,14 +889,10 @@
         });
         if (!error) addedCount++;
       }
-
-      // Tasks取得
       const taskCount = await fetchGoogleTasks();
       await loadSchedules();
       addMessageToUI(`Googleカレンダーから${addedCount}件の予定と、Todoリストから${taskCount}件のタスクを取り込んだよ！📅✨`, 'ai');
-    } catch(e) {
-      addMessageToUI(`カレンダーの取得に失敗したよ😢 ${e.message}`, 'ai');
-    }
+    } catch(e) { addMessageToUI(`カレンダーの取得に失敗したよ😢 ${e.message}`, 'ai'); }
   }
 
   async function fetchGoogleTasks() {
@@ -707,11 +903,8 @@
       const taskLists = listsData.items || [];
       if (taskLists.length === 0) return 0;
 
-      // 今日から1ヶ月の範囲
       const today = new Date(); today.setHours(0,0,0,0);
-      const todayStr = today.toISOString().split('T')[0];
-      const oneMonthLater = new Date(today);
-      oneMonthLater.setMonth(today.getMonth()+1);
+      const oneMonthLater = new Date(today); oneMonthLater.setMonth(today.getMonth()+1);
       const oneMonthStr = oneMonthLater.toISOString().split('T')[0];
 
       let addedCount = 0;
@@ -720,22 +913,14 @@
           `https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=50`,
           { headers: { Authorization: `Bearer ${googleAccessToken}` } });
         const tasksData = await tasksRes.json();
-        const tasks = tasksData.items || [];
-
-        for (const task of tasks) {
+        for (const task of (tasksData.items || [])) {
           if (!task.title || task.status==='completed') continue;
           const dueDate = task.due ? task.due.split('T')[0] : null;
-
-          // 1ヶ月以内のタスクのみ
           if (dueDate && dueDate > oneMonthStr) continue;
-
-          // 繰り返しタスク：日付がある場合は今日〜1週間分を展開
           const isRecurring = task.notes?.includes('毎日') || task.notes?.includes('繰り返し');
           if (isRecurring && dueDate) {
-            // 今日から7日分を生成
             for (let i = 0; i < 7; i++) {
-              const d = new Date(today);
-              d.setDate(today.getDate() + i);
+              const d = new Date(today); d.setDate(today.getDate() + i);
               const ds = d.toISOString().split('T')[0];
               const { data: ex } = await sb.from('schedules').select('id')
                 .eq('family_id', familyId).eq('title', task.title).eq('event_date', ds);
@@ -746,7 +931,6 @@
               if (!error) addedCount++;
             }
           } else {
-            // 通常タスク：重複チェック（タイトルのみ）
             const { data: existingList } = await sb.from('schedules').select('id')
               .eq('family_id', familyId).eq('title', task.title);
             if (existingList && existingList.length > 0) continue;
@@ -758,10 +942,7 @@
         }
       }
       return addedCount;
-    } catch(e) {
-      console.error('Tasks取得エラー:', e);
-      return 0;
-    }
+    } catch(e) { console.error('Tasks取得エラー:', e); return 0; }
   }
 
   window.addEventListener('load', () => {
