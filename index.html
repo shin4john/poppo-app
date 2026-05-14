@@ -51,32 +51,44 @@
 
   /* アプリ画面 */
   #appScreen{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .header{background:white;padding:10px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(180,100,130,0.1);z-index:10;}
-  .bunny-svg{width:52px;height:52px;animation:float 3s ease-in-out infinite;flex-shrink:0;}
+  .header{background:white;padding:8px 16px;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 16px rgba(180,100,130,0.1);z-index:10;}
+  .header-row1{display:flex;align-items:center;gap:10px;}
+  .bunny-svg{width:36px;height:36px;animation:float 3s ease-in-out infinite;flex-shrink:0;}
   .header-info{min-width:0;flex:1;overflow:hidden;}
   .header-info h1{font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;white-space:nowrap;}
   .status-dot{width:8px;height:8px;background:#5CE65C;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-  .header-actions{display:flex;gap:6px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
+  .header-row2{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
   .icon-btn{background:var(--lavender);border:none;border-radius:20px;padding:5px 10px;font-size:11px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:600;cursor:pointer;white-space:nowrap;}
-
-  /* スタンプ＆ストリークバッジ */
   .stamp-badge{background:linear-gradient(135deg,#FFF3CD,#FFE58A);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:#8B6914;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;box-shadow:0 2px 8px rgba(255,193,7,0.3);}
   .streak-badge{background:linear-gradient(135deg,#FFE4D6,#FFBDA0);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:#8B3000;white-space:nowrap;display:flex;align-items:center;gap:3px;}
 
-  /* ===== 3セクションバナー ===== */
-  .schedule-sections{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:6px 0;overflow-x:auto;scrollbar-width:none;}
+  /* セクションボタンバナー */
+  .schedule-sections{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:8px 12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
   .schedule-sections::-webkit-scrollbar{display:none;}
-  .schedule-section{display:flex;align-items:center;gap:6px;padding:3px 12px;flex-shrink:0;}
-  .section-label{font-size:10px;font-weight:800;color:white;background:rgba(255,255,255,0.3);border-radius:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0;}
-  .schedule-chip{background:white;border-radius:20px;padding:4px 10px;font-size:11px;white-space:nowrap;color:var(--brown);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.08);flex-shrink:0;display:flex;align-items:center;gap:5px;cursor:pointer;transition:all 0.2s;}
-  .schedule-chip .check-btn{width:16px;height:16px;border-radius:50%;border:2px solid var(--pink);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:transparent;transition:all 0.2s;}
-  .schedule-chip:active .check-btn{background:var(--pink);color:white;}
-  .schedule-chip .assignee{font-size:10px;color:var(--pink-dark);font-weight:700;}
-  @keyframes chipComplete{0%{transform:scale(1);opacity:1}50%{transform:scale(1.1)}100%{transform:scale(0);opacity:0;width:0;padding:0;margin:0}}
-  .schedule-chip.completing{animation:chipComplete 0.4s ease forwards;}
-  .no-schedule{font-size:11px;color:rgba(255,255,255,0.8);padding:2px 4px;}
+  .section-btn{background:rgba(255,255,255,0.92);border:none;border-radius:20px;padding:6px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+  .section-btn:active{transform:scale(0.95);}
+  .section-btn.empty{opacity:0.5;cursor:default;}
+  .section-count{background:var(--pink-dark);color:white;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:800;}
+
+  /* スケジュール一覧モーダル内 */
+  .schedule-group{margin-bottom:14px;}
+  .schedule-group-header{font-size:12px;font-weight:800;color:var(--pink-dark);padding:4px 0 6px;border-bottom:2px solid var(--lavender);margin-bottom:6px;}
+  .schedule-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--cream);border-radius:12px;margin-bottom:6px;font-size:14px;color:var(--brown);font-weight:600;cursor:pointer;transition:all 0.15s;gap:8px;}
+  .schedule-list-item:active{transform:scale(0.98);background:var(--lavender);}
+  .list-item-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+  .list-item-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .list-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--pink);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--pink-dark);flex-shrink:0;}
+
+  /* 完了選択モーダル */
+  .completion-task-title{font-size:14px;color:#888;margin:-6px 0 2px;font-weight:600;}
+  .completion-btn{width:100%;padding:13px 16px;border-radius:14px;border:none;font-family:'Zen Maru Gothic',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-align:left;transition:transform 0.15s;display:flex;align-items:center;gap:10px;}
+  .completion-btn:active{transform:scale(0.97);}
+  .completion-btn.perfect{background:linear-gradient(135deg,#FFF9E6,#FFE082);color:#7B5800;}
+  .completion-btn.half{background:linear-gradient(135deg,#E8F4FD,#90CAF9);color:#1A4E7A;}
+  .completion-btn.incomplete{background:linear-gradient(135deg,#F5F5F5,#E0E0E0);color:#555;}
+  .completion-btn.reschedule{background:linear-gradient(135deg,#E8FFE8,#A5D6A7);color:#1B5E20;}
 
   .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
   .chat-area::-webkit-scrollbar{display:none;}
@@ -111,6 +123,7 @@
   /* モーダル共通 */
   .modal-overlay{position:fixed;inset:0;background:rgba(60,30,40,0.5);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
   .modal-overlay.hidden{display:none;}
+  .modal-overlay.z200{z-index:200;}
   .modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));width:100%;animation:slideUp 0.3s ease;display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow-y:auto;}
   @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .modal h2{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);}
@@ -125,12 +138,14 @@
   .stamp-member-card{background:var(--cream);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;}
   .stamp-member-header{display:flex;align-items:center;gap:10px;}
   .stamp-member-name{font-size:15px;font-weight:700;color:var(--brown);}
-  .stamp-count-big{font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;color:var(--brown);margin-left:auto;}
-  .stamp-icons{display:flex;flex-wrap:wrap;gap:4px;min-height:28px;}
+  .stamp-count-big{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);margin-left:auto;}
+  .stamp-type-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .stamp-type-chip{border-radius:12px;padding:4px 10px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;}
+  .stamp-type-chip.perfect{background:#FFF9E6;color:#7B5800;}
+  .stamp-type-chip.half{background:#E8F4FD;color:#1A4E7A;}
+  .stamp-type-chip.incomplete{background:#F5F5F5;color:#555;}
   .streak-row{display:flex;align-items:center;gap:6px;font-size:12px;color:#888;}
   .streak-count{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--fire);}
-
-  /* ご褒美 */
   .reward-card{background:white;border:2px solid var(--lavender);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
   .reward-title{font-size:14px;font-weight:700;color:var(--brown);}
   .reward-progress-bar{background:#F0E8FF;border-radius:10px;height:10px;overflow:hidden;}
@@ -138,8 +153,6 @@
   .reward-label{font-size:11px;color:#888;display:flex;justify-content:space-between;}
   .reward-achieved{border-color:var(--gold);background:linear-gradient(135deg,#FFFDE7,#FFF9C4);}
   .reward-achieved .reward-title::before{content:'🏆 ';}
-
-  /* スタンプ飛ぶアニメ */
   .stamp-float{position:fixed;font-size:32px;pointer-events:none;z-index:999;animation:stampFly 0.8s ease forwards;}
   @keyframes stampFly{0%{transform:scale(0) translateY(0);opacity:1}60%{transform:scale(1.4) translateY(-40px);opacity:1}100%{transform:scale(0.8) translateY(-80px);opacity:0}}
 </style>
@@ -197,16 +210,16 @@
 
 <!-- アプリ画面 -->
 <div id="appScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-  <div class="header" style="flex-direction:column;align-items:stretch;padding:8px 16px;gap:6px;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <svg class="bunny-svg" style="width:36px;height:36px;" viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  <div class="header">
+    <div class="header-row1">
+      <svg class="bunny-svg" viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
       <div class="header-info">
         <h1 id="familyNameHeader">ぽぽちゃん 🌸</h1>
         <p><span class="status-dot"></span><span id="memberCountText">家族のAIアシスタント</span></p>
       </div>
       <button class="icon-btn" onclick="logout()" style="margin-left:auto;">ログアウト</button>
     </div>
-    <div class="header-actions" style="justify-content:flex-start;">
+    <div class="header-row2">
       <button class="icon-btn" onclick="showScheduleModal()">➕ 予定</button>
       <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
       <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧 メンバー</button>
@@ -215,9 +228,9 @@
     </div>
   </div>
 
-  <!-- 3セクションバナー -->
+  <!-- セクションボタンバナー -->
   <div class="schedule-sections" id="scheduleSections">
-    <div class="schedule-section"><span class="no-schedule">読み込み中...</span></div>
+    <span style="font-size:11px;color:rgba(255,255,255,0.8);">読み込み中...</span>
   </div>
 
   <div class="chat-area" id="chatArea"></div>
@@ -281,6 +294,28 @@
   </div>
 </div>
 
+<!-- スケジュール一覧モーダル -->
+<div class="modal-overlay hidden" id="scheduleListModal">
+  <div class="modal">
+    <h2 id="scheduleListTitle">今日の予定</h2>
+    <div id="scheduleListContent"></div>
+    <button class="btn btn-secondary" onclick="hideScheduleListModal()">閉じる</button>
+  </div>
+</div>
+
+<!-- 完了選択モーダル（z-index高め） -->
+<div class="modal-overlay hidden z200" id="completionModal">
+  <div class="modal">
+    <h2>✅ どうだった？</h2>
+    <p class="completion-task-title" id="completionTaskTitle"></p>
+    <button class="completion-btn perfect" onclick="executeCompletion('perfect')">⭐ 完璧にできた！</button>
+    <button class="completion-btn half" onclick="executeCompletion('half')">🌟 まあ半分くらい</button>
+    <button class="completion-btn incomplete" onclick="executeCompletion('incomplete')">💫 やれてないけど完了にする</button>
+    <button class="completion-btn reschedule" onclick="executeCompletion('reschedule')">📅 やれてないから今日に追加</button>
+    <button class="btn btn-secondary" onclick="cancelCompletion()">キャンセル（もどる）</button>
+  </div>
+</div>
+
 <!-- スタンプ帳モーダル -->
 <div class="modal-overlay hidden" id="stampModal">
   <div class="modal">
@@ -306,7 +341,7 @@
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let currentUser = null;
-  let currentMember = null; // { display_name, role }
+  let currentMember = null;
   let familyId = null;
   let familyData = null;
   let claudeApiKey = '';
@@ -314,14 +349,21 @@
   let schedules = [];
   let members = [];
   let isSignUp = false;
-  let myDisplayName = null; // GCal取込時の担当者（モジュールスコープで共有）
+  let myDisplayName = null;
+  let pendingCompletion = null; // { id, title, assignedTo }
+  let currentListSection = null; // 'today' | 'tomorrow' | 'week'
 
   // やる気機能
+  // stampData[name] = { total, perfect, half, incomplete }
   let stampData = {};
   let streakData = {};
   let rewardsData = [];
+
   const COMPLETION_KEYWORDS = ['終わった','おわった','できた','やった','かんりょう','完了','おわり','すんだ','できたよ','おわったよ'];
   const NON_COMPLETION = ['？','?','なに','何','どうする','どうやって','教えて','おしえて','できない','わからない'];
+
+  const MEMBER_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶'];
+  const CAT_ICONS = { '予定':'📅','宿題':'📚','イベント':'🎉' };
 
   // ===== 初期化 =====
   async function init() {
@@ -390,8 +432,7 @@
     if (joinError) { errEl.textContent='参加失敗: '+joinError.message; errEl.classList.add('show'); return; }
     familyId = family.id; familyData = family;
     await sb.from('conversations').insert({
-      family_id: family.id,
-      role: 'assistant',
+      family_id: family.id, role: 'assistant',
       content: `🎉 ${displayName}さんが家族グループに参加したよ！みんなで仲良くしてね🐰💕`
     });
     succEl.textContent=`「${family.family_name}」に参加したよ！🎉`; succEl.classList.add('show');
@@ -401,6 +442,12 @@
   async function loadMembers() {
     const { data } = await sb.from('family_members').select('display_name, role').eq('family_id', familyId);
     members = data || [];
+  }
+
+  function getMemberEmojiMap() {
+    const map = {};
+    members.forEach((m, i) => { map[m.display_name] = MEMBER_EMOJIS[i % MEMBER_EMOJIS.length]; });
+    return map;
   }
 
   function updateFamilyHeader() {
@@ -434,73 +481,140 @@
     renderScheduleSections();
   }
 
-  // ===== 3セクションバナー =====
-  function renderScheduleSections() {
-    const today = new Date();
-    today.setHours(0,0,0,0);
+  // ===== セクションボタンバナー =====
+  function getDateStrings() {
+    const today = new Date(); today.setHours(0,0,0,0);
     const todayStr = today.toISOString().split('T')[0];
     const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
     const weekLater = new Date(today); weekLater.setDate(today.getDate()+7);
     const weekLaterStr = weekLater.toISOString().split('T')[0];
-
-    const memberEmojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
-    const memberEmojiMap = {};
-    members.forEach((m, i) => { memberEmojiMap[m.display_name] = memberEmojis[i % memberEmojis.length]; });
-
-    const icons = { '予定':'📅','宿題':'📚','イベント':'🎉' };
-
-    function makeChip(s) {
-      const icon = icons[s.category] || '📅';
-      const assigneeEmoji = s.assigned_to ? (memberEmojiMap[s.assigned_to] || '') : '';
-      const assigneeLabel = s.assigned_to ? `<span class="assignee">${assigneeEmoji}${s.assigned_to}</span>` : '';
-      const safeTitle = s.title.replace(/'/g,"\\'");
-      const safeAssignee = (s.assigned_to || '').replace(/'/g,"\\'");
-      return `<div class="schedule-chip" id="chip-${s.id}" onclick="completeSchedule('${s.id}','${safeTitle}','${safeAssignee}',this)">
-        <div class="check-btn">✓</div>
-        ${assigneeLabel}
-        <span>${icon} ${s.title}</span>
-      </div>`;
-    }
-
-    const todayItems = schedules.filter(s => s.event_date === todayStr || !s.event_date);
-    const tomorrowItems = schedules.filter(s => s.event_date === tomorrowStr);
-    const weekItems = schedules.filter(s => s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
-
-    const container = document.getElementById('scheduleSections');
-    let html = '';
-
-    if (todayItems.length === 0 && tomorrowItems.length === 0 && weekItems.length === 0) {
-      html = '<div class="schedule-section"><span class="no-schedule">🎉 今週の予定なし！のんびりしてね</span></div>';
-    } else {
-      if (todayItems.length > 0) html += `<div class="schedule-section"><span class="section-label">今日</span>${todayItems.map(makeChip).join('')}</div>`;
-      if (tomorrowItems.length > 0) html += `<div class="schedule-section"><span class="section-label">明日</span>${tomorrowItems.map(makeChip).join('')}</div>`;
-      if (weekItems.length > 0) html += `<div class="schedule-section"><span class="section-label">今週</span>${weekItems.map(makeChip).join('')}</div>`;
-    }
-    container.innerHTML = html;
+    return { todayStr, tomorrowStr, weekLaterStr };
   }
 
-  async function completeSchedule(id, title, assignedTo, chipEl) {
-    chipEl.classList.add('completing');
+  function filterBySection(key) {
+    const { todayStr, tomorrowStr, weekLaterStr } = getDateStrings();
+    if (key === 'today') return schedules.filter(s => s.event_date === todayStr || !s.event_date);
+    if (key === 'tomorrow') return schedules.filter(s => s.event_date === tomorrowStr);
+    return schedules.filter(s => s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
+  }
+
+  function renderScheduleSections() {
+    const todayItems    = filterBySection('today');
+    const tomorrowItems = filterBySection('tomorrow');
+    const weekItems     = filterBySection('week');
+
+    function makeBtn(label, key, items) {
+      const n = items.length;
+      const countHtml = n > 0 ? `<span class="section-count">${n}</span>` : '';
+      const cls = n === 0 ? 'section-btn empty' : 'section-btn';
+      const onclick = n > 0 ? `showScheduleList('${key}')` : '';
+      return `<button class="${cls}" ${onclick ? `onclick="${onclick}"` : ''}>${label}${countHtml}</button>`;
+    }
+
+    document.getElementById('scheduleSections').innerHTML =
+      makeBtn('今日', 'today', todayItems) +
+      makeBtn('明日', 'tomorrow', tomorrowItems) +
+      makeBtn('今週', 'week', weekItems) +
+      (todayItems.length + tomorrowItems.length + weekItems.length === 0
+        ? '<span style="font-size:11px;color:rgba(255,255,255,0.8);align-self:center;">🎉 今週の予定なし！</span>'
+        : '');
+  }
+
+  // ===== スケジュール一覧モーダル =====
+  function showScheduleList(key) {
+    currentListSection = key;
+    const labels = { today:'今日の予定', tomorrow:'明日の予定', week:'今週の予定' };
+    document.getElementById('scheduleListTitle').textContent = labels[key];
+
+    const items = filterBySection(key);
+    const emojiMap = getMemberEmojiMap();
+
+    // 担当者ごとにグループ化
+    const groups = {};
+    items.forEach(s => {
+      const g = s.assigned_to || '（担当なし）';
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(s);
+    });
+
+    let html = '';
+    for (const [assignee, list] of Object.entries(groups)) {
+      const emoji = emojiMap[assignee] || '📋';
+      html += `<div class="schedule-group">
+        <div class="schedule-group-header">${emoji} ${assignee}</div>
+        ${list.map(s => {
+          const icon = CAT_ICONS[s.category] || '📅';
+          const safe = s.title.replace(/'/g,"\\'");
+          const safeA = (s.assigned_to||'').replace(/'/g,"\\'");
+          return `<div class="schedule-list-item" onclick="openCompletionModal('${s.id}','${safe}','${safeA}')">
+            <div class="list-item-left"><span>${icon}</span><span class="list-item-title">${s.title}</span></div>
+            <div class="list-check">✓</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+    document.getElementById('scheduleListContent').innerHTML = html || '<p style="color:#aaa;font-size:13px;">予定がありません</p>';
+    document.getElementById('scheduleListModal').classList.remove('hidden');
+  }
+
+  function hideScheduleListModal() {
+    document.getElementById('scheduleListModal').classList.add('hidden');
+    currentListSection = null;
+  }
+
+  // ===== 完了選択モーダル =====
+  function openCompletionModal(id, title, assignedTo) {
+    pendingCompletion = { id, title, assignedTo };
+    document.getElementById('completionTaskTitle').textContent = `「${title}」`;
+    document.getElementById('completionModal').classList.remove('hidden');
+  }
+
+  function cancelCompletion() {
+    pendingCompletion = null;
+    document.getElementById('completionModal').classList.add('hidden');
+  }
+
+  async function executeCompletion(type) {
+    if (!pendingCompletion) return;
+    const { id, title, assignedTo } = pendingCompletion;
+    pendingCompletion = null;
+    document.getElementById('completionModal').classList.add('hidden');
+
+    if (type === 'reschedule') {
+      // 今日の日付に変更（完了にはしない）
+      const today = new Date().toISOString().split('T')[0];
+      await sb.from('schedules').update({ event_date: today }).eq('id', id);
+      await loadSchedules();
+      // 一覧を再表示
+      if (currentListSection) showScheduleList(currentListSection);
+      addMessageToUI(`「${title}」を今日の予定に追加したよ！次はがんばれ🐰`, 'ai');
+      return;
+    }
+
+    // 完了処理
     await sb.from('schedules').update({ is_done: true }).eq('id', id);
     schedules = schedules.filter(s => s.id !== id);
 
-    // スタンプ付与: assigned_to があればその人、なければ自分
     const stampTarget = assignedTo || currentMember?.display_name;
-    if (stampTarget) await addStamp(stampTarget, title);
+    if (stampTarget) await addStamp(stampTarget, title, type);
 
-    setTimeout(() => {
-      renderScheduleSections();
-      const count = stampData[stampTarget] || 0;
-      const streak = streakData[stampTarget]?.current || 0;
-      const praise = [
-        `「${title}」おわったね！えらい！🌟スタンプ${count}こ・🔥${streak}日れんぞく！`,
-        `やったね！「${title}」かんりょう！💕スタンプが${count}こになったよ✨`,
-        `「${title}」ばっちり！すごいすごい！🌸れんぞく${streak}日！`,
-        `わあ！「${title}」できたね！おつかれさま🎉スタンプ${count}こゲット！`
-      ];
-      addMessageToUI(praise[Math.floor(Math.random()*praise.length)], 'ai');
-    }, 400);
+    // 一覧を開いていた場合は再描画
+    if (currentListSection) {
+      const remaining = filterBySection(currentListSection);
+      if (remaining.length > 0) showScheduleList(currentListSection);
+      else hideScheduleListModal();
+    }
+    renderScheduleSections();
+
+    const count = stampData[stampTarget]?.total || 0;
+    const streak = streakData[stampTarget]?.current || 0;
+    const msgs = {
+      perfect:    `「${title}」完璧！⭐ めちゃくちゃえらい！スタンプ${count}こ・🔥${streak}日れんぞく！`,
+      half:       `「${title}」半分できたね🌟 それでもすごい！スタンプ${count}こゲット！`,
+      incomplete: `「${title}」完了にしたね💫 おつかれさま！次はがんばろう！`
+    };
+    addMessageToUI(msgs[type] || `「${title}」完了！`, 'ai');
   }
 
   async function addSchedule() {
@@ -520,9 +634,15 @@
 
   // ===== スタンプ・ストリーク機能 =====
   async function loadStampData() {
-    const { data: stamps } = await sb.from('stamps').select('member_name').eq('family_id', familyId);
+    const { data: stamps } = await sb.from('stamps').select('member_name, stamp_type').eq('family_id', familyId);
     stampData = {};
-    (stamps || []).forEach(s => { stampData[s.member_name] = (stampData[s.member_name] || 0) + 1; });
+    (stamps || []).forEach(s => {
+      if (!stampData[s.member_name]) stampData[s.member_name] = { total: 0, perfect: 0, half: 0, incomplete: 0 };
+      stampData[s.member_name].total++;
+      const t = s.stamp_type;
+      if (t === 'perfect' || t === 'half' || t === 'incomplete') stampData[s.member_name][t]++;
+      else stampData[s.member_name].perfect++; // 旧 'star' 型は perfect 扱い
+    });
 
     const { data: streaks } = await sb.from('streaks').select('*').eq('family_id', familyId);
     streakData = {};
@@ -536,11 +656,13 @@
     updateStampBadge();
   }
 
-  async function addStamp(memberName, taskTitle) {
-    await sb.from('stamps').insert({ family_id: familyId, member_name: memberName, task_title: taskTitle, stamp_type: 'star' });
-    stampData[memberName] = (stampData[memberName] || 0) + 1;
+  async function addStamp(memberName, taskTitle, stampType = 'perfect') {
+    await sb.from('stamps').insert({ family_id: familyId, member_name: memberName, task_title: taskTitle, stamp_type: stampType });
+    if (!stampData[memberName]) stampData[memberName] = { total: 0, perfect: 0, half: 0, incomplete: 0 };
+    stampData[memberName].total++;
+    stampData[memberName][stampType] = (stampData[memberName][stampType] || 0) + 1;
     await updateStreak(memberName);
-    showStampAnimation();
+    showStampAnimation(stampType);
     updateStampBadge();
     checkRewards(memberName);
   }
@@ -549,18 +671,13 @@
     const today = new Date().toISOString().split('T')[0];
     const existing = streakData[memberName];
     if (existing?.last_date === today) return;
-
     let newStreak = 1;
     if (existing?.last_date) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      if (existing.last_date === yesterday.toISOString().split('T')[0]) {
-        newStreak = (existing.current || 0) + 1;
-      }
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+      if (existing.last_date === yesterday.toISOString().split('T')[0]) newStreak = (existing.current||0)+1;
     }
     const longest = Math.max(existing?.longest || 0, newStreak);
     streakData[memberName] = { current: newStreak, longest, last_date: today };
-
     await sb.from('streaks').upsert({
       family_id: familyId, member_name: memberName,
       current_streak: newStreak, longest_streak: longest,
@@ -569,29 +686,26 @@
   }
 
   function checkRewards(memberName) {
-    const count = stampData[memberName] || 0;
+    const count = stampData[memberName]?.total || 0;
     const hit = rewardsData.find(r => r.required_stamps === count);
-    if (hit) {
-      setTimeout(() => {
-        addMessageToUI(`🎊 すごい！スタンプが${count}こになって「${hit.title}」のご褒美がもらえるよ！おめでとう🎉✨`, 'ai');
-      }, 600);
-    }
+    if (hit) setTimeout(() => addMessageToUI(`🎊 スタンプ${count}こで「${hit.title}」のご褒美がもらえるよ！おめでとう🎉✨`, 'ai'), 600);
   }
 
   function updateStampBadge() {
     if (!currentMember) return;
-    const count = stampData[currentMember.display_name] || 0;
+    const d = stampData[currentMember.display_name] || { total: 0 };
     const streak = streakData[currentMember.display_name]?.current || 0;
-    document.getElementById('myStampCount').textContent = count;
+    document.getElementById('myStampCount').textContent = d.total;
     document.getElementById('myStreakCount').textContent = streak;
     document.getElementById('stampBadge').style.display = 'flex';
     document.getElementById('streakBadge').style.display = streak > 0 ? 'flex' : 'none';
   }
 
-  function showStampAnimation() {
+  function showStampAnimation(type = 'perfect') {
+    const icons = { perfect: '⭐', half: '🌟', incomplete: '💫' };
     const el = document.createElement('div');
     el.className = 'stamp-float';
-    el.textContent = '🌟';
+    el.textContent = icons[type] || '🌟';
     el.style.left = (Math.random() * 60 + 20) + '%';
     el.style.top = '40%';
     document.body.appendChild(el);
@@ -599,44 +713,42 @@
   }
 
   function showStampModal() {
-    const emojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
-    const cards = members.map((m, i) => {
-      const count = stampData[m.display_name] || 0;
+    const emojiMap = getMemberEmojiMap();
+    document.getElementById('stampMemberCards').innerHTML = members.map((m, i) => {
+      const d = stampData[m.display_name] || { total: 0, perfect: 0, half: 0, incomplete: 0 };
       const streak = streakData[m.display_name] || {};
-      const stampIcons = '🌟'.repeat(Math.min(count, 20)) + (count > 20 ? `<span style="font-size:11px;color:#888;">+${count-20}</span>` : '');
       return `<div class="stamp-member-card">
         <div class="stamp-member-header">
-          <div class="member-avatar" style="font-size:18px;">${emojis[i%emojis.length]}</div>
+          <div class="member-avatar" style="font-size:18px;">${emojiMap[m.display_name]||'🐰'}</div>
           <span class="stamp-member-name">${m.display_name}</span>
-          <span class="stamp-count-big">🌟${count}</span>
+          <span class="stamp-count-big">🌟${d.total}</span>
         </div>
-        <div class="stamp-icons">${stampIcons || '<span style="color:#ccc;font-size:12px;">まだスタンプなし</span>'}</div>
+        <div class="stamp-type-row">
+          <span class="stamp-type-chip perfect">⭐ 完璧 ${d.perfect}</span>
+          <span class="stamp-type-chip half">🌟 半分 ${d.half}</span>
+          <span class="stamp-type-chip incomplete">💫 完了 ${d.incomplete}</span>
+        </div>
         <div class="streak-row">
           🔥れんぞく <span class="streak-count">${streak.current||0}日</span>
           　さいちょう <span class="streak-count">${streak.longest||0}日</span>
         </div>
       </div>`;
-    }).join('');
-    document.getElementById('stampMemberCards').innerHTML = cards || '<p style="color:#aaa;font-size:13px;">メンバーを読み込み中...</p>';
+    }).join('') || '<p style="color:#aaa;font-size:13px;">メンバーを読み込み中...</p>';
 
-    const myCount = stampData[currentMember?.display_name] || 0;
-    if (rewardsData.length === 0) {
-      document.getElementById('rewardCards').innerHTML = '<p style="color:#aaa;font-size:13px;">ご褒美がまだ設定されていないよ</p>';
-    } else {
-      document.getElementById('rewardCards').innerHTML = rewardsData.map(r => {
-        const ratio = Math.min(myCount / r.required_stamps, 1);
-        const achieved = myCount >= r.required_stamps;
-        return `<div class="reward-card ${achieved ? 'reward-achieved' : ''}">
-          <div class="reward-title">${r.title}</div>
-          <div class="reward-progress-bar"><div class="reward-progress-fill" style="width:${ratio*100}%"></div></div>
-          <div class="reward-label"><span>🌟${myCount} / ${r.required_stamps}こ</span><span>${achieved ? '✅ たっせい！' : `あと${r.required_stamps - myCount}こ`}</span></div>
-        </div>`;
-      }).join('');
-    }
+    const myCount = stampData[currentMember?.display_name]?.total || 0;
+    document.getElementById('rewardCards').innerHTML = rewardsData.length === 0
+      ? '<p style="color:#aaa;font-size:13px;">ご褒美がまだ設定されていないよ</p>'
+      : rewardsData.map(r => {
+          const ratio = Math.min(myCount / r.required_stamps, 1);
+          const achieved = myCount >= r.required_stamps;
+          return `<div class="reward-card ${achieved?'reward-achieved':''}">
+            <div class="reward-title">${r.title}</div>
+            <div class="reward-progress-bar"><div class="reward-progress-fill" style="width:${ratio*100}%"></div></div>
+            <div class="reward-label"><span>🌟${myCount} / ${r.required_stamps}こ</span><span>${achieved?'✅ たっせい！':`あと${r.required_stamps-myCount}こ`}</span></div>
+          </div>`;
+        }).join('');
 
-    if (currentMember?.role === 'owner') {
-      document.getElementById('addRewardSection').classList.remove('hidden');
-    }
+    if (currentMember?.role === 'owner') document.getElementById('addRewardSection').classList.remove('hidden');
     document.getElementById('stampModal').classList.remove('hidden');
   }
 
@@ -663,16 +775,14 @@
     document.getElementById('chatArea').innerHTML = '';
     if (conversationHistory.length === 0) {
       const name = familyData?.family_name || 'みんな';
-      addMessageToUI(`こんにちは！ぽぽちゃんだよ🐰💕\n${name}のこと、なんでも相談してね！\n予定のチップをタップすると完了にできるよ✅\nタスクが終わったら「算数おわったよ！」って話しかけてね🌟`, 'ai');
+      addMessageToUI(`こんにちは！ぽぽちゃんだよ🐰💕\n${name}のこと、なんでも相談してね！\n上のボタンをタップすると予定の一覧が見られるよ📅\nタスクが終わったら「算数おわったよ！」と話しかけてね🌟`, 'ai');
     } else {
       conversationHistory.forEach(m => addMessageToUI(m.content, m.role === 'assistant' ? 'ai' : 'user'));
     }
   }
 
   function detectTaskCompletion(text) {
-    const hasCompletion = COMPLETION_KEYWORDS.some(k => text.includes(k));
-    const hasNonCompletion = NON_COMPLETION.some(k => text.includes(k));
-    return hasCompletion && !hasNonCompletion;
+    return COMPLETION_KEYWORDS.some(k => text.includes(k)) && !NON_COMPLETION.some(k => text.includes(k));
   }
 
   async function sendMessage() {
@@ -687,20 +797,18 @@
     document.getElementById('typing').classList.add('active');
     document.getElementById('chatArea').scrollTop = 99999;
 
-    // 案C: 完了報告を検出してスタンプ付与
     if (detectTaskCompletion(text) && currentMember) {
-      const taskHint = text.length > 30 ? text.substring(0, 30) + '...' : text;
-      await addStamp(currentMember.display_name, taskHint);
+      await addStamp(currentMember.display_name, text.substring(0, 30), 'perfect');
     }
 
     const memberNames = members.map(m => m.display_name).join('、');
     const todayStr = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
-    const myCount = stampData[currentMember?.display_name] || 0;
+    const myD = stampData[currentMember?.display_name] || { total: 0 };
     const myStreak = streakData[currentMember?.display_name]?.current || 0;
     const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。今日の日付：${todayStr}。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}。
 
-話しかけているのは「${currentMember?.display_name||'ユーザー'}」さんです。スタンプ数：${myCount}個、連続達成：${myStreak}日。
-タスク完了の報告（「おわったよ」「できた」など）を受けたときは、その人のがんばりを具体的に褒めて、スタンプとれんぞくについて嬉しそうに言及してください。`;
+話しかけているのは「${currentMember?.display_name||'ユーザー'}」さんです。スタンプ合計：${myD.total}個（⭐${myD.perfect} 🌟${myD.half} 💫${myD.incomplete}）、連続達成：${myStreak}日。
+タスク完了の報告を受けたときは、がんばりを具体的に褒めてスタンプとれんぞくについて嬉しそうに言及してください。`;
 
     let reply;
     try {
@@ -738,23 +846,18 @@
     await loadMembers();
     updateFamilyHeader();
     document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
-    const emojis = ['🐰','🐻','🐼','🦊','🐱','🐶'];
-    document.getElementById('memberList').innerHTML = members.map((m,i) => `
+    const emojiMap = getMemberEmojiMap();
+    document.getElementById('memberList').innerHTML = members.map(m => `
       <div class="member-item">
-        <div class="member-avatar">${emojis[i%emojis.length]}</div>
+        <div class="member-avatar">${emojiMap[m.display_name]||'🐰'}</div>
         <div><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
       </div>`).join('');
-
-    const { data: myData } = await sb.from('family_members')
-      .select('role').eq('user_id', currentUser.id).eq('family_id', familyId).single();
-    const isOwner = myData?.role === 'owner';
+    const { data: myData } = await sb.from('family_members').select('role').eq('user_id', currentUser.id).eq('family_id', familyId).single();
     const editSection = document.getElementById('familyNameEdit');
-    if (isOwner) {
+    if (myData?.role === 'owner') {
       document.getElementById('familyNameEditInput').value = familyData?.family_name || '';
       editSection.style.display = 'flex';
-    } else {
-      editSection.style.display = 'none';
-    }
+    } else { editSection.style.display = 'none'; }
     document.getElementById('familyModal').classList.remove('hidden');
   }
   function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
@@ -786,8 +889,12 @@
     document.getElementById('scheduleModal').classList.add('hidden');
     ['scheduleTitle','scheduleDate','scheduleAssigned'].forEach(id => document.getElementById(id).value='');
   }
+
+  // モーダル外タップで閉じる
   document.getElementById('scheduleModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideScheduleModal(); });
   document.getElementById('familyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideFamilyModal(); });
+  document.getElementById('scheduleListModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideScheduleListModal(); });
+  document.getElementById('completionModal').addEventListener('click', e => { if(e.target===e.currentTarget) cancelCompletion(); });
   document.getElementById('stampModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideStampModal(); });
 
   function toggleMode() {
@@ -826,11 +933,7 @@
   async function handleGoogleLogin() {
     await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: 'https://shin4john.github.io/poppo-app/',
-        skipBrowserRedirect: false,
-        scopes: 'email profile'
-      }
+      options: { redirectTo: 'https://shin4john.github.io/poppo-app/', skipBrowserRedirect: false, scopes: 'email profile' }
     });
   }
 
@@ -870,7 +973,6 @@
       addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
       const today = new Date(); today.setHours(0,0,0,0);
       const oneMonthLater = new Date(today); oneMonthLater.setMonth(today.getMonth()+1); oneMonthLater.setHours(23,59,59,999);
-
       const res = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneMonthLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`,
         { headers: { Authorization: `Bearer ${googleAccessToken}` } }
@@ -881,12 +983,9 @@
         const title = event.summary;
         const eventDate = event.start?.date || event.start?.dateTime?.split('T')[0];
         if (!title) continue;
-        const { data: existingList } = await sb.from('schedules').select('id')
-          .eq('family_id', familyId).eq('title', title).eq('event_date', eventDate);
-        if (existingList && existingList.length > 0) continue;
-        const { error } = await sb.from('schedules').insert({
-          family_id: familyId, title, event_date: eventDate||null, category: '予定', assigned_to: myDisplayName
-        });
+        const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', title).eq('event_date', eventDate);
+        if (ex && ex.length > 0) continue;
+        const { error } = await sb.from('schedules').insert({ family_id: familyId, title, event_date: eventDate||null, category: '予定', assigned_to: myDisplayName });
         if (!error) addedCount++;
       }
       const taskCount = await fetchGoogleTasks();
@@ -897,21 +996,16 @@
 
   async function fetchGoogleTasks() {
     try {
-      const listsRes = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists',
-        { headers: { Authorization: `Bearer ${googleAccessToken}` } });
+      const listsRes = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists', { headers: { Authorization: `Bearer ${googleAccessToken}` } });
       const listsData = await listsRes.json();
       const taskLists = listsData.items || [];
       if (taskLists.length === 0) return 0;
-
       const today = new Date(); today.setHours(0,0,0,0);
       const oneMonthLater = new Date(today); oneMonthLater.setMonth(today.getMonth()+1);
       const oneMonthStr = oneMonthLater.toISOString().split('T')[0];
-
       let addedCount = 0;
       for (const list of taskLists) {
-        const tasksRes = await fetch(
-          `https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=50`,
-          { headers: { Authorization: `Bearer ${googleAccessToken}` } });
+        const tasksRes = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=50`, { headers: { Authorization: `Bearer ${googleAccessToken}` } });
         const tasksData = await tasksRes.json();
         for (const task of (tasksData.items || [])) {
           if (!task.title || task.status==='completed') continue;
@@ -920,23 +1014,17 @@
           const isRecurring = task.notes?.includes('毎日') || task.notes?.includes('繰り返し');
           if (isRecurring && dueDate) {
             for (let i = 0; i < 7; i++) {
-              const d = new Date(today); d.setDate(today.getDate() + i);
+              const d = new Date(today); d.setDate(today.getDate()+i);
               const ds = d.toISOString().split('T')[0];
-              const { data: ex } = await sb.from('schedules').select('id')
-                .eq('family_id', familyId).eq('title', task.title).eq('event_date', ds);
+              const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', task.title).eq('event_date', ds);
               if (ex && ex.length > 0) continue;
-              const { error } = await sb.from('schedules').insert({
-                family_id: familyId, title: task.title, event_date: ds, category: '宿題', assigned_to: myDisplayName
-              });
+              const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: ds, category: '宿題', assigned_to: myDisplayName });
               if (!error) addedCount++;
             }
           } else {
-            const { data: existingList } = await sb.from('schedules').select('id')
-              .eq('family_id', familyId).eq('title', task.title);
-            if (existingList && existingList.length > 0) continue;
-            const { error } = await sb.from('schedules').insert({
-              family_id: familyId, title: task.title, event_date: dueDate, category: '宿題', assigned_to: myDisplayName
-            });
+            const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', task.title);
+            if (ex && ex.length > 0) continue;
+            const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: dueDate, category: '宿題', assigned_to: myDisplayName });
             if (!error) addedCount++;
           }
         }
