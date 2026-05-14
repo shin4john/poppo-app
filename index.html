@@ -471,7 +471,7 @@
 
   // ===== 予定読み込み =====
   async function loadSchedules() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDateStr(new Date());
     const { data, error } = await sb.from('schedules').select('*')
       .eq('family_id', familyId).eq('is_done', false)
       .or(`event_date.gte.${today},event_date.is.null`)
@@ -481,14 +481,22 @@
     renderScheduleSections();
   }
 
+  // ローカル日付をYYYY-MM-DD形式で返す（toISOStringはUTC変換でズレるため使わない）
+  function localDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+
   // ===== セクションボタンバナー =====
   function getDateStrings() {
     const today = new Date(); today.setHours(0,0,0,0);
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = localDateStr(today);
     const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const tomorrowStr = localDateStr(tomorrow);
     const weekLater = new Date(today); weekLater.setDate(today.getDate()+7);
-    const weekLaterStr = weekLater.toISOString().split('T')[0];
+    const weekLaterStr = localDateStr(weekLater);
     return { todayStr, tomorrowStr, weekLaterStr };
   }
 
@@ -583,7 +591,7 @@
 
     if (type === 'reschedule') {
       // 今日の日付に変更（完了にはしない）
-      const today = new Date().toISOString().split('T')[0];
+      const today = localDateStr(new Date());
       await sb.from('schedules').update({ event_date: today }).eq('id', id);
       await loadSchedules();
       // 一覧を再表示
@@ -668,13 +676,13 @@
   }
 
   async function updateStreak(memberName) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDateStr(new Date());
     const existing = streakData[memberName];
     if (existing?.last_date === today) return;
     let newStreak = 1;
     if (existing?.last_date) {
       const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
-      if (existing.last_date === yesterday.toISOString().split('T')[0]) newStreak = (existing.current||0)+1;
+      if (existing.last_date === localDateStr(yesterday)) newStreak = (existing.current||0)+1;
     }
     const longest = Math.max(existing?.longest || 0, newStreak);
     streakData[memberName] = { current: newStreak, longest, last_date: today };
