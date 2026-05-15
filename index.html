@@ -72,6 +72,8 @@
   .section-btn:active{transform:scale(0.95);}
   .section-btn.empty{opacity:0.5;cursor:default;}
   .section-count{background:var(--pink-dark);color:white;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:800;}
+  .section-btn.past{background:rgba(255,240,220,0.95);color:#7B3A00;}
+  .section-count.past{background:#E8640A;}
 
   /* スケジュール一覧モーダル内 */
   .schedule-group{margin-bottom:14px;}
@@ -359,6 +361,7 @@
   let claudeApiKey = '';
   let conversationHistory = [];
   let schedules = [];
+  let pastSchedules = [];
   let members = [];
   let isSignUp = false;
   let myDisplayName = null;
@@ -406,6 +409,7 @@
       claudeApiKey = settings.claude_api_key;
       await loadMembers();
       await loadSchedules();
+      await loadPastSchedules();
       await loadConversationHistory();
       await loadStampData();
       updateFamilyHeader();
@@ -477,7 +481,7 @@
     const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers(); await loadSchedules(); await loadConversationHistory();
+    await loadMembers(); await loadSchedules(); await loadPastSchedules(); await loadConversationHistory();
     await loadStampData();
     updateFamilyHeader();
     showScreen('app');
@@ -492,6 +496,20 @@
       .order('event_date', { ascending: true, nullsFirst: false }).limit(50);
     if (error) console.error('schedules取得エラー:', error);
     schedules = data || [];
+    renderScheduleSections();
+  }
+
+  async function loadPastSchedules() {
+    const today = localDateStr(new Date());
+    const monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth()-1);
+    const monthAgoStr = localDateStr(monthAgo);
+    const { data, error } = await sb.from('schedules').select('*')
+      .eq('family_id', familyId).eq('is_done', false)
+      .lt('event_date', today)
+      .gte('event_date', monthAgoStr)
+      .order('event_date', { ascending: false }).limit(100);
+    if (error) console.error('pastSchedules取得エラー:', error);
+    pastSchedules = data || [];
     renderScheduleSections();
   }
 
@@ -515,6 +533,7 @@
   }
 
   function filterBySection(key) {
+    if (key === 'past') return pastSchedules;
     const { todayStr, tomorrowStr, weekLaterStr } = getDateStrings();
     if (key === 'today') return schedules.filter(s => s.event_date === todayStr || !s.event_date);
     if (key === 'tomorrow') return schedules.filter(s => s.event_date === tomorrowStr);
@@ -525,16 +544,18 @@
     const todayItems    = filterBySection('today');
     const tomorrowItems = filterBySection('tomorrow');
     const weekItems     = filterBySection('week');
+    const pastItems     = filterBySection('past');
 
-    function makeBtn(label, key, items) {
+    function makeBtn(label, key, items, isPast) {
       const n = items.length;
-      const countHtml = n > 0 ? `<span class="section-count">${n}</span>` : '';
-      const cls = n === 0 ? 'section-btn empty' : 'section-btn';
+      const countHtml = n > 0 ? `<span class="section-count${isPast ? ' past' : ''}">${n}</span>` : '';
+      const cls = n === 0 ? 'section-btn empty' : isPast ? 'section-btn past' : 'section-btn';
       const onclick = n > 0 ? `showScheduleList('${key}')` : '';
       return `<button class="${cls}" ${onclick ? `onclick="${onclick}"` : ''}>${label}${countHtml}</button>`;
     }
 
     document.getElementById('scheduleSections').innerHTML =
+      makeBtn('これまで', 'past', pastItems, true) +
       makeBtn('今日', 'today', todayItems) +
       makeBtn('明日', 'tomorrow', tomorrowItems) +
       makeBtn('今週', 'week', weekItems) +
@@ -546,7 +567,7 @@
   // ===== スケジュール一覧モーダル =====
   function showScheduleList(key) {
     currentListSection = key;
-    const labels = { today:'今日の予定', tomorrow:'明日の予定', week:'今週の予定' };
+    const labels = { today:'今日の予定', tomorrow:'明日の予定', week:'今週の予定', past:'これまでの未完了' };
     document.getElementById('scheduleListTitle').textContent = labels[key];
 
     const items = filterBySection(key);
@@ -569,9 +590,12 @@
           const icon = CAT_ICONS[s.category] || '📅';
           const safe = s.title.replace(/'/g,"\\'");
           const safeA = (s.assigned_to||'').replace(/'/g,"\\'");
+          const dateLabel = key === 'past' && s.event_date
+            ? `<span style="font-size:11px;color:#f08;font-weight:700;flex-shrink:0;">${s.event_date.slice(5).replace('-','/')}</span>`
+            : '';
           return `<div class="schedule-list-item" onclick="openCompletionModal('${s.id}','${safe}','${safeA}')">
             <div class="list-item-left"><span>${icon}</span><span class="list-item-title">${s.title}</span></div>
-            <div class="list-check">✓</div>
+            ${dateLabel}<div class="list-check">✓</div>
           </div>`;
         }).join('')}
       </div>`;
@@ -608,7 +632,7 @@
       const today = localDateStr(new Date());
       await sb.from('schedules').update({ event_date: today }).eq('id', id);
       await loadSchedules();
-      // 一覧を再表示
+      await loadPastSchedules();
       if (currentListSection) showScheduleList(currentListSection);
       addMessageToUI(`「${title}」を今日の予定に追加したよ！次はがんばれ🐰`, 'ai');
       return;
@@ -617,6 +641,7 @@
     // 完了処理
     await sb.from('schedules').update({ is_done: true }).eq('id', id);
     schedules = schedules.filter(s => s.id !== id);
+    pastSchedules = pastSchedules.filter(s => s.id !== id);
 
     const stampTarget = assignedTo || currentMember?.display_name;
     if (stampTarget) await addStamp(stampTarget, title, type);
