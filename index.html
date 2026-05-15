@@ -28,8 +28,9 @@
   .card h2{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--brown);}
   .card p{font-size:13px;color:#888;line-height:1.7;}
   .card a{color:var(--pink-dark);}
-  .input-field{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);transition:border-color 0.2s;background:white;}
+  .input-field{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);transition:border-color 0.2s;background:white;display:block;box-sizing:border-box;}
   .input-field:focus{border-color:var(--pink);}
+  input[type="date"].input-field{-webkit-appearance:none;appearance:none;}
   .btn{width:100%;padding:13px;border-radius:14px;border:none;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:transform 0.15s,opacity 0.15s;}
   .btn:active{transform:scale(0.97);}
   .btn:disabled{opacity:0.6;}
@@ -133,6 +134,9 @@
   .member-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
   .member-name{font-size:14px;font-weight:600;color:var(--brown);}
   .member-role{font-size:11px;color:#aaa;}
+  .member-switch-btn{margin-left:auto;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:14px;padding:5px 12px;font-size:12px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .member-switch-btn:active{opacity:0.8;}
+  .member-active-badge{margin-left:auto;background:var(--lavender);color:var(--brown);border-radius:14px;padding:5px 10px;font-size:11px;font-weight:700;white-space:nowrap;}
 
   /* スタンプ画面 */
   .stamp-member-card{background:var(--cream);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;}
@@ -269,7 +273,13 @@
       <option value="宿題">📚 宿題</option>
       <option value="イベント">🎉 イベント</option>
     </select>
-    <input class="input-field" type="text" id="scheduleAssigned" placeholder="誰の予定？（例：太郎、ママ）"/>
+    <select class="input-field" id="scheduleAssigned">
+      <option value="">担当者を選ぶ</option>
+      <option value="パパ">パパ</option>
+      <option value="ママ">ママ</option>
+      <option value="晴輝">晴輝</option>
+      <option value="いずみ">いずみ</option>
+    </select>
     <button class="btn btn-primary" onclick="addSchedule()">保存する ✨</button>
     <button class="btn btn-secondary" onclick="hideScheduleModal()">キャンセル</button>
   </div>
@@ -342,6 +352,8 @@
 
   let currentUser = null;
   let currentMember = null;
+  let realUserRole = null;       // ログインしたSupabaseユーザーの実際のrole
+  let realUserDisplayName = null; // 同 display_name
   let familyId = null;
   let familyData = null;
   let claudeApiKey = '';
@@ -381,6 +393,8 @@
       .select('family_id, role, display_name').eq('user_id', currentUser.id).single();
     if (!memberData) { showScreen('family'); return; }
     currentMember = { display_name: memberData.display_name, role: memberData.role };
+    realUserRole = memberData.role;
+    realUserDisplayName = memberData.display_name;
     myDisplayName = memberData.display_name;
     familyId = memberData.family_id;
     const { data: fData } = await sb.from('families')
@@ -855,11 +869,20 @@
     updateFamilyHeader();
     document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
     const emojiMap = getMemberEmojiMap();
-    document.getElementById('memberList').innerHTML = members.map(m => `
-      <div class="member-item">
+    const isOwner = realUserRole === 'owner';
+    document.getElementById('memberList').innerHTML = members.map(m => {
+      const isActive = m.display_name === currentMember?.display_name;
+      const badge = isActive
+        ? `<span class="member-active-badge">✅ いまここ</span>`
+        : isOwner
+          ? `<button class="member-switch-btn" onclick="switchToMember('${m.display_name}','${m.role}')">切り替え</button>`
+          : '';
+      return `<div class="member-item">
         <div class="member-avatar">${emojiMap[m.display_name]||'🐰'}</div>
-        <div><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
-      </div>`).join('');
+        <div style="flex:1"><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
+        ${badge}
+      </div>`;
+    }).join('');
     const { data: myData } = await sb.from('family_members').select('role').eq('user_id', currentUser.id).eq('family_id', familyId).single();
     const editSection = document.getElementById('familyNameEdit');
     if (myData?.role === 'owner') {
@@ -869,6 +892,15 @@
     document.getElementById('familyModal').classList.remove('hidden');
   }
   function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
+
+  async function switchToMember(displayName, role) {
+    currentMember = { display_name: displayName, role };
+    hideFamilyModal();
+    await loadStampData();
+    updateStampBadge();
+    updateFamilyHeader();
+    addMessageToUI(`${displayName}に切り替えたよ🐰`, 'ai');
+  }
 
   async function updateFamilyName() {
     const newName = document.getElementById('familyNameEditInput').value.trim();
