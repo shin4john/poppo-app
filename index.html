@@ -172,6 +172,9 @@
   .template-item-meta{font-size:11px;color:#aaa;margin-top:2px;}
   .template-del-btn{background:none;border:none;font-size:16px;cursor:pointer;color:#ccc;padding:4px;line-height:1;flex-shrink:0;}
   .template-del-btn:active{color:#f08;}
+  .template-add-btn{background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Zen Maru Gothic',sans-serif;flex-shrink:0;}
+  .template-add-btn:active{opacity:0.8;}
+  .template-add-btn.done{background:linear-gradient(135deg,#A5D6A7,#81C784);}
   .template-prompt-banner{background:linear-gradient(135deg,#FFF3CD,#FFE082);border-radius:14px;margin:8px 12px 0;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(255,193,7,0.25);}
   .template-prompt-banner p{flex:1;font-size:13px;font-weight:700;color:#7B5800;line-height:1.4;}
   .template-prompt-apply{background:var(--pink-dark);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:'Zen Maru Gothic',sans-serif;}
@@ -778,11 +781,12 @@
       const days = t.days_of_week.split(',').map(d => DAY_LABELS[Number(d)]).join('・');
       const assignee = t.assigned_to ? ` ／ 👤${t.assigned_to}` : '';
       const icon = CAT_ICONS[t.category] || '📅';
-      return `<div class="template-item">
+      return `<div class="template-item" id="tmpl-item-${t.id}">
         <div class="template-item-info">
           <div class="template-item-title">${icon} ${t.title}</div>
           <div class="template-item-meta">${days}${assignee}</div>
         </div>
+        <button class="template-add-btn" id="tmpl-add-${t.id}" onclick="applyOneTemplate('${t.id}')">今週に追加</button>
         <button class="template-del-btn" onclick="deleteTemplate('${t.id}')">🗑️</button>
       </div>`;
     }).join('');
@@ -804,6 +808,33 @@
     document.getElementById('tmplTitle').value = '';
     document.getElementById('tmplAssigned').value = '';
     document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
+  }
+
+  async function applyOneTemplate(id) {
+    const tmpl = templates.find(t => t.id === id);
+    if (!tmpl) return;
+    const btn = document.getElementById('tmpl-add-' + id);
+    if (btn) { btn.disabled = true; btn.textContent = '追加中…'; }
+    const monday = getThisMonday();
+    let addedCount = 0;
+    const days = tmpl.days_of_week.split(',').map(Number);
+    for (const day of days) {
+      const offset = (day === 0) ? 6 : day - 1;
+      const date = new Date(monday); date.setDate(monday.getDate() + offset);
+      const dateStr = localDateStr(date);
+      const { data: ex } = await sb.from('schedules').select('id')
+        .eq('family_id', familyId).eq('title', tmpl.title).eq('event_date', dateStr);
+      if (!ex || ex.length === 0) {
+        await sb.from('schedules').insert({
+          family_id: familyId, title: tmpl.title, event_date: dateStr,
+          category: tmpl.category, assigned_to: tmpl.assigned_to, is_done: false
+        });
+        addedCount++;
+      }
+    }
+    if (btn) { btn.classList.add('done'); btn.textContent = addedCount > 0 ? `✓ ${addedCount}件追加` : '✓ 追加済み'; btn.disabled = true; }
+    await loadSchedules();
+    await loadPastSchedules();
   }
 
   async function deleteTemplate(id) {
