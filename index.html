@@ -161,6 +161,21 @@
   .reward-achieved .reward-title::before{content:'🏆 ';}
   .stamp-float{position:fixed;font-size:32px;pointer-events:none;z-index:999;animation:stampFly 0.8s ease forwards;}
   @keyframes stampFly{0%{transform:scale(0) translateY(0);opacity:1}60%{transform:scale(1.4) translateY(-40px);opacity:1}100%{transform:scale(0.8) translateY(-80px);opacity:0}}
+
+  /* テンプレート機能 */
+  .day-chips-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .day-chip{width:36px;height:36px;border-radius:50%;background:var(--cream);border:2px solid var(--lavender);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--brown);cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;}
+  .day-chip.active{background:var(--pink-dark);border-color:var(--pink-dark);color:white;}
+  .template-item{background:var(--cream);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;}
+  .template-item-info{flex:1;min-width:0;}
+  .template-item-title{font-size:14px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .template-item-meta{font-size:11px;color:#aaa;margin-top:2px;}
+  .template-del-btn{background:none;border:none;font-size:16px;cursor:pointer;color:#ccc;padding:4px;line-height:1;flex-shrink:0;}
+  .template-del-btn:active{color:#f08;}
+  .template-prompt-banner{background:linear-gradient(135deg,#FFF3CD,#FFE082);border-radius:14px;margin:8px 12px 0;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(255,193,7,0.25);}
+  .template-prompt-banner p{flex:1;font-size:13px;font-weight:700;color:#7B5800;line-height:1.4;}
+  .template-prompt-apply{background:var(--pink-dark);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:'Zen Maru Gothic',sans-serif;}
+  .template-prompt-dismiss{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;padding:2px;line-height:1;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -227,11 +242,19 @@
     </div>
     <div class="header-row2">
       <button class="icon-btn" onclick="showScheduleModal()">➕ 予定</button>
+      <button class="icon-btn" onclick="showTemplateModal()">📋 テンプレ</button>
       <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
       <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧 メンバー</button>
       <div class="stamp-badge" id="stampBadge" onclick="showStampModal()" style="display:none;">🌟<span id="myStampCount">0</span></div>
       <div class="streak-badge" id="streakBadge" style="display:none;">🔥<span id="myStreakCount">0</span></div>
     </div>
+  </div>
+
+  <!-- 月曜テンプレート適用バナー -->
+  <div class="template-prompt-banner hidden" id="templatePromptBanner">
+    <p>📋 今週のテンプレートを<br>予定に追加する？</p>
+    <button class="template-prompt-apply" onclick="applyWeeklyTemplates()">追加する！</button>
+    <button class="template-prompt-dismiss" onclick="dismissTemplateBanner()">✕</button>
   </div>
 
   <!-- セクションボタンバナー -->
@@ -345,6 +368,43 @@
   </div>
 </div>
 
+<!-- テンプレートモーダル -->
+<div class="modal-overlay hidden" id="templateModal">
+  <div class="modal">
+    <h2>📋 週間テンプレート</h2>
+    <button class="btn btn-primary" id="applyTemplateBtn" onclick="applyWeeklyTemplates()">✨ 今週の予定に追加する</button>
+    <div id="templateList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div class="divider">テンプレートを追加</div>
+    <input class="input-field" type="text" id="tmplTitle" placeholder="タイトル（例：算数ドリル）"/>
+    <select class="input-field" id="tmplAssigned">
+      <option value="">担当者を選ぶ</option>
+      <option value="パパ">パパ</option>
+      <option value="ママ">ママ</option>
+      <option value="晴輝">晴輝</option>
+      <option value="いずみ">いずみ</option>
+    </select>
+    <select class="input-field" id="tmplCategory">
+      <option value="予定">📅 予定</option>
+      <option value="宿題">📚 宿題</option>
+      <option value="イベント">🎉 イベント</option>
+    </select>
+    <div>
+      <div style="font-size:12px;color:#aaa;font-weight:700;margin-bottom:8px;">繰り返す曜日</div>
+      <div class="day-chips-row" id="dayChipsRow">
+        <div class="day-chip" data-day="1">月</div>
+        <div class="day-chip" data-day="2">火</div>
+        <div class="day-chip" data-day="3">水</div>
+        <div class="day-chip" data-day="4">木</div>
+        <div class="day-chip" data-day="5">金</div>
+        <div class="day-chip" data-day="6">土</div>
+        <div class="day-chip" data-day="0">日</div>
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="addTemplate()">このテンプレートを登録 ➕</button>
+    <button class="btn btn-secondary" onclick="hideTemplateModal()">閉じる</button>
+  </div>
+</div>
+
 <script>
   const SUPABASE_URL = 'https://svuzjqwumfcidoqfwqqm.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dXpqcXd1bWZjaWRvcWZ3cXFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTQ1NjEsImV4cCI6MjA5Mzc5MDU2MX0.k7YTiXqZgFY9CY5R5cX9ldp7YLBO7HV5ic7E8AfQ7SM';
@@ -362,6 +422,7 @@
   let conversationHistory = [];
   let schedules = [];
   let pastSchedules = [];
+  let templates = [];
   let members = [];
   let isSignUp = false;
   let myDisplayName = null;
@@ -410,6 +471,8 @@
       await loadMembers();
       await loadSchedules();
       await loadPastSchedules();
+      await loadTemplates();
+      checkMondayPrompt();
       await loadConversationHistory();
       await loadStampData();
       updateFamilyHeader();
@@ -481,7 +544,8 @@
     const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers(); await loadSchedules(); await loadPastSchedules(); await loadConversationHistory();
+    await loadMembers(); await loadSchedules(); await loadPastSchedules(); await loadTemplates(); await loadConversationHistory();
+    checkMondayPrompt();
     await loadStampData();
     updateFamilyHeader();
     showScreen('app');
@@ -677,6 +741,124 @@
     hideScheduleModal();
     await loadSchedules();
     addMessageToUI(`「${title}」を予定に追加したよ！🐰✨`, 'ai');
+  }
+
+  // ===== テンプレート機能 =====
+  const DAY_LABELS = {0:'日', 1:'月', 2:'火', 3:'水', 4:'木', 5:'金', 6:'土'};
+
+  function getThisMonday() {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const day = today.getDay();
+    const offset = (day === 0) ? -6 : 1 - day;
+    const monday = new Date(today); monday.setDate(today.getDate() + offset);
+    return monday;
+  }
+
+  async function loadTemplates() {
+    const { data } = await sb.from('schedule_templates').select('*').eq('family_id', familyId).order('created_at');
+    templates = data || [];
+  }
+
+  function showTemplateModal() {
+    renderTemplateList();
+    document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('tmplTitle').value = '';
+    document.getElementById('tmplAssigned').value = '';
+    document.getElementById('tmplCategory').value = '予定';
+    document.getElementById('templateModal').classList.remove('hidden');
+  }
+  function hideTemplateModal() { document.getElementById('templateModal').classList.add('hidden'); }
+
+  function renderTemplateList() {
+    if (templates.length === 0) {
+      document.getElementById('templateList').innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:8px 0;">まだテンプレートがないよ🐰<br>下のフォームから追加してね！</p>';
+      return;
+    }
+    document.getElementById('templateList').innerHTML = templates.map(t => {
+      const days = t.days_of_week.split(',').map(d => DAY_LABELS[Number(d)]).join('・');
+      const assignee = t.assigned_to ? ` ／ 👤${t.assigned_to}` : '';
+      const icon = CAT_ICONS[t.category] || '📅';
+      return `<div class="template-item">
+        <div class="template-item-info">
+          <div class="template-item-title">${icon} ${t.title}</div>
+          <div class="template-item-meta">${days}${assignee}</div>
+        </div>
+        <button class="template-del-btn" onclick="deleteTemplate('${t.id}')">🗑️</button>
+      </div>`;
+    }).join('');
+  }
+
+  async function addTemplate() {
+    const title = document.getElementById('tmplTitle').value.trim();
+    const assignedTo = document.getElementById('tmplAssigned').value || null;
+    const category = document.getElementById('tmplCategory').value;
+    const selectedDays = [...document.querySelectorAll('.day-chip.active')].map(c => c.dataset.day);
+    if (!title) { alert('タイトルを入力してね'); return; }
+    if (selectedDays.length === 0) { alert('曜日を選んでね'); return; }
+    const { data, error } = await sb.from('schedule_templates').insert({
+      family_id: familyId, title, assigned_to: assignedTo, category, days_of_week: selectedDays.join(',')
+    }).select().single();
+    if (error) { alert('保存に失敗: ' + error.message); return; }
+    templates.push(data);
+    renderTemplateList();
+    document.getElementById('tmplTitle').value = '';
+    document.getElementById('tmplAssigned').value = '';
+    document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
+  }
+
+  async function deleteTemplate(id) {
+    if (!confirm('このテンプレートを削除しますか？')) return;
+    await sb.from('schedule_templates').delete().eq('id', id);
+    templates = templates.filter(t => t.id !== id);
+    renderTemplateList();
+  }
+
+  async function applyWeeklyTemplates() {
+    if (templates.length === 0) {
+      hideTemplateModal();
+      addMessageToUI('テンプレートがまだ登録されていないよ🐰 まず登録してね！', 'ai');
+      showTemplateModal();
+      return;
+    }
+    const monday = getThisMonday();
+    let addedCount = 0;
+    for (const tmpl of templates) {
+      const days = tmpl.days_of_week.split(',').map(Number);
+      for (const day of days) {
+        const offset = (day === 0) ? 6 : day - 1; // Mon=0, Tue=1, ..., Sun=6
+        const date = new Date(monday); date.setDate(monday.getDate() + offset);
+        const dateStr = localDateStr(date);
+        const { data: ex } = await sb.from('schedules').select('id')
+          .eq('family_id', familyId).eq('title', tmpl.title).eq('event_date', dateStr);
+        if (!ex || ex.length === 0) {
+          await sb.from('schedules').insert({
+            family_id: familyId, title: tmpl.title, event_date: dateStr,
+            category: tmpl.category, assigned_to: tmpl.assigned_to, is_done: false
+          });
+          addedCount++;
+        }
+      }
+    }
+    localStorage.setItem('poppo_tmpl_' + familyId, localDateStr(monday));
+    hideTemplateBanner();
+    hideTemplateModal();
+    await loadSchedules();
+    await loadPastSchedules();
+    addMessageToUI(`今週の予定を${addedCount}件追加したよ！🐰✨`, 'ai');
+  }
+
+  function checkMondayPrompt() {
+    if (templates.length === 0) return;
+    const mondayStr = localDateStr(getThisMonday());
+    if (localStorage.getItem('poppo_tmpl_' + familyId) === mondayStr) return;
+    document.getElementById('templatePromptBanner').classList.remove('hidden');
+  }
+
+  function hideTemplateBanner() { document.getElementById('templatePromptBanner').classList.add('hidden'); }
+
+  function dismissTemplateBanner() {
+    localStorage.setItem('poppo_tmpl_' + familyId, localDateStr(getThisMonday()));
+    hideTemplateBanner();
   }
 
   // ===== スタンプ・ストリーク機能 =====
@@ -961,6 +1143,10 @@
   document.getElementById('scheduleListModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideScheduleListModal(); });
   document.getElementById('completionModal').addEventListener('click', e => { if(e.target===e.currentTarget) cancelCompletion(); });
   document.getElementById('stampModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideStampModal(); });
+  document.getElementById('templateModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideTemplateModal(); });
+  document.querySelectorAll('.day-chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('active'));
+  });
 
   function toggleMode() {
     isSignUp = !isSignUp;
