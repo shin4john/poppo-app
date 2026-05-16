@@ -180,10 +180,6 @@
   .template-add-btn{background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Zen Maru Gothic',sans-serif;flex-shrink:0;}
   .template-add-btn:active{opacity:0.8;}
   .template-add-btn.done{background:linear-gradient(135deg,#A5D6A7,#81C784);}
-  .template-prompt-banner{background:linear-gradient(135deg,#FFF3CD,#FFE082);border-radius:14px;margin:8px 12px 0;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(255,193,7,0.25);}
-  .template-prompt-banner p{flex:1;font-size:13px;font-weight:700;color:#7B5800;line-height:1.4;}
-  .template-prompt-apply{background:var(--pink-dark);color:white;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:'Zen Maru Gothic',sans-serif;}
-  .template-prompt-dismiss{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;padding:2px;line-height:1;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -256,13 +252,6 @@
       <div class="stamp-badge" id="stampBadge" onclick="showStampModal()" style="display:none;">🌟<span id="myStampCount">0</span></div>
       <div class="streak-badge" id="streakBadge" style="display:none;">🔥<span id="myStreakCount">0</span></div>
     </div>
-  </div>
-
-  <!-- 月曜テンプレート適用バナー -->
-  <div class="template-prompt-banner hidden" id="templatePromptBanner">
-    <p>📋 今週のテンプレートを<br>予定に追加する？</p>
-    <button class="template-prompt-apply" onclick="applyWeeklyTemplates()">追加する！</button>
-    <button class="template-prompt-dismiss" onclick="dismissTemplateBanner()">✕</button>
   </div>
 
   <!-- セクションボタンバナー -->
@@ -382,7 +371,7 @@
     <!-- 上部：スクロール可能（タイトル＋リスト） -->
     <div class="template-scroll-top">
       <h2>📋 週間テンプレート</h2>
-      <button class="btn btn-primary" id="applyTemplateBtn" onclick="applyWeeklyTemplates()">✨ 今週の予定に追加する</button>
+      <button class="btn btn-primary" id="applyTemplateBtn" onclick="applyWeeklyTemplates()">✨ テンプレを追加する</button>
       <div id="templateList"></div>
     </div>
     <!-- 下部：常に表示される入力フォーム -->
@@ -486,7 +475,6 @@
       await loadSchedules();
       await loadPastSchedules();
       await loadTemplates();
-      checkMondayPrompt();
       await loadConversationHistory();
       await loadStampData();
       updateFamilyHeader();
@@ -559,7 +547,6 @@
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
     await loadMembers(); await loadSchedules(); await loadPastSchedules(); await loadTemplates(); await loadConversationHistory();
-    checkMondayPrompt();
     await loadStampData();
     updateFamilyHeader();
     showScreen('app');
@@ -797,7 +784,7 @@
           <div class="template-item-title">${icon} ${t.title}</div>
           <div class="template-item-meta">${days}${assignee}</div>
         </div>
-        <button class="template-add-btn" id="tmpl-add-${t.id}" onclick="applyOneTemplate('${t.id}')">今週に追加</button>
+        <button class="template-add-btn" id="tmpl-add-${t.id}" onclick="applyOneTemplate('${t.id}')">テンプレを追加する</button>
         <button class="template-del-btn" onclick="deleteTemplate('${t.id}')">🗑️</button>
       </div>`;
     }).join('');
@@ -821,29 +808,42 @@
     document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
   }
 
+  // 今日〜2回目の日曜日までの範囲でテンプレを登録する共通処理
+  async function applyTemplateItems(tmplList) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dow = today.getDay(); // 0=日
+    const daysToFirstSun = dow === 0 ? 7 : 7 - dow;
+    const endDate = new Date(today); endDate.setDate(today.getDate() + daysToFirstSun + 7);
+    let addedCount = 0;
+    for (const tmpl of tmplList) {
+      const days = new Set(tmpl.days_of_week.split(',').map(Number));
+      const cur = new Date(today);
+      while (cur.getTime() <= endDate.getTime()) {
+        if (days.has(cur.getDay())) {
+          const dateStr = localDateStr(cur);
+          const { data: ex } = await sb.from('schedules').select('id')
+            .eq('family_id', familyId).eq('title', tmpl.title).eq('event_date', dateStr);
+          if (!ex || ex.length === 0) {
+            await sb.from('schedules').insert({
+              family_id: familyId, title: tmpl.title, event_date: dateStr,
+              category: tmpl.category, assigned_to: tmpl.assigned_to, is_done: false
+            });
+            addedCount++;
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+    return addedCount;
+  }
+
   async function applyOneTemplate(id) {
     const tmpl = templates.find(t => t.id === id);
     if (!tmpl) return;
     const btn = document.getElementById('tmpl-add-' + id);
     if (btn) { btn.disabled = true; btn.textContent = '追加中…'; }
-    const monday = getThisMonday();
-    let addedCount = 0;
-    const days = tmpl.days_of_week.split(',').map(Number);
-    for (const day of days) {
-      const offset = (day === 0) ? 6 : day - 1;
-      const date = new Date(monday); date.setDate(monday.getDate() + offset);
-      const dateStr = localDateStr(date);
-      const { data: ex } = await sb.from('schedules').select('id')
-        .eq('family_id', familyId).eq('title', tmpl.title).eq('event_date', dateStr);
-      if (!ex || ex.length === 0) {
-        await sb.from('schedules').insert({
-          family_id: familyId, title: tmpl.title, event_date: dateStr,
-          category: tmpl.category, assigned_to: tmpl.assigned_to, is_done: false
-        });
-        addedCount++;
-      }
-    }
-    if (btn) { btn.classList.add('done'); btn.textContent = addedCount > 0 ? `✓ ${addedCount}件追加` : '✓ 追加済み'; btn.disabled = true; }
+    const count = await applyTemplateItems([tmpl]);
+    if (btn) { btn.classList.add('done'); btn.textContent = count > 0 ? `✓ ${count}件追加` : '✓ 追加済み'; btn.disabled = true; }
     await loadSchedules();
     await loadPastSchedules();
   }
@@ -857,50 +857,17 @@
 
   async function applyWeeklyTemplates() {
     if (templates.length === 0) {
-      hideTemplateModal();
       addMessageToUI('テンプレートがまだ登録されていないよ🐰 まず登録してね！', 'ai');
-      showTemplateModal();
       return;
     }
-    const monday = getThisMonday();
-    let addedCount = 0;
-    for (const tmpl of templates) {
-      const days = tmpl.days_of_week.split(',').map(Number);
-      for (const day of days) {
-        const offset = (day === 0) ? 6 : day - 1; // Mon=0, Tue=1, ..., Sun=6
-        const date = new Date(monday); date.setDate(monday.getDate() + offset);
-        const dateStr = localDateStr(date);
-        const { data: ex } = await sb.from('schedules').select('id')
-          .eq('family_id', familyId).eq('title', tmpl.title).eq('event_date', dateStr);
-        if (!ex || ex.length === 0) {
-          await sb.from('schedules').insert({
-            family_id: familyId, title: tmpl.title, event_date: dateStr,
-            category: tmpl.category, assigned_to: tmpl.assigned_to, is_done: false
-          });
-          addedCount++;
-        }
-      }
-    }
-    localStorage.setItem('poppo_tmpl_' + familyId, localDateStr(monday));
-    hideTemplateBanner();
+    const btn = document.getElementById('applyTemplateBtn');
+    btn.disabled = true; btn.textContent = '追加中…';
+    const count = await applyTemplateItems(templates);
+    btn.disabled = false; btn.textContent = 'テンプレを追加する';
     hideTemplateModal();
     await loadSchedules();
     await loadPastSchedules();
-    addMessageToUI(`今週の予定を${addedCount}件追加したよ！🐰✨`, 'ai');
-  }
-
-  function checkMondayPrompt() {
-    if (templates.length === 0) return;
-    const mondayStr = localDateStr(getThisMonday());
-    if (localStorage.getItem('poppo_tmpl_' + familyId) === mondayStr) return;
-    document.getElementById('templatePromptBanner').classList.remove('hidden');
-  }
-
-  function hideTemplateBanner() { document.getElementById('templatePromptBanner').classList.add('hidden'); }
-
-  function dismissTemplateBanner() {
-    localStorage.setItem('poppo_tmpl_' + familyId, localDateStr(getThisMonday()));
-    hideTemplateBanner();
+    addMessageToUI(`予定を${count}件追加したよ！🐰✨`, 'ai');
   }
 
   // ===== スタンプ・ストリーク機能 =====
