@@ -410,9 +410,16 @@
   const SUPABASE_URL = 'https://svuzjqwumfcidoqfwqqm.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dXpqcXd1bWZjaWRvcWZ3cXFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTQ1NjEsImV4cCI6MjA5Mzc5MDU2MX0.k7YTiXqZgFY9CY5R5cX9ldp7YLBO7HV5ic7E8AfQ7SM';
 
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+ const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      storageKey: 'poppo-auth',
+      storage: window.localStorage,
+      autoRefreshToken: true,
+    }
+  });
+  
   let currentUser = null;
   let currentMember = null;
   let realUserRole = null;       // ログインしたSupabaseユーザーの実際のrole
