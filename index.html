@@ -655,8 +655,8 @@
           const icon = CAT_ICONS[s.category] || '📅';
           const safe = s.title.replace(/'/g,"\\'");
           const safeA = (s.assigned_to||'').replace(/'/g,"\\'");
-          const dateLabel = key === 'past' && s.event_date
-            ? `<span style="font-size:11px;color:#f08;font-weight:700;flex-shrink:0;">${s.event_date.slice(5).replace('-','/')}</span>`
+          const dateLabel = s.event_date
+            ? `<span style="font-size:11px;color:${key === 'past' ? '#f08' : '#aaa'};font-weight:700;flex-shrink:0;">${s.event_date.slice(5).replace('-','/')}</span>`
             : '';
           return `<div class="schedule-list-item" onclick="openCompletionModal('${s.id}','${safe}','${safeA}')">
             <div class="list-item-left"><span>${icon}</span><span class="list-item-title">${s.title}</span></div>
