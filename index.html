@@ -80,6 +80,8 @@
   .schedule-group-header{font-size:12px;font-weight:800;color:var(--pink-dark);padding:4px 0 6px;border-bottom:2px solid var(--lavender);margin-bottom:6px;}
   .schedule-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--cream);border-radius:12px;margin-bottom:6px;font-size:14px;color:var(--brown);font-weight:600;cursor:pointer;transition:all 0.15s;gap:8px;}
   .schedule-list-item:active{transform:scale(0.98);background:var(--lavender);}
+  .schedule-list-item.event-item{cursor:default;opacity:0.85;}
+  .schedule-list-item.event-item:active{transform:none;background:var(--cream);}
   .list-item-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
   .list-item-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .list-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--pink);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--pink-dark);flex-shrink:0;}
@@ -249,7 +251,6 @@
       <button class="icon-btn" onclick="showTemplateModal()">📋 テンプレ</button>
       <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
       <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧 メンバー</button>
-      <div class="stamp-badge" id="stampBadge" onclick="showStampModal()" style="display:none;">🌟<span id="myStampCount">0</span></div>
       <div class="streak-badge" id="streakBadge" style="display:none;">🔥<span id="myStreakCount">0</span></div>
     </div>
   </div>
@@ -267,8 +268,7 @@
   </div>
 
   <div class="quick-replies">
-    <button class="qr-btn" onclick="sendQuick('今日の予定を教えて！')">📅 今日の予定</button>
-    <button class="qr-btn" onclick="sendQuick('今週の宿題は何？')">📚 宿題確認</button>
+    <button class="qr-btn" onclick="sendQuick('今週のやることを教えて！')">📝 やること確認</button>
     <button class="qr-btn" onclick="showStampModal()">🌟 スタンプ帳</button>
     <button class="qr-btn" onclick="sendQuick('今週のイベントは？')">🎉 イベント</button>
     <button class="qr-btn" onclick="sendQuick('予定を全部見せて')">📋 一覧</button>
@@ -291,8 +291,7 @@
     <input class="input-field" type="text" id="scheduleTitle" placeholder="タイトル（例：算数プリント）"/>
     <input class="input-field" type="date" id="scheduleDate"/>
     <select id="scheduleCategory">
-      <option value="予定">📅 予定</option>
-      <option value="宿題">📚 宿題</option>
+      <option value="予定（やること）">📅 予定（やること）</option>
       <option value="イベント">🎉 イベント</option>
     </select>
     <select class="input-field" id="scheduleAssigned">
@@ -386,8 +385,7 @@
         <option value="いずみ">いずみ</option>
       </select>
       <select class="input-field" id="tmplCategory">
-        <option value="予定">📅 予定</option>
-        <option value="宿題">📚 宿題</option>
+        <option value="予定（やること）">📅 予定（やること）</option>
         <option value="イベント">🎉 イベント</option>
       </select>
       <div>
@@ -442,7 +440,7 @@
   const NON_COMPLETION = ['？','?','なに','何','どうする','どうやって','教えて','おしえて','できない','わからない'];
 
   const MEMBER_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶'];
-  const CAT_ICONS = { '予定':'📅','宿題':'📚','イベント':'🎉' };
+  const CAT_ICONS = { '予定（やること）':'📅','予定':'📅','宿題':'📚','イベント':'🎉' };
 
   // ===== 初期化 =====
   async function init() {
@@ -472,6 +470,7 @@
     if (settings?.claude_api_key) {
       claudeApiKey = settings.claude_api_key;
       await loadMembers();
+      await autoCloseEvents();
       await loadSchedules();
       await loadPastSchedules();
       await loadTemplates();
@@ -546,7 +545,7 @@
     const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers(); await loadSchedules(); await loadPastSchedules(); await loadTemplates(); await loadConversationHistory();
+    await loadMembers(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadTemplates(); await loadConversationHistory();
     await loadStampData();
     updateFamilyHeader();
     showScreen('app');
@@ -562,6 +561,12 @@
     if (error) console.error('schedules取得エラー:', error);
     schedules = data || [];
     renderScheduleSections();
+  }
+
+  async function autoCloseEvents() {
+    const today = localDateStr(new Date());
+    await sb.from('schedules').update({ is_done: true })
+      .eq('family_id', familyId).eq('category', 'イベント').eq('is_done', false).lt('event_date', today);
   }
 
   async function loadPastSchedules() {
@@ -655,12 +660,18 @@
           const icon = CAT_ICONS[s.category] || '📅';
           const safe = s.title.replace(/'/g,"\\'");
           const safeA = (s.assigned_to||'').replace(/'/g,"\\'");
+          const safeCat = (s.category||'').replace(/'/g,"\\'");
+          const isEvent = s.category === 'イベント';
           const dateLabel = s.event_date
             ? `<span style="font-size:11px;color:${key === 'past' ? '#f08' : '#aaa'};font-weight:700;flex-shrink:0;">${s.event_date.slice(5).replace('-','/')}</span>`
             : '';
-          return `<div class="schedule-list-item" onclick="openCompletionModal('${s.id}','${safe}','${safeA}')">
+          const clickAttr = isEvent ? '' : `onclick="openCompletionModal('${s.id}','${safe}','${safeA}','${safeCat}')"`;
+          const checkEl = isEvent
+            ? `<span style="font-size:16px;flex-shrink:0;">🎉</span>`
+            : `<div class="list-check">✓</div>`;
+          return `<div class="schedule-list-item${isEvent ? ' event-item' : ''}" ${clickAttr}>
             <div class="list-item-left"><span>${icon}</span><span class="list-item-title">${s.title}</span></div>
-            ${dateLabel}<div class="list-check">✓</div>
+            ${dateLabel}${checkEl}
           </div>`;
         }).join('')}
       </div>`;
@@ -675,8 +686,8 @@
   }
 
   // ===== 完了選択モーダル =====
-  function openCompletionModal(id, title, assignedTo) {
-    pendingCompletion = { id, title, assignedTo };
+  function openCompletionModal(id, title, assignedTo, category) {
+    pendingCompletion = { id, title, assignedTo, category };
     document.getElementById('completionTaskTitle').textContent = `「${title}」`;
     document.getElementById('completionModal').classList.remove('hidden');
   }
@@ -688,12 +699,11 @@
 
   async function executeCompletion(type) {
     if (!pendingCompletion) return;
-    const { id, title, assignedTo } = pendingCompletion;
+    const { id, title, assignedTo, category } = pendingCompletion;
     pendingCompletion = null;
     document.getElementById('completionModal').classList.add('hidden');
 
     if (type === 'reschedule') {
-      // 今日の日付に変更（完了にはしない）
       const today = localDateStr(new Date());
       await sb.from('schedules').update({ event_date: today }).eq('id', id);
       await loadSchedules();
@@ -709,7 +719,7 @@
     pastSchedules = pastSchedules.filter(s => s.id !== id);
 
     const stampTarget = assignedTo || currentMember?.display_name;
-    if (stampTarget) await addStamp(stampTarget, title, type);
+    if (stampTarget && category !== 'イベント') await addStamp(stampTarget, title, type);
 
     // 一覧を開いていた場合は再描画
     if (currentListSection) {
@@ -765,7 +775,7 @@
     document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('tmplTitle').value = '';
     document.getElementById('tmplAssigned').value = '';
-    document.getElementById('tmplCategory').value = '予定';
+    document.getElementById('tmplCategory').value = '予定（やること）';
     document.getElementById('templateModal').classList.remove('hidden');
   }
   function hideTemplateModal() { document.getElementById('templateModal').classList.add('hidden'); }
@@ -933,9 +943,7 @@
     if (!currentMember) return;
     const d = stampData[currentMember.display_name] || { total: 0 };
     const streak = streakData[currentMember.display_name]?.current || 0;
-    document.getElementById('myStampCount').textContent = d.total;
     document.getElementById('myStreakCount').textContent = streak;
-    document.getElementById('stampBadge').style.display = 'flex';
     document.getElementById('streakBadge').style.display = streak > 0 ? 'flex' : 'none';
   }
 
@@ -1278,13 +1286,13 @@
               const ds = d.toISOString().split('T')[0];
               const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', task.title).eq('event_date', ds);
               if (ex && ex.length > 0) continue;
-              const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: ds, category: '宿題', assigned_to: myDisplayName });
+              const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: ds, category: '予定（やること）', assigned_to: myDisplayName });
               if (!error) addedCount++;
             }
           } else {
             const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', task.title);
             if (ex && ex.length > 0) continue;
-            const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: dueDate, category: '宿題', assigned_to: myDisplayName });
+            const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: dueDate, category: '予定（やること）', assigned_to: myDisplayName });
             if (!error) addedCount++;
           }
         }
