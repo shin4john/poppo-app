@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ぽぽちゃん つかいかたガイド</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#FFF8F0;--pink:#FFB5C8;--pink-dark:#FF8FAD;
+    --lavender:#E8D5FF;--lavender-dark:#C9A8FF;
+    --brown:#6B4C3B;--text:#3D2B1F;
+    --gold:#FFD700;--mint:#B8F0E0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Zen Maru Gothic',sans-serif;background:var(--cream);color:var(--text);line-height:1.7;background-image:radial-gradient(circle at 10% 10%,rgba(255,181,200,0.2) 0%,transparent 40%),radial-gradient(circle at 90% 90%,rgba(200,168,255,0.15) 0%,transparent 40%);}
+
+  .hero{text-align:center;padding:48px 24px 32px;position:relative;}
+  .bunny{font-size:72px;animation:float 3s ease-in-out infinite;display:inline-block;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .hero h1{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:var(--brown);margin-top:12px;}
+  .hero p{font-size:14px;color:#999;margin-top:6px;}
+
+  .toc{background:white;border-radius:20px;margin:0 16px 24px;padding:20px;box-shadow:0 4px 20px rgba(180,100,130,0.1);}
+  .toc h2{font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--brown);margin-bottom:12px;}
+  .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .toc-item{background:var(--cream);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;color:var(--brown);text-decoration:none;display:flex;align-items:center;gap:6px;transition:background 0.2s;}
+  .toc-item:hover{background:var(--lavender);}
+
+  .section{margin:0 16px 24px;}
+  .section-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .section-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .section-title{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);}
+
+  .card{background:white;border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(180,100,130,0.08);margin-bottom:12px;}
+  .card-title{font-size:14px;font-weight:700;color:var(--brown);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .card-body{font-size:13px;color:#666;line-height:1.8;}
+
+  .step-list{display:flex;flex-direction:column;gap:10px;}
+  .step{display:flex;gap:12px;align-items:flex-start;}
+  .step-num{width:24px;height:24px;border-radius:50%;background:var(--pink);color:white;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .step-text{font-size:13px;color:#555;flex:1;}
+  .step-text strong{color:var(--brown);}
+
+  .badge{display:inline-flex;align-items:center;gap:4px;background:var(--lavender);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--brown);margin:2px;}
+  .badge.pink{background:var(--pink);color:white;}
+  .badge.gold{background:linear-gradient(135deg,#FFF3CD,#FFE58A);color:#8B6914;}
+  .badge.green{background:#E8FFE8;color:#2A7;}
+  .badge.fire{background:linear-gradient(135deg,#FFE4D6,#FFBDA0);color:#8B3000;}
+
+  .tip{background:linear-gradient(135deg,#FFF9E6,#FFF3CD);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:12px 14px;font-size:13px;color:#7B5800;margin-top:10px;}
+  .tip::before{content:'💡 ';font-weight:700;}
+
+  .flow{display:flex;flex-direction:column;gap:4px;margin:8px 0;}
+  .flow-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;}
+  .flow-arrow{color:var(--pink-dark);font-size:16px;margin-left:12px;}
+
+  .table-simple{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  .table-simple th{background:var(--lavender);color:var(--brown);font-weight:700;padding:8px 10px;text-align:left;}
+  .table-simple td{padding:8px 10px;border-bottom:1px solid #F0E8FF;color:#555;vertical-align:top;}
+  .table-simple tr:last-child td{border-bottom:none;}
+
+  .highlight-box{background:linear-gradient(135deg,var(--lavender),rgba(255,181,200,0.3));border-radius:16px;padding:16px;margin-top:10px;}
+  .highlight-box p{font-size:13px;color:var(--brown);font-weight:600;}
+
+  .footer{text-align:center;padding:32px 16px;color:#ccc;font-size:12px;}
+  .footer .bunny-small{font-size:24px;}
+</style>
+</head>
+<body>
+
+<!-- ヒーロー -->
+<div class="hero">
+  <div class="bunny">🐰</div>
+  <h1>ぽぽちゃん<br>つかいかたガイド</h1>
+  <p>家族のAIアシスタント・かんたんマニュアル</p>
+</div>
+
+<!-- 目次 -->
+<div class="toc">
+  <h2>📋 もくじ</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#login">🔐 ログイン</a>
+    <a class="toc-item" href="#schedule">📅 予定管理</a>
+    <a class="toc-item" href="#template">📋 テンプレート</a>
+    <a class="toc-item" href="#gcal">📱 Googleカレンダー</a>
+    <a class="toc-item" href="#stamp">🌟 スタンプ</a>
+    <a class="toc-item" href="#chat">🐰 会話</a>
+    <a class="toc-item" href="#line">🔔 LINE通知</a>
+    <a class="toc-item" href="#member">👨‍👩‍👧 メンバー</a>
+  </div>
+</div>
+
+<!-- 1. ログイン -->
+<div class="section" id="login">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title">🔐 ログイン・アカウント</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📱 はじめてログインする</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text">メールアドレス＋パスワード <strong>または</strong> Googleアカウントでログイン</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">はじめての人は<strong>家族グループを作る</strong>か、招待コードで<strong>参加する</strong>かを選ぶ</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Claude <strong>APIキーを入力</strong>して完了（APIキーは <a href="https://console.anthropic.com" style="color:var(--pink-dark);">console.anthropic.com</a> で取得）</div></div>
+    </div>
+    <div class="tip">一度ログインするとSafariを閉じても自動でログイン状態が保たれます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👨‍👩‍👧 家族を招待する</div>
+    <div class="card-body">
+      <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → <strong>招待コード</strong>（6文字）を家族に教える → 家族が招待コードを入力して参加
+    </div>
+    <div class="tip">オーナーは「切り替え」ボタンで別のメンバーとして操作できます（子どものかわりに入力するとき便利）</div>
+  </div>
+</div>
+
+<!-- 2. 予定管理 -->
+<div class="section" id="schedule">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title">📅 予定の管理</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">➕ 予定を追加する</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>「➕ 予定」</strong> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">タイトル・日付・種類・担当者を入力</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">「保存する」でバナーに追加される</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 バナーのボタンで確認する</div>
+    <div class="card-body" style="margin-bottom:10px;">画面上部のバナーに4つのボタンがあります</div>
+    <table class="table-simple">
+      <tr><th>ボタン</th><th>内容</th></tr>
+      <tr><td><span class="badge" style="background:#FFE4D6;color:#8B3000;">これまで</span></td><td>期限切れの未完了タスク</td></tr>
+      <tr><td><span class="badge pink">今日</span></td><td>今日の予定・タスク</td></tr>
+      <tr><td><span class="badge">明日</span></td><td>明日の予定</td></tr>
+      <tr><td><span class="badge">今週</span></td><td>今週中の予定</td></tr>
+    </table>
+    <div class="tip">ボタンの数字は未完了の件数。タップすると一覧が開きます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ タスクを完了する</div>
+    <div class="card-body" style="margin-bottom:8px;">バナーをタップ → タスク一覧 → タスクをタップ → 完了方法を選ぶ</div>
+    <table class="table-simple">
+      <tr><th>選択肢</th><th>内容</th><th>スタンプ</th></tr>
+      <tr><td>⭐ 完璧にできた</td><td>バッチリ完了</td><td>⭐ 獲得</td></tr>
+      <tr><td>🌟 まあ半分</td><td>半分くらいできた</td><td>🌟 獲得</td></tr>
+      <tr><td>💫 完了にする</td><td>完了扱いにする</td><td>💫 獲得</td></tr>
+      <tr><td>📅 今日に追加</td><td>今日の予定に移動</td><td>なし</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 3. テンプレート -->
+<div class="section" id="template">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title">📋 週間テンプレート</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">毎週繰り返す予定を自動登録</div>
+    <div class="card-body" style="margin-bottom:10px;">「月水金は算数ドリル」のような繰り返し予定を登録しておくと、ワンタップで今週分が追加されます</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>「📋 テンプレ」</strong> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">タイトル・担当者・曜日を選んで <strong>「このテンプレートを登録」</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">登録したら <strong>「✨ テンプレを追加する」</strong> で今週〜来週分が一括追加</div></div>
+    </div>
+    <div class="tip">個別に「テンプレを追加する」ボタンを押すと1件ずつ追加もできます</div>
+  </div>
+</div>
+
+<!-- 4. Googleカレンダー -->
+<div class="section" id="gcal">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title">📱 Googleカレンダー連携</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 GCal ボタンで取り込む</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>「📅 GCal」</strong> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Googleの認証画面で <strong>「許可」</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">今日から1ヶ月分のカレンダーとTodoリストが自動取り込み</div></div>
+    </div>
+    <div class="highlight-box">
+      <p>📌 取り込みのルール</p>
+      <p style="font-weight:400;margin-top:6px;font-size:12px;">・同じタイトルの予定は重複して追加されません<br>・Todoのメモに「毎日」と書いてあると7日分展開<br>・取り込んだ予定の担当者は操作中のメンバー名</p>
+    </div>
+  </div>
+</div>
+
+<!-- 5. スタンプ -->
+<div class="section" id="stamp">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title">🌟 スタンプ・ご褒美</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">スタンプのしくみ</div>
+    <div class="flow">
+      <div class="flow-item">タスクを完了する</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-item">スタンプが貯まる <span class="badge gold">🌟 スタンプ帳</span></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-item">設定した数に達するとご褒美！🎁</div>
+    </div>
+    <div class="tip">会話で「算数終わったよ！」と話しかけるだけでもスタンプが自動でもらえます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔥 れんぞく記録（streak）</div>
+    <div class="card-body">毎日タスクを完了すると🔥が増えます。ヘッダーに <span class="badge fire">🔥3</span> のように連続日数が表示されます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏆 ご褒美を設定する（おや専用）</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><span class="badge gold">🌟 スタンプ帳</span> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">「ご褒美を追加」セクションにタイトルとスタンプ数を入力</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">スタンプが目標数に達するとぽぽちゃんがお知らせ</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. 会話 -->
+<div class="section" id="chat">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title">🐰 ぽぽちゃんとの会話</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">こんな話しかけ方ができるよ</div>
+    <table class="table-simple">
+      <tr><th>話しかけ方</th><th>ぽぽちゃんの反応</th></tr>
+      <tr><td>「今日の予定は？」</td><td>今日のタスクをまとめて教えてくれる</td></tr>
+      <tr><td>「算数終わったよ！」</td><td>褒めてスタンプをくれる</td></tr>
+      <tr><td>「今週のイベントは？」</td><td>今週の予定を確認してくれる</td></tr>
+      <tr><td>「〇〇を予定に入れて」</td><td>AIが予定を解析してサポート</td></tr>
+    </table>
+    <div class="tip">Shift+Enterで送信（Enterは改行）</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">クイックボタン</div>
+    <div class="card-body">
+      <span class="badge">📝 やること確認</span>
+      <span class="badge gold">🌟 スタンプ帳</span>
+      <span class="badge">🎉 イベント</span>
+      <span class="badge">📋 一覧</span>
+      <br><br>よく使う質問をワンタップで送れます
+    </div>
+  </div>
+</div>
+
+<!-- 7. LINE通知 -->
+<div class="section" id="line">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">🔔 LINE通知</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">毎朝7時に届く通知</div>
+    <div class="card-body" style="margin-bottom:10px;">家族のLINEグループに毎朝7時、ぽぽちゃんから今日・明日の予定が届きます</div>
+    <div class="highlight-box">
+      <p>通知のイメージ</p>
+      <p style="font-weight:400;font-size:12px;margin-top:6px;white-space:pre-line;">🐰 おはよう！ぽぽちゃんだよ🌸
+
+📅 今日 5/16(金)
+📚【晴輝】算数ドリル
+📅【パパ】打ち合わせ
+
+📅 明日 5/17(土)
+🎉【家族】BBQ
+
+今日も家族みんなで頑張ろうね💪✨</p>
+    </div>
+  </div>
+</div>
+
+<!-- 8. メンバー切り替え -->
+<div class="section" id="member">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">👨‍👩‍👧 メンバー切り替え</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">オーナーができること</div>
+    <div class="card-body">
+      <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → 「切り替え」ボタンで別のメンバーとして操作できます<br><br>
+      例：パパが晴輝に切り替えて、晴輝のタスクを完了にする
+    </div>
+    <div class="tip">切り替えるとスタンプやstreakも切り替わったメンバーのものが表示されます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">家族名を変更する</div>
+    <div class="card-body">
+      <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → 「家族名の変更」セクション（オーナーのみ表示）
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="bunny-small">🐰</div>
+  <p style="margin-top:8px;">ぽぽちゃん ファミリーAIアシスタント</p>
+  <p style="margin-top:4px;">わからないことはぽぽちゃんに聞いてね！</p>
+</div>
+
+</body>
+</html>
