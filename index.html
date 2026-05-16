@@ -166,6 +166,8 @@
   .day-chips-row{display:flex;gap:6px;flex-wrap:wrap;}
   .day-chip{width:36px;height:36px;border-radius:50%;background:var(--cream);border:2px solid var(--lavender);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--brown);cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;}
   .day-chip.active{background:var(--pink-dark);border-color:var(--pink-dark);color:white;}
+  #templateList{max-height:30vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  #templateList::-webkit-scrollbar{display:none;}
   .template-item{background:var(--cream);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;}
   .template-item-info{flex:1;min-width:0;}
   .template-item-title{font-size:14px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
