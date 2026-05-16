@@ -268,9 +268,8 @@
   </div>
 
   <div class="quick-replies">
- <button class="qr-btn" onclick="sendQuick('今週のやることを教えて！')">📝 やること確認</button>
+    <button class="qr-btn" onclick="sendQuick('今週のやることを教えて！')">📝 やること確認</button>
     <button class="qr-btn" onclick="showStampModal()">🌟 スタンプ帳</button>
-    <button class="qr-btn" onclick="window.open('https://shin4john.github.io/poppo-app/guide.html','_blank')">📖 使い方</button>
     <button class="qr-btn" onclick="sendQuick('今週のイベントは？')">🎉 イベント</button>
     <button class="qr-btn" onclick="sendQuick('予定を全部見せて')">📋 一覧</button>
   </div>
@@ -1066,18 +1065,24 @@
 
     let reply;
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
       const res = await fetch('https://poppo-api.onoshin2.workers.dev', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           model: 'claude-sonnet-4-5', max_tokens: 500,
           system: systemPrompt,
           messages: conversationHistory.map(m => ({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
         })
       });
+      clearTimeout(timeoutId);
       const data = await res.json();
       reply = res.ok ? (data.content?.[0]?.text||'ごめんね😢') : `エラー ${res.status}: ${data.error?.message||''}`;
-    } catch(e) { reply=`通信エラー: ${e.message}`; }
+    } catch(e) {
+      reply = e.name === 'AbortError' ? 'タイムアウトしちゃった😢 もう一度送ってね！' : `通信エラー: ${e.message}`;
+    }
 
     document.getElementById('typing').classList.remove('active');
     addMessageToUI(reply, 'ai');
@@ -1171,6 +1176,17 @@
   document.getElementById('templateModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideTemplateModal(); });
   document.querySelectorAll('.day-chip').forEach(chip => {
     chip.addEventListener('click', () => chip.classList.toggle('active'));
+  });
+
+  // Safari バックグラウンド復帰時のUI・セッションリセット
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible') return;
+    // 送信ボタンとタイピング表示をリセット
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn) sendBtn.disabled = false;
+    document.getElementById('typing').classList.remove('active');
+    // Supabaseセッションを更新して認証切れを防ぐ
+    if (currentUser) await sb.auth.refreshSession();
   });
 
   function toggleMode() {
