@@ -166,8 +166,11 @@
   .day-chips-row{display:flex;gap:6px;flex-wrap:wrap;}
   .day-chip{width:36px;height:36px;border-radius:50%;background:var(--cream);border:2px solid var(--lavender);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--brown);cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;}
   .day-chip.active{background:var(--pink-dark);border-color:var(--pink-dark);color:white;}
-  #templateList{max-height:30vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
-  #templateList::-webkit-scrollbar{display:none;}
+  #templateModal .modal{overflow:hidden;height:85vh;max-height:85vh;padding-bottom:calc(12px + env(safe-area-inset-bottom));}
+  .template-scroll-top{overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;}
+  .template-scroll-top::-webkit-scrollbar{display:none;}
+  #templateList{display:flex;flex-direction:column;gap:8px;}
+  .template-form-fixed{flex-shrink:0;display:flex;flex-direction:column;gap:10px;padding-top:10px;border-top:2px solid var(--lavender);}
   .template-item{background:var(--cream);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;}
   .template-item-info{flex:1;min-width:0;}
   .template-item-title{font-size:14px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -376,37 +379,43 @@
 <!-- テンプレートモーダル -->
 <div class="modal-overlay hidden" id="templateModal">
   <div class="modal">
-    <h2>📋 週間テンプレート</h2>
-    <button class="btn btn-primary" id="applyTemplateBtn" onclick="applyWeeklyTemplates()">✨ 今週の予定に追加する</button>
-    <div id="templateList" style="display:flex;flex-direction:column;gap:8px;"></div>
-    <div class="divider">テンプレートを追加</div>
-    <input class="input-field" type="text" id="tmplTitle" placeholder="タイトル（例：算数ドリル）"/>
-    <select class="input-field" id="tmplAssigned">
-      <option value="">担当者を選ぶ</option>
-      <option value="パパ">パパ</option>
-      <option value="ママ">ママ</option>
-      <option value="晴輝">晴輝</option>
-      <option value="いずみ">いずみ</option>
-    </select>
-    <select class="input-field" id="tmplCategory">
-      <option value="予定">📅 予定</option>
-      <option value="宿題">📚 宿題</option>
-      <option value="イベント">🎉 イベント</option>
-    </select>
-    <div>
-      <div style="font-size:12px;color:#aaa;font-weight:700;margin-bottom:8px;">繰り返す曜日</div>
-      <div class="day-chips-row" id="dayChipsRow">
-        <div class="day-chip" data-day="1">月</div>
-        <div class="day-chip" data-day="2">火</div>
-        <div class="day-chip" data-day="3">水</div>
-        <div class="day-chip" data-day="4">木</div>
-        <div class="day-chip" data-day="5">金</div>
-        <div class="day-chip" data-day="6">土</div>
-        <div class="day-chip" data-day="0">日</div>
-      </div>
+    <!-- 上部：スクロール可能（タイトル＋リスト） -->
+    <div class="template-scroll-top">
+      <h2>📋 週間テンプレート</h2>
+      <button class="btn btn-primary" id="applyTemplateBtn" onclick="applyWeeklyTemplates()">✨ 今週の予定に追加する</button>
+      <div id="templateList"></div>
     </div>
-    <button class="btn btn-outline" onclick="addTemplate()">このテンプレートを登録 ➕</button>
-    <button class="btn btn-secondary" onclick="hideTemplateModal()">閉じる</button>
+    <!-- 下部：常に表示される入力フォーム -->
+    <div class="template-form-fixed">
+      <div style="font-size:12px;color:#888;font-weight:700;">➕ テンプレートを追加</div>
+      <input class="input-field" type="text" id="tmplTitle" placeholder="タイトル（例：算数ドリル）"/>
+      <select class="input-field" id="tmplAssigned">
+        <option value="">担当者を選ぶ</option>
+        <option value="パパ">パパ</option>
+        <option value="ママ">ママ</option>
+        <option value="晴輝">晴輝</option>
+        <option value="いずみ">いずみ</option>
+      </select>
+      <select class="input-field" id="tmplCategory">
+        <option value="予定">📅 予定</option>
+        <option value="宿題">📚 宿題</option>
+        <option value="イベント">🎉 イベント</option>
+      </select>
+      <div>
+        <div style="font-size:12px;color:#aaa;font-weight:700;margin-bottom:8px;">繰り返す曜日</div>
+        <div class="day-chips-row" id="dayChipsRow">
+          <div class="day-chip" data-day="1">月</div>
+          <div class="day-chip" data-day="2">火</div>
+          <div class="day-chip" data-day="3">水</div>
+          <div class="day-chip" data-day="4">木</div>
+          <div class="day-chip" data-day="5">金</div>
+          <div class="day-chip" data-day="6">土</div>
+          <div class="day-chip" data-day="0">日</div>
+        </div>
+      </div>
+      <button class="btn btn-outline" onclick="addTemplate()">このテンプレートを登録 ➕</button>
+      <button class="btn btn-secondary" onclick="hideTemplateModal()">閉じる</button>
+    </div>
   </div>
 </div>
 
