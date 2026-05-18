@@ -98,6 +98,18 @@
   .completion-btn.incomplete{background:#F0F0F0;color:#999;font-size:12px;font-weight:500;padding:9px 14px;}
   .completion-btn.reschedule{background:linear-gradient(135deg,#E8FFE8,#A5D6A7);color:#1B5E20;}
 
+  /* 編集モーダル */
+  .modal-overlay.z300{z-index:300;}
+  .edit-field-label{font-size:12px;color:#aaa;font-weight:600;margin-bottom:4px;}
+  .status-toggle{display:flex;gap:8px;}
+  .status-toggle-btn{flex:1;padding:10px;border-radius:12px;border:2px solid #eee;background:#f5f5f5;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:#bbb;transition:all 0.2s;}
+  .status-toggle-btn.active-undone{border-color:var(--pink);background:#fff0f5;color:var(--pink-dark);}
+  .status-toggle-btn.active-done{border-color:#4caf50;background:#f0fff4;color:#2e7d32;}
+  .delete-confirm-btn{width:100%;padding:11px;border-radius:12px;border:none;background:#fff0f0;color:#e53935;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+  .delete-confirm-btn:active{opacity:0.75;}
+  .edit-schedule-btn{background:none;border:none;font-size:15px;padding:4px 6px;cursor:pointer;flex-shrink:0;opacity:0.45;border-radius:8px;line-height:1;}
+  .edit-schedule-btn:active{opacity:1;background:var(--cream);}
+
   .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
   .chat-area::-webkit-scrollbar{display:none;}
   .message{display:flex;gap:8px;max-width:85%;animation:slideIn 0.3s ease;}
@@ -343,6 +355,32 @@
   </div>
 </div>
 
+<!-- 予定編集モーダル -->
+<div class="modal-overlay hidden z300" id="editScheduleModal">
+  <div class="modal">
+    <h2>✏️ 予定を変更</h2>
+    <p class="completion-task-title" id="editScheduleTitle"></p>
+    <div>
+      <div class="edit-field-label">日付</div>
+      <input type="date" id="editScheduleDate" style="width:100%;border:2px solid var(--lavender);border-radius:12px;padding:10px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;box-sizing:border-box;color:var(--text);">
+    </div>
+    <div>
+      <div class="edit-field-label">担当者</div>
+      <select id="editScheduleAssigned"></select>
+    </div>
+    <div>
+      <div class="edit-field-label">完了状態</div>
+      <div class="status-toggle">
+        <button id="editStatusUndone" class="status-toggle-btn" onclick="setEditStatus(false)">⬜ 未完了</button>
+        <button id="editStatusDone" class="status-toggle-btn" onclick="setEditStatus(true)">✅ 完了</button>
+      </div>
+    </div>
+    <button class="btn" onclick="saveScheduleEdit()">💾 保存する</button>
+    <button class="delete-confirm-btn" onclick="confirmDeleteSchedule()">🗑️ この予定を削除する</button>
+    <button class="btn btn-secondary" onclick="cancelEditSchedule()">キャンセル</button>
+  </div>
+</div>
+
 <!-- 完了選択モーダル（z-index高め） -->
 <div class="modal-overlay hidden z200" id="completionModal">
   <div class="modal">
@@ -448,6 +486,7 @@
   let isSignUp = false;
   let myDisplayName = null;
   let pendingCompletion = null; // { id, title, assignedTo }
+  let pendingEdit = null; // { id, title, assignedTo, category, isDone, originalIsDone, originalAssignedTo }
   let currentListSection = null; // 'today' | 'tomorrow' | 'week'
 
   // やる気機能
@@ -757,6 +796,7 @@
               <span style="font-size:13px;flex-shrink:0;">${emoji}</span>
               <span class="list-item-title" style="text-decoration:line-through;flex:1;font-size:13px;">${s.title}</span>
               <span style="font-size:14px;flex-shrink:0;white-space:nowrap;">${resultIcon} ${resultLabel}</span>
+              <button class="edit-schedule-btn" onclick="openEditModal('${s.id}')">✏️</button>
             </div>`;
           } else {
             const safe = s.title.replace(/'/g,"\\'");
@@ -770,6 +810,7 @@
               <span style="font-size:13px;flex-shrink:0;">${emoji}</span>
               <span class="list-item-title" style="flex:1;font-size:13px;">${s.title}</span>
               ${checkEl}
+              <button class="edit-schedule-btn" onclick="event.stopPropagation();openEditModal('${s.id}')">✏️</button>
             </div>`;
           }
         }).join('');
@@ -809,6 +850,7 @@
           return `<div class="schedule-list-item${isEvent ? ' event-item' : ''}" ${clickAttr}>
             <div class="list-item-left"><span>${icon}</span><span class="list-item-title">${s.title}</span></div>
             ${dateLabel}${checkEl}
+            <button class="edit-schedule-btn" onclick="event.stopPropagation();openEditModal('${s.id}')">✏️</button>
           </div>`;
         }).join('')}
       </div>`;
@@ -827,6 +869,7 @@
           return `<div class="schedule-list-item done-item">
             <div class="list-item-left"><span>${icon}</span><span class="list-item-title" style="text-decoration:line-through;">${s.title}</span></div>
             ${assigneeLabel}<span style="font-size:15px;flex-shrink:0;white-space:nowrap;">${resultIcon} ${resultLabel}</span>
+            <button class="edit-schedule-btn" onclick="openEditModal('${s.id}')">✏️</button>
           </div>`;
         }).join('')}
       </div>`;
@@ -838,6 +881,105 @@
   function hideScheduleListModal() {
     document.getElementById('scheduleListModal').classList.add('hidden');
     currentListSection = null;
+  }
+
+  // ===== 予定編集・削除 =====
+  function openEditModal(id) {
+    const all = [...schedules, ...pastSchedules, ...todayDoneSchedules, ...pastDoneSchedules];
+    const s = all.find(x => x.id === id);
+    if (!s) return;
+    pendingEdit = {
+      id: s.id, title: s.title,
+      category: s.category || '予定（やること）',
+      isDone: s.is_done,
+      originalIsDone: s.is_done,
+      originalAssignedTo: s.assigned_to || ''
+    };
+    document.getElementById('editScheduleTitle').textContent = `「${s.title}」`;
+    document.getElementById('editScheduleDate').value = s.event_date || '';
+    const sel = document.getElementById('editScheduleAssigned');
+    sel.innerHTML = '<option value="">なし</option>' +
+      members.map(m => `<option value="${m.display_name}"${s.assigned_to === m.display_name ? ' selected' : ''}>${m.display_name}</option>`).join('');
+    setEditStatus(s.is_done);
+    document.getElementById('editScheduleModal').classList.remove('hidden');
+  }
+
+  function setEditStatus(isDone) {
+    if (!pendingEdit) return;
+    pendingEdit.isDone = isDone;
+    document.getElementById('editStatusUndone').className = 'status-toggle-btn' + (!isDone ? ' active-undone' : '');
+    document.getElementById('editStatusDone').className   = 'status-toggle-btn' + ( isDone ? ' active-done'   : '');
+  }
+
+  function cancelEditSchedule() {
+    pendingEdit = null;
+    document.getElementById('editScheduleModal').classList.add('hidden');
+  }
+
+  async function saveScheduleEdit() {
+    if (!pendingEdit) return;
+    const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
+    const newDate     = document.getElementById('editScheduleDate').value || null;
+    const newAssigned = document.getElementById('editScheduleAssigned').value || null;
+    const newIsDone   = pendingEdit.isDone;
+    const oldMember   = originalAssignedTo || currentMember?.display_name;
+    const newMember   = newAssigned || currentMember?.display_name;
+
+    await sb.from('schedules').update({ event_date: newDate, assigned_to: newAssigned, is_done: newIsDone }).eq('id', id);
+
+    if (!originalIsDone && newIsDone) {
+      // 未完了→完了：スタンプ付与（管理上の完了なので incomplete 扱い）
+      if (newMember && category !== 'イベント') await addStamp(newMember, title, 'incomplete');
+    } else if (originalIsDone && !newIsDone) {
+      // 完了→未完了：スタンプ削除
+      if (oldMember) {
+        const { data: rows } = await sb.from('stamps').select('id')
+          .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
+          .order('earned_at', { ascending: false }).limit(1);
+        if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
+      }
+    } else if (originalIsDone && newIsDone && oldMember !== newMember) {
+      // 完了のまま担当者変更：スタンプを付け替え
+      const { data: rows } = await sb.from('stamps').select('id, stamp_type')
+        .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
+        .order('earned_at', { ascending: false }).limit(1);
+      if (rows?.length) {
+        await sb.from('stamps').delete().eq('id', rows[0].id);
+        if (newMember && category !== 'イベント')
+          await sb.from('stamps').insert({ family_id: familyId, member_name: newMember, task_title: title, stamp_type: rows[0].stamp_type });
+      }
+    }
+
+    pendingEdit = null;
+    document.getElementById('editScheduleModal').classList.add('hidden');
+    await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadStampData();
+    if (currentListSection) showScheduleList(currentListSection);
+  }
+
+  async function confirmDeleteSchedule() {
+    if (!pendingEdit) return;
+    const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
+    const oldMember = originalAssignedTo || currentMember?.display_name;
+
+    if (originalIsDone && oldMember && category !== 'イベント') {
+      const { data: rows } = await sb.from('stamps').select('id')
+        .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
+        .order('earned_at', { ascending: false }).limit(1);
+      if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
+    }
+
+    await sb.from('schedules').delete().eq('id', id);
+    pendingEdit = null;
+    document.getElementById('editScheduleModal').classList.add('hidden');
+    await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadStampData();
+    if (currentListSection) {
+      const remaining = currentListSection === 'past'
+        ? [...pastSchedules, ...pastDoneSchedules]
+        : filterBySection(currentListSection);
+      if (remaining.length > 0 || currentListSection === 'today' || currentListSection === 'past') showScheduleList(currentListSection);
+      else hideScheduleListModal();
+    }
+    addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
   }
 
   // ===== 完了選択モーダル =====
