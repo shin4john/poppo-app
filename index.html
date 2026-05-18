@@ -144,6 +144,12 @@
   .member-switch-btn{margin-left:auto;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:14px;padding:5px 12px;font-size:12px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap;}
   .member-switch-btn:active{opacity:0.8;}
   .member-active-badge{margin-left:auto;background:var(--lavender);color:var(--brown);border-radius:14px;padding:5px 10px;font-size:11px;font-weight:700;white-space:nowrap;}
+  .member-avatar{cursor:pointer;transition:transform 0.15s;}
+  .member-avatar:active{transform:scale(0.9);}
+  .emoji-picker{display:flex;flex-wrap:wrap;gap:6px;padding:8px 4px 2px;width:100%;flex-basis:100%;}
+  .emoji-opt{width:38px;height:38px;border-radius:50%;border:2px solid transparent;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--cream);transition:all 0.15s;}
+  .emoji-opt:active{transform:scale(0.88);}
+  .emoji-opt.selected{border-color:var(--pink-dark);background:var(--lavender);}
 
   /* スタンプ画面 */
   .stamp-member-card{background:var(--cream);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;}
@@ -444,6 +450,7 @@
 
   // やる気機能
   // stampData[name] = { total, perfect, half, incomplete }
+  let memberEmojiCustom = {};
   let stampData = {};
   let streakData = {};
   let rewardsData = [];
@@ -452,6 +459,7 @@
   const NON_COMPLETION = ['？','?','なに','何','どうする','どうやって','教えて','おしえて','できない','わからない'];
 
   const MEMBER_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶'];
+  const ANIMAL_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶','🐸','🐯','🦁','🐨','🐮','🐷','🐭','🐹','🦝','🐺','🐧','🦆','🐬','🦭','🐣','🦉'];
   const CAT_ICONS = { '予定（やること）':'📅','予定':'📅','宿題':'📚','イベント':'🎉' };
 
   // ===== 初期化 =====
@@ -482,6 +490,7 @@
     if (settings?.claude_api_key) {
       claudeApiKey = settings.claude_api_key;
       await loadMembers();
+      loadEmojiCustom();
       await autoCloseEvents();
       await loadSchedules();
       await loadPastSchedules();
@@ -541,8 +550,31 @@
 
   function getMemberEmojiMap() {
     const map = {};
-    members.forEach((m, i) => { map[m.display_name] = MEMBER_EMOJIS[i % MEMBER_EMOJIS.length]; });
+    members.forEach((m, i) => {
+      map[m.display_name] = memberEmojiCustom[m.display_name] || MEMBER_EMOJIS[i % MEMBER_EMOJIS.length];
+    });
     return map;
+  }
+
+  function loadEmojiCustom() {
+    try {
+      const saved = localStorage.getItem('poppo_emojis_' + familyId);
+      memberEmojiCustom = saved ? JSON.parse(saved) : {};
+    } catch(e) { memberEmojiCustom = {}; }
+  }
+
+  function setMemberEmoji(idx, emoji) {
+    const name = members[idx]?.display_name;
+    if (!name) return;
+    memberEmojiCustom[name] = emoji;
+    localStorage.setItem('poppo_emojis_' + familyId, JSON.stringify(memberEmojiCustom));
+    renderFamilyModalContent();
+  }
+
+  function toggleEmojiPicker(idx) {
+    const el = document.getElementById('emoji-picker-' + idx);
+    if (!el) return;
+    el.classList.toggle('hidden');
   }
 
   function updateFamilyHeader() {
@@ -558,7 +590,7 @@
     const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadTodayDone(); await loadTemplates(); await loadConversationHistory();
+    await loadMembers(); loadEmojiCustom(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadTodayDone(); await loadTemplates(); await loadConversationHistory();
     await loadStampData();
     updateFamilyHeader();
     showScreen('app');
@@ -1151,17 +1183,22 @@
     const emojiMap = getMemberEmojiMap();
     const isOwner = realUserRole === 'owner';
     document.getElementById('memberList').innerHTML = members.length > 0
-      ? members.map(m => {
+      ? members.map((m, i) => {
           const isActive = m.display_name === currentMember?.display_name;
+          const currentEmoji = emojiMap[m.display_name] || '🐰';
           const badge = isActive
             ? `<span class="member-active-badge">✅ いまここ</span>`
             : isOwner
               ? `<button class="member-switch-btn" onclick="switchToMember('${m.display_name}','${m.role}')">切り替え</button>`
               : '';
-          return `<div class="member-item">
-            <div class="member-avatar">${emojiMap[m.display_name]||'🐰'}</div>
+          const pickerHtml = ANIMAL_EMOJIS.map(e =>
+            `<div class="emoji-opt${e===currentEmoji?' selected':''}" onclick="setMemberEmoji(${i},'${e}')">${e}</div>`
+          ).join('');
+          return `<div class="member-item" style="flex-wrap:wrap;">
+            <div class="member-avatar" onclick="toggleEmojiPicker(${i})" title="タップでアイコン変更">${currentEmoji}</div>
             <div style="flex:1"><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
             ${badge}
+            <div class="emoji-picker hidden" id="emoji-picker-${i}">${pickerHtml}</div>
           </div>`;
         }).join('')
       : '<p style="color:#aaa;font-size:13px;">読み込み中...</p>';
