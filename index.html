@@ -1145,32 +1145,44 @@
     area.scrollTop = area.scrollHeight;
   }
 
-  async function showFamilyModal() {
-    await loadMembers();
+  function renderFamilyModalContent() {
     updateFamilyHeader();
     document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
     const emojiMap = getMemberEmojiMap();
     const isOwner = realUserRole === 'owner';
-    document.getElementById('memberList').innerHTML = members.map(m => {
-      const isActive = m.display_name === currentMember?.display_name;
-      const badge = isActive
-        ? `<span class="member-active-badge">✅ いまここ</span>`
-        : isOwner
-          ? `<button class="member-switch-btn" onclick="switchToMember('${m.display_name}','${m.role}')">切り替え</button>`
-          : '';
-      return `<div class="member-item">
-        <div class="member-avatar">${emojiMap[m.display_name]||'🐰'}</div>
-        <div style="flex:1"><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
-        ${badge}
-      </div>`;
-    }).join('');
-    const { data: myData } = await sb.from('family_members').select('role').eq('user_id', currentUser.id).eq('family_id', familyId).single();
+    document.getElementById('memberList').innerHTML = members.length > 0
+      ? members.map(m => {
+          const isActive = m.display_name === currentMember?.display_name;
+          const badge = isActive
+            ? `<span class="member-active-badge">✅ いまここ</span>`
+            : isOwner
+              ? `<button class="member-switch-btn" onclick="switchToMember('${m.display_name}','${m.role}')">切り替え</button>`
+              : '';
+          return `<div class="member-item">
+            <div class="member-avatar">${emojiMap[m.display_name]||'🐰'}</div>
+            <div style="flex:1"><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
+            ${badge}
+          </div>`;
+        }).join('')
+      : '<p style="color:#aaa;font-size:13px;">読み込み中...</p>';
+    // オーナー編集欄（キャッシュ済みroleで判定）
     const editSection = document.getElementById('familyNameEdit');
-    if (myData?.role === 'owner') {
+    if (realUserRole === 'owner') {
       document.getElementById('familyNameEditInput').value = familyData?.family_name || '';
       editSection.style.display = 'flex';
     } else { editSection.style.display = 'none'; }
+  }
+
+  function showFamilyModal() {
+    // キャッシュ済みデータで即座に開く
+    renderFamilyModalContent();
     document.getElementById('familyModal').classList.remove('hidden');
+    // バックグラウンドで最新データに更新
+    loadMembers().then(() => {
+      if (!document.getElementById('familyModal').classList.contains('hidden')) {
+        renderFamilyModalContent();
+      }
+    }).catch(() => {});
   }
   function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
 
