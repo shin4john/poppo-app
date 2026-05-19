@@ -82,9 +82,11 @@
   <div class="toc-grid">
     <a class="toc-item" href="#login">🔐 ログイン</a>
     <a class="toc-item" href="#schedule">📅 予定管理</a>
+    <a class="toc-item" href="#edit">✏️ 予定の変更・削除</a>
     <a class="toc-item" href="#template">📋 テンプレート</a>
     <a class="toc-item" href="#gcal">📱 Googleカレンダー</a>
     <a class="toc-item" href="#stamp">🌟 スタンプ</a>
+    <a class="toc-item" href="#duty">📋 当番表</a>
     <a class="toc-item" href="#chat">🐰 会話</a>
     <a class="toc-item" href="#line">🔔 LINE通知</a>
     <a class="toc-item" href="#member">👨‍👩‍👧 メンバー</a>
@@ -138,7 +140,7 @@
     <div class="card-body" style="margin-bottom:10px;">画面上部のバナーに4つのボタンがあります</div>
     <table class="table-simple">
       <tr><th>ボタン</th><th>内容</th></tr>
-      <tr><td><span class="badge" style="background:#FFE4D6;color:#8B3000;">これまで</span></td><td>期限切れの未完了タスク</td></tr>
+      <tr><td><span class="badge" style="background:#FFE4D6;color:#8B3000;">これまで</span></td><td>過去1ヶ月の予定すべて（完了・未完了）日付が新しい順。未完了件数をバッジ表示</td></tr>
       <tr><td><span class="badge pink">今日</span></td><td>今日の予定・タスク</td></tr>
       <tr><td><span class="badge">明日</span></td><td>明日の予定</td></tr>
       <tr><td><span class="badge">今週</span></td><td>今週中の予定</td></tr>
@@ -153,9 +155,47 @@
       <tr><th>選択肢</th><th>内容</th><th>スタンプ</th></tr>
       <tr><td>⭐ 完璧にできた</td><td>バッチリ完了</td><td>⭐ 獲得</td></tr>
       <tr><td>🌟 まあ半分</td><td>半分くらいできた</td><td>🌟 獲得</td></tr>
-      <tr><td>💫 完了にする</td><td>完了扱いにする</td><td>💫 獲得</td></tr>
+      <tr><td>とりあえず完了にする</td><td>完了扱いにする</td><td>獲得</td></tr>
       <tr><td>📅 今日に追加</td><td>今日の予定に移動</td><td>なし</td></tr>
     </table>
+  </div>
+</div>
+
+<!-- 2b. 予定の変更・削除 -->
+<div class="section" id="edit">
+  <div class="section-header">
+    <div class="section-num" style="font-size:13px;">2+</div>
+    <div class="section-title">✏️ 予定の変更・削除</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✏️ ボタンから編集する</div>
+    <div class="card-body" style="margin-bottom:10px;">バナーをタップして一覧を開くと、各行の右端に薄い <strong>✏️</strong> ボタンが表示されます</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text">一覧の行右端の <strong>✏️</strong> をタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">変更したい項目を編集する</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">「💾 保存する」で確定</div></div>
+    </div>
+    <div class="tip">完了済みのタスクの ✏️ からも編集できます（「これまで」一覧も同様）</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">変更できる項目</div>
+    <table class="table-simple">
+      <tr><th>項目</th><th>内容</th></tr>
+      <tr><td>📅 日付</td><td>予定の日付を変更</td></tr>
+      <tr><td>👤 担当者</td><td>メンバー一覧から選択して変更</td></tr>
+      <tr><td>✅ 完了状態</td><td>未完了 ⬜ ↔ 完了 ✅ の切り替え</td></tr>
+    </table>
+    <div class="tip">完了状態を「未完了→完了」に変えるとスタンプが付与され、「完了→未完了」に戻すと直近のスタンプが削除されます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗑️ 予定を削除する</div>
+    <div class="card-body">
+      ✏️ ボタン → 編集モーダル下部の <strong>「🗑️ この予定を削除する」</strong> をタップ<br><br>
+      完了済み予定を削除すると、紐づくスタンプも合わせて削除されます
+    </div>
   </div>
 </div>
 
@@ -220,7 +260,7 @@
 
   <div class="card">
     <div class="card-title">🔥 れんぞく記録（streak）</div>
-    <div class="card-body">毎日タスクを完了すると🔥が増えます。ヘッダーに <span class="badge fire">🔥3</span> のように連続日数が表示されます</div>
+    <div class="card-body">毎日タスクを完了すると🔥が増えます。<span class="badge gold">🌟 スタンプ帳</span> を開くとメンバーごとの連続日数・最長記録が確認できます</div>
   </div>
 
   <div class="card">
@@ -256,10 +296,12 @@
     <div class="card-title">クイックボタン</div>
     <div class="card-body">
       <span class="badge">📝 やること確認</span>
+      <span class="badge">📋 当番表</span>
       <span class="badge gold">🌟 スタンプ帳</span>
       <span class="badge">🎉 イベント</span>
       <span class="badge">📋 一覧</span>
-      <br><br>よく使う質問をワンタップで送れます
+      <span class="badge">📖 使い方</span>
+      <br><br>よく使う機能をワンタップで開けます
     </div>
   </div>
 </div>
@@ -310,6 +352,70 @@
     <div class="card-title">家族名を変更する</div>
     <div class="card-body">
       <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → 「家族名の変更」セクション（オーナーのみ表示）
+    </div>
+  </div>
+</div>
+
+<!-- 9. 当番表 -->
+<div class="section" id="duty">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <div class="section-title">📋 当番表</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">家族の当番をマトリクスで管理</div>
+    <div class="card-body" style="margin-bottom:10px;">担当者×当番内容を行として登録し、1週間分の完了状況をひとめで確認できます</div>
+    <div class="highlight-box">
+      <p>📌 当番表のイメージ</p>
+      <p style="font-weight:400;font-size:12px;margin-top:6px;white-space:pre-line;">            月  火  水  木  金  土  日
+パパ・ゴミ出し  ✅  ー  ✅  ー  ✅  ー  ー
+パパ・洗濯畳み  ✅  ✅  ❌  ✅  ✅  ー  ー
+晴輝・テーブルふき ✅ ✅  ✅  ・  ✅  ✅  ✅
+いずみ・花の水やり ー  ・  ✅  ー  ✅  ✅  ー</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 当番表を開く</div>
+    <div class="card-body">
+      クイックボタン <span class="badge">📋 当番表</span> をタップ
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">＋ 当番を追加する</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text">当番表下部の <strong>「＋ 当番を追加」</strong> をタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">担当者をプルダウンで選ぶ（家族メンバー一覧から）</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">当番内容を入力して <strong>「追加する」</strong></div></div>
+    </div>
+    <div class="tip">当番は毎日すべての列に表示されます。対象外の日は「ー 対象外」を選んで記録しましょう</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">セルをタップして状態を記録する</div>
+    <table class="table-simple">
+      <tr><th>選択肢</th><th>意味</th></tr>
+      <tr><td>✅ できた</td><td>その日の当番を完了</td></tr>
+      <tr><td>❌ できなかった</td><td>その日はできなかった</td></tr>
+      <tr><td>ー 対象外</td><td>その日はやらなくてOK</td></tr>
+      <tr><td>🔄 リセット</td><td>入力をクリアして未入力に戻す</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">◀ 先週 / 来週 ▶ で週をスライド</div>
+    <div class="card-body">
+      当番表上部のナビボタンで前後の週に移動できます。今日の列はピンクでハイライト表示されます
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗑 当番を削除する</div>
+    <div class="card-body">
+      各行の右端にある <strong>🗑</strong> ボタンをタップ → 確認後に削除されます<br>
+      削除すると、その当番のすべての記録（ログ）も一緒に削除されます
     </div>
   </div>
 </div>
