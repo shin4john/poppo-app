@@ -110,6 +110,47 @@
   .edit-schedule-btn{background:none;border:none;font-size:15px;padding:4px 6px;cursor:pointer;flex-shrink:0;opacity:0.45;border-radius:8px;line-height:1;}
   .edit-schedule-btn:active{opacity:1;background:var(--cream);}
 
+  /* 当番表 */
+  .modal-overlay.z400{z-index:400;}
+  #dutyModal .modal{height:85vh;overflow:hidden;padding:0;gap:0;}
+  .duty-modal-header{padding:16px 20px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #f0e8f0;}
+  .duty-week-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;flex-shrink:0;}
+  .duty-nav-btn{background:var(--lavender);border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:var(--brown);cursor:pointer;}
+  .duty-nav-btn:active{opacity:0.75;}
+  .duty-week-label{font-size:13px;font-weight:700;color:var(--brown);}
+  .duty-table-wrap{flex:1;overflow:auto;min-height:0;}
+  .duty-table{border-collapse:collapse;width:max-content;min-width:100%;}
+  .duty-table th,.duty-table td{border:1px solid #f0e8f0;padding:6px 8px;text-align:center;font-size:12px;white-space:nowrap;vertical-align:middle;}
+  .duty-table .col-duty{position:sticky;left:0;background:white;z-index:2;text-align:left;min-width:110px;max-width:140px;white-space:normal;word-break:break-all;}
+  .duty-table thead th{background:var(--lavender);color:var(--brown);font-weight:700;position:sticky;top:0;z-index:1;}
+  .duty-table thead th.col-duty{z-index:3;background:var(--lavender);}
+  .duty-table tbody tr:nth-child(even) td{background:#faf8ff;}
+  .duty-table tbody tr:nth-child(even) td.col-duty{background:#f5f0ff;}
+  .duty-cell{cursor:pointer;border-radius:6px;padding:3px 4px;transition:background 0.15s;font-size:18px;display:inline-block;min-width:28px;line-height:1.3;}
+  .duty-cell:active{background:var(--cream);}
+  .duty-cell.empty{font-size:13px;color:#ddd;}
+  .duty-cell.today-col{background:rgba(255,200,210,0.15);}
+  .duty-person-tag{font-size:11px;font-weight:700;color:var(--pink-dark);}
+  .duty-title-tag{font-size:12px;color:var(--brown);}
+  .duty-delete-btn{background:none;border:none;font-size:12px;color:#ddd;cursor:pointer;padding:0 2px;float:right;}
+  .duty-delete-btn:active{color:#e53935;}
+  .duty-add-section{padding:10px 16px;border-top:1px solid #f0e8f0;flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+  .duty-add-row{display:flex;gap:8px;align-items:center;}
+  .duty-add-form{display:flex;flex-direction:column;gap:8px;padding-top:4px;}
+  .duty-add-form select,.duty-add-form input{border:2px solid var(--lavender);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);}
+  .duty-add-btn{background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;cursor:pointer;}
+  .duty-add-btn:active{opacity:0.8;}
+  .duty-toggle-btn{background:var(--lavender);border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:var(--brown);cursor:pointer;}
+  /* セル選択メニュー */
+  .duty-cell-menu{background:white;border-radius:24px 24px 0 0;padding:20px;width:100%;animation:slideUp 0.25s ease;}
+  .duty-cell-menu-title{font-size:13px;color:#aaa;font-weight:600;margin-bottom:10px;text-align:center;}
+  .duty-cell-menu-btn{width:100%;padding:13px;border-radius:14px;border:none;font-family:'Zen Maru Gothic',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;text-align:center;}
+  .duty-cell-menu-btn.done{background:linear-gradient(135deg,#f0fff4,#a5d6a7);color:#1b5e20;}
+  .duty-cell-menu-btn.failed{background:linear-gradient(135deg,#fff0f0,#ef9a9a);color:#b71c1c;}
+  .duty-cell-menu-btn.skip{background:#f5f5f5;color:#aaa;}
+  .duty-cell-menu-btn.reset{background:#f9f9f9;color:#bbb;font-size:12px;padding:9px;}
+  .duty-cell-menu-btn.cancel{background:#f0e8f0;color:var(--brown);}
+
   .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
   .chat-area::-webkit-scrollbar{display:none;}
   .message{display:flex;gap:8px;max-width:85%;animation:slideIn 0.3s ease;}
@@ -289,6 +330,7 @@
 
   <div class="quick-replies">
     <button class="qr-btn" onclick="sendQuick('今週のやることを教えて！')">📝 やること確認</button>
+    <button class="qr-btn" onclick="showDutyModal()">📋 当番表</button>
     <button class="qr-btn" onclick="showStampModal()">🌟 スタンプ帳</button>
     <button class="qr-btn" onclick="sendQuick('今週のイベントは？')">🎉 イベント</button>
     <button class="qr-btn" onclick="sendQuick('予定を全部見せて')">📋 一覧</button>
@@ -352,6 +394,49 @@
     <h2 id="scheduleListTitle">今日の予定</h2>
     <div id="scheduleListContent"></div>
     <button class="btn btn-secondary" onclick="hideScheduleListModal()">閉じる</button>
+  </div>
+</div>
+
+<!-- 当番表モーダル -->
+<div class="modal-overlay hidden" id="dutyModal">
+  <div class="modal">
+    <div class="duty-modal-header">
+      <h2 style="margin:0;">📋 当番表</h2>
+      <button onclick="hideDutyModal()" style="background:none;border:none;font-size:22px;color:#bbb;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <div class="duty-week-nav">
+      <button class="duty-nav-btn" onclick="navigateDutyWeek(-1)">◀ 先週</button>
+      <span class="duty-week-label" id="dutyWeekLabel"></span>
+      <button class="duty-nav-btn" onclick="navigateDutyWeek(1)">来週 ▶</button>
+    </div>
+    <div class="duty-table-wrap">
+      <div id="dutyTableWrap"></div>
+    </div>
+    <div class="duty-add-section">
+      <div class="duty-add-row">
+        <button class="duty-toggle-btn" onclick="toggleAddDutyForm()">＋ 当番を追加</button>
+      </div>
+      <div id="addDutyForm" class="hidden duty-add-form">
+        <select id="dutyPersonSelect" style="width:100%;"></select>
+        <input id="dutyTitleInput" placeholder="当番内容（例：テーブルふき）" style="width:100%;box-sizing:border-box;">
+        <button class="duty-add-btn" onclick="addDuty()">追加する</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;flex-shrink:0;">
+      <button class="btn btn-secondary" onclick="hideDutyModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 当番セル選択メニュー -->
+<div class="modal-overlay hidden z400" id="dutyCellMenu">
+  <div class="duty-cell-menu">
+    <div class="duty-cell-menu-title" id="dutyCellMenuTitle"></div>
+    <button class="duty-cell-menu-btn done"   onclick="setDutyStatus('done')">✅ できた</button>
+    <button class="duty-cell-menu-btn failed" onclick="setDutyStatus('failed')">❌ できなかった</button>
+    <button class="duty-cell-menu-btn skip"   onclick="setDutyStatus('skip')">ー 対象外</button>
+    <button class="duty-cell-menu-btn reset"  onclick="setDutyStatus(null)">🔄 リセット（未入力に戻す）</button>
+    <button class="duty-cell-menu-btn cancel" onclick="closeDutyCellMenu()">キャンセル</button>
   </div>
 </div>
 
@@ -487,6 +572,10 @@
   let myDisplayName = null;
   let pendingCompletion = null; // { id, title, assignedTo }
   let pendingEdit = null; // { id, title, assignedTo, category, isDone, originalIsDone, originalAssignedTo }
+  let duties = [];
+  let dutyLogs = {}; // key: `${dutyId}_${dateStr}` → { id, status }
+  let currentDutyWeekOffset = 0;
+  let pendingDutyCell = null; // { dutyId, date, personName, dutyTitle }
   let currentListSection = null; // 'today' | 'tomorrow' | 'week'
 
   // やる気機能
@@ -538,6 +627,7 @@
       await loadPastDone();
       await loadTodayDone();
       await loadTemplates();
+      await loadDuties();
       await loadConversationHistory();
       await loadStampData();
       updateFamilyHeader();
@@ -632,7 +722,7 @@
     const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers(); loadEmojiCustom(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadTemplates(); await loadConversationHistory();
+    await loadMembers(); loadEmojiCustom(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadTemplates(); await loadDuties(); await loadConversationHistory();
     await loadStampData();
     updateFamilyHeader();
     showScreen('app');
@@ -1487,6 +1577,8 @@
   document.getElementById('completionModal').addEventListener('click', e => { if(e.target===e.currentTarget) cancelCompletion(); });
   document.getElementById('stampModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideStampModal(); });
   document.getElementById('templateModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideTemplateModal(); });
+  document.getElementById('dutyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideDutyModal(); });
+  document.getElementById('dutyCellMenu').addEventListener('click', e => { if(e.target===e.currentTarget) closeDutyCellMenu(); });
   document.querySelectorAll('.day-chip').forEach(chip => {
     chip.addEventListener('click', () => chip.classList.toggle('active'));
   });
@@ -1659,6 +1751,197 @@
       }
       return addedCount;
     } catch(e) { console.error('Tasks取得エラー:', e); return 0; }
+  }
+
+  // ===== 当番表 =====
+  const DAY_LABELS_DUTY = ['日','月','火','水','木','金','土'];
+
+  function getDutyWeekDates(offset = 0) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dow = today.getDay(); // 0=Sun
+    const daysToMon = dow === 0 ? -6 : 1 - dow;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + daysToMon + offset * 7);
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday); d.setDate(monday.getDate() + i);
+      dates.push(localDateStr(d));
+    }
+    return dates;
+  }
+
+  async function loadDuties() {
+    const { data } = await sb.from('duties').select('*').eq('family_id', familyId).order('sort_order').order('created_at');
+    duties = data || [];
+  }
+
+  async function loadDutyLogs(dateStrings) {
+    if (!duties.length) { dutyLogs = {}; return; }
+    const { data } = await sb.from('duty_logs').select('*')
+      .eq('family_id', familyId)
+      .in('log_date', dateStrings);
+    dutyLogs = {};
+    (data || []).forEach(r => { dutyLogs[`${r.duty_id}_${r.log_date}`] = { id: r.id, status: r.status }; });
+  }
+
+  async function showDutyModal() {
+    currentDutyWeekOffset = 0;
+    document.getElementById('dutyModal').classList.remove('hidden');
+    // 追加フォームを閉じる
+    document.getElementById('addDutyForm').classList.add('hidden');
+    // 担当者プルダウンを更新
+    const sel = document.getElementById('dutyPersonSelect');
+    sel.innerHTML = members.map(m => `<option value="${m.display_name}">${m.display_name}</option>`).join('');
+    await renderDutyTable();
+  }
+
+  function hideDutyModal() {
+    document.getElementById('dutyModal').classList.add('hidden');
+  }
+
+  async function renderDutyTable() {
+    const dates = getDutyWeekDates(currentDutyWeekOffset);
+    const todayStr = localDateStr(new Date());
+    await loadDutyLogs(dates);
+
+    // 週ラベル
+    const d0 = dates[0].slice(5).replace('-','/');
+    const d6 = dates[6].slice(5).replace('-','/');
+    document.getElementById('dutyWeekLabel').textContent = `${d0} 〜 ${d6}`;
+
+    if (!duties.length) {
+      document.getElementById('dutyTableWrap').innerHTML =
+        '<p style="padding:20px;color:#aaa;font-size:13px;text-align:center;">当番がまだ登録されていません。＋ボタンから追加してください。</p>';
+      return;
+    }
+
+    const emojiMap = getMemberEmojiMap();
+    const STATUS_ICON = { done: '✅', failed: '❌', skip: 'ー' };
+
+    let html = '<table class="duty-table"><thead><tr>';
+    html += '<th class="col-duty">担当 / 当番</th>';
+    dates.forEach(d => {
+      const dayLabel = DAY_LABELS_DUTY[new Date(d + 'T00:00:00').getDay()];
+      const mmdd = d.slice(5).replace('-','/');
+      const isToday = d === todayStr;
+      html += `<th style="${isToday ? 'background:var(--pink);color:white;' : ''}">${dayLabel}<br>${mmdd}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    duties.forEach(duty => {
+      const emoji = emojiMap[duty.person_name] || '📋';
+      html += '<tr>';
+      html += `<td class="col-duty">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;">
+          <div>
+            <div class="duty-person-tag">${emoji} ${duty.person_name}</div>
+            <div class="duty-title-tag">${duty.title}</div>
+          </div>
+          <button class="duty-delete-btn" onclick="deleteDuty('${duty.id}')">🗑</button>
+        </div>
+      </td>`;
+      dates.forEach(d => {
+        const key = `${duty.id}_${d}`;
+        const log = dutyLogs[key];
+        const icon = log ? STATUS_ICON[log.status] : '・';
+        const cls = log ? '' : ' empty';
+        const isToday = d === todayStr;
+        html += `<td style="${isToday ? 'background:rgba(255,180,200,0.12);' : ''}">
+          <span class="duty-cell${cls}" onclick="openDutyCellMenu('${duty.id}','${d}','${duty.person_name}','${duty.title.replace(/'/g,"\\'")}')">${icon}</span>
+        </td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('dutyTableWrap').innerHTML = html;
+  }
+
+  async function navigateDutyWeek(delta) {
+    currentDutyWeekOffset += delta;
+    await renderDutyTable();
+  }
+
+  function openDutyCellMenu(dutyId, date, personName, dutyTitle) {
+    pendingDutyCell = { dutyId, date, personName, dutyTitle };
+    const log = dutyLogs[`${dutyId}_${date}`];
+    const mmdd = date.slice(5).replace('-','/');
+    const statusLabel = log ? { done:'✅ できた', failed:'❌ できなかった', skip:'ー 対象外' }[log.status] || '' : '未入力';
+    document.getElementById('dutyCellMenuTitle').textContent = `${personName}・${dutyTitle}（${mmdd}）— ${statusLabel}`;
+    document.getElementById('dutyCellMenu').classList.remove('hidden');
+  }
+
+  function closeDutyCellMenu() {
+    pendingDutyCell = null;
+    document.getElementById('dutyCellMenu').classList.add('hidden');
+  }
+
+  async function setDutyStatus(status) {
+    if (!pendingDutyCell) return;
+    const { dutyId, date } = pendingDutyCell;
+    const key = `${dutyId}_${date}`;
+    closeDutyCellMenu();
+
+    if (status === null) {
+      // リセット：ログを削除
+      if (dutyLogs[key]) {
+        await sb.from('duty_logs').delete().eq('id', dutyLogs[key].id);
+        delete dutyLogs[key];
+      }
+    } else {
+      // upsert
+      const { data, error } = await sb.from('duty_logs').upsert(
+        { family_id: familyId, duty_id: dutyId, log_date: date, status },
+        { onConflict: 'duty_id,log_date' }
+      ).select('id, status').single();
+      if (!error && data) dutyLogs[key] = { id: data.id, status: data.status };
+    }
+
+    // テーブルを再描画
+    const STATUS_ICON = { done: '✅', failed: '❌', skip: 'ー' };
+    const log = dutyLogs[key];
+    const icon = log ? STATUS_ICON[log.status] : '・';
+    const cls = log ? '' : ' empty';
+    // セルだけ即時更新（全再描画は重いため）
+    document.querySelectorAll(`.duty-cell`).forEach(el => {
+      const onclick = el.getAttribute('onclick') || '';
+      if (onclick.includes(`'${dutyId}','${date}'`)) {
+        el.className = `duty-cell${cls}`;
+        el.textContent = icon;
+      }
+    });
+  }
+
+  function toggleAddDutyForm() {
+    const f = document.getElementById('addDutyForm');
+    f.classList.toggle('hidden');
+    if (!f.classList.contains('hidden')) {
+      document.getElementById('dutyTitleInput').focus();
+    }
+  }
+
+  async function addDuty() {
+    const personName = document.getElementById('dutyPersonSelect').value;
+    const title = document.getElementById('dutyTitleInput').value.trim();
+    if (!title) { alert('当番内容を入力してください'); return; }
+    const { data, error } = await sb.from('duties').insert({
+      family_id: familyId, person_name: personName, title,
+      sort_order: duties.length
+    }).select('*').single();
+    if (error) { alert('追加に失敗しました: ' + error.message); return; }
+    duties.push(data);
+    document.getElementById('dutyTitleInput').value = '';
+    document.getElementById('addDutyForm').classList.add('hidden');
+    await renderDutyTable();
+  }
+
+  async function deleteDuty(id) {
+    if (!confirm('この当番を削除しますか？記録もすべて消えます。')) return;
+    await sb.from('duties').delete().eq('id', id);
+    duties = duties.filter(d => d.id !== id);
+    // 関連するログをキャッシュから削除
+    Object.keys(dutyLogs).forEach(k => { if (k.startsWith(id)) delete dutyLogs[k]; });
+    await renderDutyTable();
   }
 
   window.addEventListener('load', () => {
