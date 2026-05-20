@@ -1033,6 +1033,7 @@
   async function saveScheduleEdit() {
     if (!pendingEdit) return;
     const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
+    const section     = currentListSection; // await 前にキャプチャ
     const newDate     = document.getElementById('editScheduleDate').value || null;
     const newAssigned = document.getElementById('editScheduleAssigned').value || null;
     const newIsDone   = pendingEdit.isDone;
@@ -1067,14 +1068,17 @@
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
     await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadStampData();
-    if (currentListSection) showScheduleList(currentListSection);
+    if (section) showScheduleList(section);
   }
 
   async function confirmDeleteSchedule() {
     if (!pendingEdit) return;
     const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
+    // await の前にセクションを確保しておく（await 中に currentListSection が null になる場合がある）
+    const section = currentListSection;
     const oldMember = originalAssignedTo || currentMember?.display_name;
 
+    // スタンプ削除（完了済みだった場合）
     if (originalIsDone && oldMember && category !== 'イベント') {
       const { data: rows } = await sb.from('stamps').select('id')
         .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
@@ -1082,27 +1086,38 @@
       if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
     }
 
+    // スケジュール削除
     await sb.from('schedules').delete().eq('id', id);
+
+    // モーダルを閉じる
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
 
-    // 即座にローカル配列から除去して UI を更新（削除済みアイテムが見えなくなる）
-    schedules          = schedules.filter(s => s.id !== id);
-    pastSchedules      = pastSchedules.filter(s => s.id !== id);
-    todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
-    pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
-    renderScheduleSections();
-    if (currentListSection) {
-      const remaining = currentListSection === 'past'
-        ? [...pastSchedules, ...pastDoneSchedules]
-        : filterBySection(currentListSection);
-      if (remaining.length > 0 || currentListSection === 'today' || currentListSection === 'past') showScheduleList(currentListSection);
-      else hideScheduleListModal();
-    }
-    addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+    // DB から最新データを取得（await で確実に完了させてから再描画）
+    await loadSchedules();
+    await loadPastSchedules();
+    await loadPastDone();
+    await loadTodayDone();
 
-    // バックグラウンドでDBとの整合性を確認
-    loadSchedules(); loadPastSchedules(); loadPastDone(); loadTodayDone(); loadStampData();
+    // バナー更新
+    renderScheduleSections();
+
+    // 一覧モーダルを再描画（残件数に関係なく、開いていたセクションを常に再描画）
+    if (section) {
+      const remaining = section === 'past'
+        ? [...pastSchedules, ...pastDoneSchedules]
+        : filterBySection(section);
+      if (remaining.length > 0) {
+        showScheduleList(section);
+      } else {
+        // 残件数 0 の場合はモーダルを閉じる
+        document.getElementById('scheduleListModal').classList.add('hidden');
+        currentListSection = null;
+      }
+    }
+
+    addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+    loadStampData(); // スタンプ帳はバックグラウンドで更新
   }
 
   // ===== 完了選択モーダル =====
