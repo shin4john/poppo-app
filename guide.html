@@ -1080,15 +1080,14 @@
     const section   = currentListSection;
     const oldMember = originalAssignedTo || currentMember?.display_name;
 
-    // ① 編集モーダル・リストモーダル両方を即座に閉じる
-    //    （古いリストが一切見えない状態にしてから DB 処理へ）
+    // ① 両モーダルを即座に閉じる（古いリストを見せない）
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
     document.getElementById('scheduleListModal').classList.add('hidden');
     currentListSection = null;
 
-    // ② DB削除
     try {
+      // ② スタンプ削除（完了済みやることのみ）
       if (originalIsDone && oldMember && category !== 'イベント') {
         const { data: rows } = await sb.from('stamps').select('id')
           .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
@@ -1096,23 +1095,36 @@
         if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
       }
 
-      const { error: delErr } = await sb.from('schedules').delete().eq('id', id);
+      // ③ DBから削除。.select('id') で「実際に削除されたか」を確認
+      //    RLSがDELETEをブロックするとerror=nullのまま0件返る（silent failure）ので必須
+      const { data: deleted, error: delErr } = await sb.from('schedules')
+        .delete().eq('id', id).select('id');
 
       if (delErr) {
-        console.error('削除エラー:', delErr);
-        // 失敗時はDBから再取得して正しい状態に戻す
-        await Promise.all([loadSchedules(), loadPastSchedules(), loadPastDone(), loadTodayDone()]);
-        renderScheduleSections();
-        addMessageToUI('削除できませんでした😢 もう一度試してください', 'ai');
+        addMessageToUI(`削除できませんでした😢（${delErr.message}）`, 'ai');
         return;
       }
 
-      // ③ 削除成功 → DBから最新データを取得してバナー＋リストを更新
-      await Promise.all([loadSchedules(), loadPastSchedules(), loadPastDone(), loadTodayDone()]);
+      if (!deleted?.length) {
+        // Supabase RLS が DELETE を無音でブロックしている
+        addMessageToUI(
+          '⚠️ 削除の権限がありません。\nSupabase の SQL Editor で supabase_schedules_fix.sql を実行してから再度お試しください。',
+          'ai'
+        );
+        return;
+      }
+
+      // ④ 削除確認済み → ローカル配列からだけ除去（loadSchedules は呼ばない）
+      //    loadSchedules を呼ぶと並行処理でアイテムが復活するリスクがあるため
+      schedules          = schedules.filter(s => s.id !== id);
+      pastSchedules      = pastSchedules.filter(s => s.id !== id);
+      todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
+      pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
       renderScheduleSections();
+
       addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
 
-      // 削除前に開いていたセクションに残りの予定があれば、リストを再表示
+      // ⑤ 元のセクションに残りの予定があればリストを再表示（ローカル配列から描画）
       if (section) {
         const remaining = section === 'past'
           ? [...pastSchedules, ...pastDoneSchedules]
@@ -1126,7 +1138,7 @@
 
     } catch(e) {
       console.error('削除例外:', e);
-      addMessageToUI('削除に失敗しました😢', 'ai');
+      addMessageToUI(`削除に失敗しました😢（${e.message}）`, 'ai');
     }
   }
 
