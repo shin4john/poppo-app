@@ -1108,11 +1108,14 @@
         return;
       }
 
-      // ③ DB削除確認後にのみローカル配列・UIを更新（ここで初めて画面から消す）
-      schedules          = schedules.filter(s => s.id !== id);
-      pastSchedules      = pastSchedules.filter(s => s.id !== id);
-      todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
-      pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
+      // ③ DB削除確認後 → DBから最新データを再取得してUIを更新
+      //    （ローカル配列の手動フィルタは使わず、DB取得データで上書きすることで確実に消す）
+      await Promise.all([
+        loadSchedules(),
+        loadPastSchedules(),
+        loadPastDone(),
+        loadTodayDone(),
+      ]);
       renderScheduleSections();
       _refreshListModal(section);
 
