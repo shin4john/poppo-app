@@ -2,2041 +2,429 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ぽぽちゃん - 家族のAIアシスタント</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="https://accounts.google.com/gsi/client"></script>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ぽぽちゃん つかいかたガイド</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --cream:#FFF8F0;--pink:#FFB5C8;--pink-dark:#FF8FAD;
     --lavender:#E8D5FF;--lavender-dark:#C9A8FF;
     --brown:#6B4C3B;--text:#3D2B1F;
-    --shadow:0 8px 32px rgba(180,100,130,0.12);
-    --gold:#FFD700;--fire:#FF6B2B;
+    --gold:#FFD700;--mint:#B8F0E0;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Zen Maru Gothic',sans-serif;background:var(--cream);height:100dvh;display:flex;flex-direction:column;overflow:hidden;background-image:radial-gradient(circle at 20% 10%,rgba(255,181,200,0.25) 0%,transparent 50%),radial-gradient(circle at 80% 90%,rgba(200,168,255,0.2) 0%,transparent 50%);}
-  .hidden{display:none !important;}
-  .screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px;}
-  .login-bunny svg{width:100px;height:100px;animation:float 3s ease-in-out infinite;}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  .login-title{font-family:'Nunito',sans-serif;font-size:26px;font-weight:800;color:var(--brown);text-align:center;}
-  .login-sub{font-size:13px;color:#aaa;text-align:center;}
-  .card{background:white;border-radius:24px;padding:24px 20px;width:100%;max-width:360px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;}
-  .card h2{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--brown);}
-  .card p{font-size:13px;color:#888;line-height:1.7;}
-  .card a{color:var(--pink-dark);}
-  .input-field{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);transition:border-color 0.2s;background:white;display:block;box-sizing:border-box;}
-  .input-field:focus{border-color:var(--pink);}
-  input[type="date"].input-field{-webkit-appearance:none;appearance:none;}
-  .btn{width:100%;padding:13px;border-radius:14px;border:none;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:transform 0.15s,opacity 0.15s;}
-  .btn:active{transform:scale(0.97);}
-  .btn:disabled{opacity:0.6;}
-  .btn-primary{background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;box-shadow:0 4px 16px rgba(255,100,150,0.25);}
-  .btn-google{background:white;border:2px solid #ddd !important;color:var(--text);display:flex;align-items:center;justify-content:center;gap:8px;}
-  .btn-secondary{background:var(--cream);color:var(--brown);font-size:13px;}
-  .btn-outline{background:white;border:2px solid var(--pink) !important;color:var(--pink-dark);font-size:14px;}
-  .divider{display:flex;align-items:center;gap:10px;color:#ccc;font-size:12px;}
-  .divider::before,.divider::after{content:'';flex:1;height:1px;background:#eee;}
-  .toggle-mode{text-align:center;font-size:13px;color:#aaa;}
-  .toggle-mode span{color:var(--pink-dark);font-weight:700;cursor:pointer;}
-  .error-msg{background:#FFE8E8;color:#D44;border-radius:10px;padding:8px 12px;font-size:12px;display:none;}
-  .error-msg.show{display:block;}
-  .success-msg{background:#E8FFE8;color:#2A7;border-radius:10px;padding:8px 12px;font-size:12px;display:none;}
-  .success-msg.show{display:block;}
-  .invite-code-box{background:var(--lavender);border-radius:16px;padding:16px;text-align:center;}
-  .invite-code-box .code{font-family:'Nunito',sans-serif;font-size:28px;font-weight:800;color:var(--brown);letter-spacing:4px;}
-  .invite-code-box .hint{font-size:11px;color:#888;margin-top:4px;}
+  body{font-family:'Zen Maru Gothic',sans-serif;background:var(--cream);color:var(--text);line-height:1.7;background-image:radial-gradient(circle at 10% 10%,rgba(255,181,200,0.2) 0%,transparent 40%),radial-gradient(circle at 90% 90%,rgba(200,168,255,0.15) 0%,transparent 40%);}
 
-  /* アプリ画面 */
-  #appScreen{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .header{background:white;padding:8px 16px;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 16px rgba(180,100,130,0.1);z-index:10;}
-  .header-row1{display:flex;align-items:center;gap:10px;}
-  .bunny-svg{width:36px;height:36px;animation:float 3s ease-in-out infinite;flex-shrink:0;}
-  .header-info{min-width:0;flex:1;overflow:hidden;}
-  .header-info h1{font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .header-info p{font-size:11px;color:var(--pink-dark);font-weight:500;white-space:nowrap;}
-  .status-dot{width:8px;height:8px;background:#5CE65C;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-  .header-row2{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
-  .icon-btn{background:var(--lavender);border:none;border-radius:20px;padding:5px 10px;font-size:11px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:600;cursor:pointer;white-space:nowrap;}
-  .stamp-badge{background:linear-gradient(135deg,#FFF3CD,#FFE58A);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:#8B6914;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;box-shadow:0 2px 8px rgba(255,193,7,0.3);}
-  .streak-badge{background:linear-gradient(135deg,#FFE4D6,#FFBDA0);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:#8B3000;white-space:nowrap;display:flex;align-items:center;gap:3px;}
+  .hero{text-align:center;padding:48px 24px 32px;position:relative;}
+  .bunny{font-size:72px;animation:float 3s ease-in-out infinite;display:inline-block;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .hero h1{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:var(--brown);margin-top:12px;}
+  .hero p{font-size:14px;color:#999;margin-top:6px;}
 
-  /* セクションボタンバナー */
-  .schedule-sections{background:linear-gradient(135deg,var(--lavender),var(--pink));padding:8px 12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
-  .schedule-sections::-webkit-scrollbar{display:none;}
-  .section-btn{background:rgba(255,255,255,0.92);border:none;border-radius:20px;padding:6px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--brown);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
-  .section-btn:active{transform:scale(0.95);}
-  .section-btn.empty{opacity:0.5;cursor:default;}
-  .section-count{background:var(--pink-dark);color:white;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:800;}
-  .section-btn.past{background:rgba(255,240,220,0.95);color:#7B3A00;}
-  .section-count.past{background:#E8640A;}
+  .toc{background:white;border-radius:20px;margin:0 16px 24px;padding:20px;box-shadow:0 4px 20px rgba(180,100,130,0.1);}
+  .toc h2{font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--brown);margin-bottom:12px;}
+  .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .toc-item{background:var(--cream);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;color:var(--brown);text-decoration:none;display:flex;align-items:center;gap:6px;transition:background 0.2s;}
+  .toc-item:hover{background:var(--lavender);}
 
-  /* スケジュール一覧モーダル内 */
-  .schedule-group{margin-bottom:14px;}
-  .schedule-group-header{font-size:12px;font-weight:800;color:var(--pink-dark);padding:4px 0 6px;border-bottom:2px solid var(--lavender);margin-bottom:6px;}
-  .schedule-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--cream);border-radius:12px;margin-bottom:6px;font-size:14px;color:var(--brown);font-weight:600;cursor:pointer;transition:all 0.15s;gap:8px;}
-  .schedule-list-item:active{transform:scale(0.98);background:var(--lavender);}
-  .schedule-list-item.event-item{cursor:default;opacity:0.85;}
-  .schedule-list-item.event-item:active{transform:none;background:var(--cream);}
-  .schedule-list-item.done-item{cursor:default;background:#F6FFF6;opacity:0.8;}
-  .schedule-list-item.done-item:active{transform:none;background:#F6FFF6;}
-  .done-section-header{font-size:12px;font-weight:800;color:#5cb85c;padding:8px 0 6px;border-bottom:2px solid #E8F5E9;margin-bottom:4px;}
-  .list-item-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
-  .list-item-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .list-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--pink);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--pink-dark);flex-shrink:0;}
+  .section{margin:0 16px 24px;}
+  .section-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .section-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .section-title{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);}
 
-  /* 完了選択モーダル */
-  .completion-task-title{font-size:14px;color:#888;margin:-6px 0 2px;font-weight:600;}
-  .completion-btn{width:100%;padding:13px 16px;border-radius:14px;border:none;font-family:'Zen Maru Gothic',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-align:left;transition:transform 0.15s;display:flex;align-items:center;gap:10px;}
-  .completion-btn:active{transform:scale(0.97);}
-  .completion-btn.perfect{background:linear-gradient(135deg,#FFF9E6,#FFE082);color:#7B5800;}
-  .completion-btn.half{background:linear-gradient(135deg,#E8F4FD,#90CAF9);color:#1A4E7A;}
-  .completion-btn.incomplete{background:#F0F0F0;color:#999;font-size:12px;font-weight:500;padding:9px 14px;}
-  .completion-btn.reschedule{background:linear-gradient(135deg,#E8FFE8,#A5D6A7);color:#1B5E20;}
+  .card{background:white;border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(180,100,130,0.08);margin-bottom:12px;}
+  .card-title{font-size:14px;font-weight:700;color:var(--brown);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .card-body{font-size:13px;color:#666;line-height:1.8;}
 
-  /* 編集モーダル */
-  .modal-overlay.z300{z-index:300;}
-  .edit-field-label{font-size:12px;color:#aaa;font-weight:600;margin-bottom:4px;}
-  .status-toggle{display:flex;gap:8px;}
-  .status-toggle-btn{flex:1;padding:10px;border-radius:12px;border:2px solid #eee;background:#f5f5f5;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:#bbb;transition:all 0.2s;}
-  .status-toggle-btn.active-undone{border-color:var(--pink);background:#fff0f5;color:var(--pink-dark);}
-  .status-toggle-btn.active-done{border-color:#4caf50;background:#f0fff4;color:#2e7d32;}
-  .delete-confirm-btn{width:100%;padding:11px;border-radius:12px;border:none;background:#fff0f0;color:#e53935;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
-  .delete-confirm-btn:active{opacity:0.75;}
-  .edit-schedule-btn{background:none;border:none;font-size:15px;padding:4px 6px;cursor:pointer;flex-shrink:0;opacity:0.45;border-radius:8px;line-height:1;}
-  .edit-schedule-btn:active{opacity:1;background:var(--cream);}
+  .step-list{display:flex;flex-direction:column;gap:10px;}
+  .step{display:flex;gap:12px;align-items:flex-start;}
+  .step-num{width:24px;height:24px;border-radius:50%;background:var(--pink);color:white;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .step-text{font-size:13px;color:#555;flex:1;}
+  .step-text strong{color:var(--brown);}
 
-  /* 当番表 */
-  .modal-overlay.z400{z-index:400;}
-  #dutyModal .modal{height:85vh;overflow:hidden;padding:0;gap:0;}
-  .duty-modal-header{padding:16px 20px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #f0e8f0;}
-  .duty-week-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;flex-shrink:0;}
-  .duty-nav-btn{background:var(--lavender);border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:var(--brown);cursor:pointer;}
-  .duty-nav-btn:active{opacity:0.75;}
-  .duty-week-label{font-size:13px;font-weight:700;color:var(--brown);}
-  .duty-table-wrap{flex:1;overflow:auto;min-height:0;}
-  .duty-table{border-collapse:collapse;width:max-content;min-width:100%;}
-  .duty-table th,.duty-table td{border:1px solid #f0e8f0;padding:6px 8px;text-align:center;font-size:12px;white-space:nowrap;vertical-align:middle;}
-  .duty-table .col-duty{position:sticky;left:0;background:white;z-index:2;text-align:left;min-width:110px;max-width:140px;white-space:normal;word-break:break-all;}
-  .duty-table thead th{background:var(--lavender);color:var(--brown);font-weight:700;position:sticky;top:0;z-index:1;}
-  .duty-table thead th.col-duty{z-index:3;background:var(--lavender);}
-  .duty-table tbody tr:nth-child(even) td{background:#faf8ff;}
-  .duty-table tbody tr:nth-child(even) td.col-duty{background:#f5f0ff;}
-  .duty-cell{cursor:pointer;border-radius:6px;padding:3px 4px;transition:background 0.15s;font-size:18px;display:inline-block;min-width:28px;line-height:1.3;}
-  .duty-cell:active{background:var(--cream);}
-  .duty-cell.empty{font-size:13px;color:#ddd;}
-  .duty-cell.today-col{background:rgba(255,200,210,0.15);}
-  .duty-person-tag{font-size:11px;font-weight:700;color:var(--pink-dark);}
-  .duty-title-tag{font-size:12px;color:var(--brown);}
-  .duty-delete-btn{background:none;border:none;font-size:12px;color:#ddd;cursor:pointer;padding:0 2px;float:right;}
-  .duty-delete-btn:active{color:#e53935;}
-  .duty-add-section{padding:10px 16px;border-top:1px solid #f0e8f0;flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
-  .duty-add-row{display:flex;gap:8px;align-items:center;}
-  .duty-add-form{display:flex;flex-direction:column;gap:8px;padding-top:4px;}
-  .duty-add-form select,.duty-add-form input{border:2px solid var(--lavender);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);}
-  .duty-add-btn{background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;cursor:pointer;}
-  .duty-add-btn:active{opacity:0.8;}
-  .duty-toggle-btn{background:var(--lavender);border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:var(--brown);cursor:pointer;}
-  /* セル選択メニュー */
-  .duty-cell-menu{background:white;border-radius:24px 24px 0 0;padding:20px;width:100%;animation:slideUp 0.25s ease;}
-  .duty-cell-menu-title{font-size:13px;color:#aaa;font-weight:600;margin-bottom:10px;text-align:center;}
-  .duty-cell-menu-btn{width:100%;padding:13px;border-radius:14px;border:none;font-family:'Zen Maru Gothic',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;text-align:center;}
-  .duty-cell-menu-btn.done{background:linear-gradient(135deg,#f0fff4,#a5d6a7);color:#1b5e20;}
-  .duty-cell-menu-btn.failed{background:linear-gradient(135deg,#fff0f0,#ef9a9a);color:#b71c1c;}
-  .duty-cell-menu-btn.skip{background:#f5f5f5;color:#aaa;}
-  .duty-cell-menu-btn.reset{background:#f9f9f9;color:#bbb;font-size:12px;padding:9px;}
-  .duty-cell-menu-btn.cancel{background:#f0e8f0;color:var(--brown);}
+  .badge{display:inline-flex;align-items:center;gap:4px;background:var(--lavender);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--brown);margin:2px;}
+  .badge.pink{background:var(--pink);color:white;}
+  .badge.gold{background:linear-gradient(135deg,#FFF3CD,#FFE58A);color:#8B6914;}
+  .badge.green{background:#E8FFE8;color:#2A7;}
+  .badge.fire{background:linear-gradient(135deg,#FFE4D6,#FFBDA0);color:#8B3000;}
 
-  .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
-  .chat-area::-webkit-scrollbar{display:none;}
-  .message{display:flex;gap:8px;max-width:85%;animation:slideIn 0.3s ease;}
-  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-  .message.ai{align-self:flex-start;}
-  .message.user{align-self:flex-end;flex-direction:row-reverse;}
-  .msg-avatar{width:32px;height:32px;flex-shrink:0;margin-top:auto;}
-  .msg-avatar svg{width:32px;height:32px;}
-  .bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.6;color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,0.07);}
-  .message.ai .bubble{background:white;border-bottom-left-radius:4px;}
-  .message.user .bubble{background:var(--pink);color:var(--brown);border-bottom-right-radius:4px;}
-  .typing{display:none;align-self:flex-start;align-items:center;gap:8px;}
-  .typing.active{display:flex;animation:slideIn 0.3s ease;}
-  .typing-bubble{background:white;border-radius:18px;border-bottom-left-radius:4px;padding:12px 16px;display:flex;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,0.07);}
-  .typing-dot{width:7px;height:7px;background:var(--pink-dark);border-radius:50%;animation:bounce 1.2s infinite;}
-  .typing-dot:nth-child(2){animation-delay:0.2s}.typing-dot:nth-child(3){animation-delay:0.4s}
-  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-  .quick-replies{display:flex;gap:8px;overflow-x:auto;padding:0 16px 8px;scrollbar-width:none;}
-  .quick-replies::-webkit-scrollbar{display:none;}
-  .qr-btn{background:white;border:2px solid var(--pink);border-radius:20px;padding:7px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--pink-dark);font-weight:600;white-space:nowrap;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
-  .qr-btn:active{background:var(--pink);color:white;transform:scale(0.97);}
-  .input-area{background:white;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;box-shadow:0 -2px 16px rgba(180,100,130,0.1);}
-  .input-wrap{flex:1;background:var(--cream);border-radius:24px;display:flex;align-items:center;padding:8px 16px;border:2px solid transparent;transition:border-color 0.2s;}
-  .input-wrap:focus-within{border-color:var(--pink);}
-  #msgInput{flex:1;background:none;border:none;outline:none;font-size:15px;font-family:'Zen Maru Gothic',sans-serif;color:var(--text);resize:none;max-height:80px;line-height:1.4;}
-  #msgInput::placeholder{color:#CCC;}
-  .send-btn{width:44px;height:44px;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s,opacity 0.15s;box-shadow:0 4px 12px rgba(255,100,150,0.3);}
-  .send-btn:active{transform:scale(0.93);}
-  .send-btn:disabled{opacity:0.5;}
+  .tip{background:linear-gradient(135deg,#FFF9E6,#FFF3CD);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:12px 14px;font-size:13px;color:#7B5800;margin-top:10px;}
+  .tip::before{content:'💡 ';font-weight:700;}
 
-  /* モーダル共通 */
-  .modal-overlay{position:fixed;inset:0;background:rgba(60,30,40,0.5);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
-  .modal-overlay.hidden{display:none;}
-  .modal-overlay.z200{z-index:200;}
-  .modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom));width:100%;animation:slideUp 0.3s ease;display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow-y:auto;}
-  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-  .modal h2{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);}
-  .modal select{width:100%;border:2px solid var(--lavender);border-radius:12px;padding:11px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;color:var(--text);background:white;}
-  .member-list{display:flex;flex-direction:column;gap:8px;}
-  .member-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--cream);border-radius:12px;}
-  .member-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-  .member-name{font-size:14px;font-weight:600;color:var(--brown);}
-  .member-role{font-size:11px;color:#aaa;}
-  .member-switch-btn{margin-left:auto;background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:14px;padding:5px 12px;font-size:12px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap;}
-  .member-switch-btn:active{opacity:0.8;}
-  .member-active-badge{margin-left:auto;background:var(--lavender);color:var(--brown);border-radius:14px;padding:5px 10px;font-size:11px;font-weight:700;white-space:nowrap;}
-  .member-avatar{cursor:pointer;transition:transform 0.15s;}
-  .member-avatar:active{transform:scale(0.9);}
-  .emoji-picker{display:flex;flex-wrap:wrap;gap:6px;padding:8px 4px 2px;width:100%;flex-basis:100%;}
-  .emoji-opt{width:38px;height:38px;border-radius:50%;border:2px solid transparent;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--cream);transition:all 0.15s;}
-  .emoji-opt:active{transform:scale(0.88);}
-  .emoji-opt.selected{border-color:var(--pink-dark);background:var(--lavender);}
+  .flow{display:flex;flex-direction:column;gap:4px;margin:8px 0;}
+  .flow-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;}
+  .flow-arrow{color:var(--pink-dark);font-size:16px;margin-left:12px;}
 
-  /* スタンプ画面 */
-  .stamp-member-card{background:var(--cream);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;}
-  .stamp-member-header{display:flex;align-items:center;gap:10px;}
-  .stamp-member-name{font-size:15px;font-weight:700;color:var(--brown);}
-  .stamp-count-big{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--brown);margin-left:auto;}
-  .stamp-type-row{display:flex;gap:8px;flex-wrap:wrap;}
-  .stamp-type-chip{border-radius:12px;padding:4px 10px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;}
-  .stamp-type-chip.perfect{background:#FFF9E6;color:#7B5800;}
-  .stamp-type-chip.half{background:#E8F4FD;color:#1A4E7A;}
-  .stamp-type-chip.incomplete{background:#F5F5F5;color:#555;}
-  .streak-row{display:flex;align-items:center;gap:6px;font-size:12px;color:#888;}
-  .streak-count{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--fire);}
-  .reward-card{background:white;border:2px solid var(--lavender);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
-  .reward-title{font-size:14px;font-weight:700;color:var(--brown);}
-  .reward-progress-bar{background:#F0E8FF;border-radius:10px;height:10px;overflow:hidden;}
-  .reward-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink),var(--lavender-dark));border-radius:10px;transition:width 0.5s ease;}
-  .reward-label{font-size:11px;color:#888;display:flex;justify-content:space-between;}
-  .reward-achieved{border-color:var(--gold);background:linear-gradient(135deg,#FFFDE7,#FFF9C4);}
-  .reward-achieved .reward-title::before{content:'🏆 ';}
-  .stamp-float{position:fixed;font-size:32px;pointer-events:none;z-index:999;animation:stampFly 0.8s ease forwards;}
-  @keyframes stampFly{0%{transform:scale(0) translateY(0);opacity:1}60%{transform:scale(1.4) translateY(-40px);opacity:1}100%{transform:scale(0.8) translateY(-80px);opacity:0}}
+  .table-simple{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  .table-simple th{background:var(--lavender);color:var(--brown);font-weight:700;padding:8px 10px;text-align:left;}
+  .table-simple td{padding:8px 10px;border-bottom:1px solid #F0E8FF;color:#555;vertical-align:top;}
+  .table-simple tr:last-child td{border-bottom:none;}
 
-  /* テンプレート機能 */
-  .day-chips-row{display:flex;gap:6px;flex-wrap:wrap;}
-  .day-chip{width:36px;height:36px;border-radius:50%;background:var(--cream);border:2px solid var(--lavender);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--brown);cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;}
-  .day-chip.active{background:var(--pink-dark);border-color:var(--pink-dark);color:white;}
-  #templateModal .modal{overflow:hidden;height:85vh;max-height:85vh;padding-bottom:calc(12px + env(safe-area-inset-bottom));}
-  .template-scroll-top{overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;}
-  .template-scroll-top::-webkit-scrollbar{display:none;}
-  #templateList{display:flex;flex-direction:column;gap:8px;}
-  .template-form-fixed{flex-shrink:0;display:flex;flex-direction:column;gap:10px;padding-top:10px;border-top:2px solid var(--lavender);}
-  .template-item{background:var(--cream);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;}
-  .template-item-info{flex:1;min-width:0;}
-  .template-item-title{font-size:14px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .template-item-meta{font-size:11px;color:#aaa;margin-top:2px;}
-  .template-del-btn{background:none;border:none;font-size:16px;cursor:pointer;color:#ccc;padding:4px;line-height:1;flex-shrink:0;}
-  .template-del-btn:active{color:#f08;}
-  .template-add-btn{background:linear-gradient(135deg,var(--pink),var(--lavender-dark));color:white;border:none;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Zen Maru Gothic',sans-serif;flex-shrink:0;}
-  .template-add-btn:active{opacity:0.8;}
-  .template-add-btn.done{background:linear-gradient(135deg,#A5D6A7,#81C784);}
+  .highlight-box{background:linear-gradient(135deg,var(--lavender),rgba(255,181,200,0.3));border-radius:16px;padding:16px;margin-top:10px;}
+  .highlight-box p{font-size:13px;color:var(--brown);font-weight:600;}
+
+  .footer{text-align:center;padding:32px 16px;color:#ccc;font-size:12px;}
+  .footer .bunny-small{font-size:24px;}
 </style>
 </head>
 <body>
 
-<!-- ログイン画面 -->
-<div id="loginScreen" class="screen">
-  <div class="login-bunny"><svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-  <div><div class="login-title">ぽぽちゃん 🌸</div><div class="login-sub">家族のAIアシスタント</div></div>
+<!-- ヒーロー -->
+<div class="hero">
+  <div class="bunny">🐰</div>
+  <h1>ぽぽちゃん<br>つかいかたガイド</h1>
+  <p>家族のAIアシスタント・かんたんマニュアル</p>
+</div>
+
+<!-- 目次 -->
+<div class="toc">
+  <h2>📋 もくじ</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#login">🔐 ログイン</a>
+    <a class="toc-item" href="#schedule">📅 予定管理</a>
+    <a class="toc-item" href="#edit">✏️ 予定の変更・削除</a>
+    <a class="toc-item" href="#template">📋 テンプレート</a>
+    <a class="toc-item" href="#gcal">📱 Googleカレンダー</a>
+    <a class="toc-item" href="#stamp">🌟 スタンプ</a>
+    <a class="toc-item" href="#duty">📋 当番表</a>
+    <a class="toc-item" href="#chat">🐰 会話</a>
+    <a class="toc-item" href="#line">🔔 LINE通知</a>
+    <a class="toc-item" href="#member">👨‍👩‍👧 メンバー</a>
+  </div>
+</div>
+
+<!-- 1. ログイン -->
+<div class="section" id="login">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title">🔐 ログイン・アカウント</div>
+  </div>
+
   <div class="card">
-    <h2 id="loginTitle">ログイン</h2>
-    <div class="error-msg" id="errorMsg"></div>
-    <input class="input-field" type="email" id="emailInput" placeholder="メールアドレス"/>
-    <input class="input-field" type="password" id="passwordInput" placeholder="パスワード"/>
-    <button class="btn btn-primary" id="emailBtn" onclick="handleEmailAuth()">ログイン</button>
-    <div class="divider">または</div>
-    <button class="btn btn-google" onclick="handleGoogleLogin()">
-      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      Googleでログイン
-    </button>
-    <div class="toggle-mode">アカウントがない方は <span onclick="toggleMode()">新規登録</span></div>
+    <div class="card-title">📱 はじめてログインする</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text">メールアドレス＋パスワード <strong>または</strong> Googleアカウントでログイン</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">はじめての人は<strong>家族グループを作る</strong>か、招待コードで<strong>参加する</strong>かを選ぶ</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Claude <strong>APIキーを入力</strong>して完了（APIキーは <a href="https://console.anthropic.com" style="color:var(--pink-dark);">console.anthropic.com</a> で取得）</div></div>
+    </div>
+    <div class="tip">一度ログインするとSafariを閉じても自動でログイン状態が保たれます</div>
   </div>
-</div>
 
-<!-- APIキー設定画面 -->
-<div id="apiKeyScreen" class="screen hidden">
-  <div class="login-bunny"><svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/></svg></div>
   <div class="card">
-    <h2>🔑 APIキーの設定</h2>
-    <p>Claude APIキーを入力してね！<br><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>で取得できるよ🐰<br><br>入力したキーはあなた専用のDBに安全に保存されます🔒</p>
-    <div id="apiKeyError" class="error-msg"></div>
-    <input class="input-field" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..."/>
-    <button class="btn btn-primary" onclick="saveApiKey()">保存してはじめる ✨</button>
-    <button class="btn btn-secondary" onclick="logout()">ログアウト</button>
+    <div class="card-title">👨‍👩‍👧 家族を招待する</div>
+    <div class="card-body">
+      <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → <strong>招待コード</strong>（6文字）を家族に教える → 家族が招待コードを入力して参加
+    </div>
+    <div class="tip">オーナーは「切り替え」ボタンで別のメンバーとして操作できます（子どものかわりに入力するとき便利）</div>
   </div>
 </div>
 
-<!-- 家族設定画面 -->
-<div id="familyScreen" class="screen hidden">
-  <div class="login-bunny"><svg viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/></svg></div>
+<!-- 2. 予定管理 -->
+<div class="section" id="schedule">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title">📅 予定の管理</div>
+  </div>
+
   <div class="card">
-    <h2>👨‍👩‍👧 家族グループの設定</h2>
-    <p>あなたの名前と、家族グループをどうするか選んでね！</p>
-    <input class="input-field" type="text" id="displayNameInput" placeholder="あなたの名前（例：パパ、ママ）"/>
-    <div class="error-msg" id="familyError"></div>
-    <div class="success-msg" id="familySuccess"></div>
-    <button class="btn btn-primary" onclick="createFamily()">🏠 新しい家族グループを作る</button>
-    <div class="divider">または</div>
-    <input class="input-field" type="text" id="inviteCodeInput" placeholder="招待コードを入力（例：SAKURA25）" style="text-transform:uppercase;letter-spacing:2px;"/>
-    <button class="btn btn-outline" onclick="joinFamily()">🔗 招待コードで参加する</button>
-    <button class="btn btn-secondary" onclick="logout()">ログアウト</button>
+    <div class="card-title">➕ 予定を追加する</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>「➕ 予定」</strong> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">タイトル・日付・種類・担当者を入力</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">「保存する」でバナーに追加される</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 バナーのボタンで確認する</div>
+    <div class="card-body" style="margin-bottom:10px;">画面上部のバナーに4つのボタンがあります</div>
+    <table class="table-simple">
+      <tr><th>ボタン</th><th>内容</th></tr>
+      <tr><td><span class="badge" style="background:#FFE4D6;color:#8B3000;">これまで</span></td><td>過去1ヶ月の予定すべて（完了・未完了）日付が新しい順。未完了件数をバッジ表示</td></tr>
+      <tr><td><span class="badge pink">今日</span></td><td>今日の予定・タスク</td></tr>
+      <tr><td><span class="badge">明日</span></td><td>明日の予定</td></tr>
+      <tr><td><span class="badge">今週</span></td><td>今週中の予定</td></tr>
+    </table>
+    <div class="tip">ボタンの数字は未完了の件数。タップすると一覧が開きます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ タスクを完了する</div>
+    <div class="card-body" style="margin-bottom:8px;">バナーをタップ → タスク一覧 → タスクをタップ → 完了方法を選ぶ</div>
+    <table class="table-simple">
+      <tr><th>選択肢</th><th>内容</th><th>スタンプ</th></tr>
+      <tr><td>⭐ 完璧にできた</td><td>バッチリ完了</td><td>⭐ 獲得</td></tr>
+      <tr><td>🌟 まあ半分</td><td>半分くらいできた</td><td>🌟 獲得</td></tr>
+      <tr><td>とりあえず完了にする</td><td>完了扱いにする</td><td>獲得</td></tr>
+      <tr><td>📅 今日に追加</td><td>今日の予定に移動</td><td>なし</td></tr>
+    </table>
   </div>
 </div>
 
-<!-- アプリ画面 -->
-<div id="appScreen" class="hidden" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-  <div class="header">
-    <div class="header-row1">
-      <svg class="bunny-svg" viewBox="0 0 100 100"><ellipse cx="35" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="35" cy="28" rx="6" ry="15" fill="#FFB5C8"/><ellipse cx="65" cy="28" rx="10" ry="20" fill="#F8D0DC"/><ellipse cx="65" cy="28" rx="6" ry="15" fill="#FFB5C8"/><circle cx="50" cy="58" r="30" fill="#FDE8F0"/><circle cx="38" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="62" cy="65" r="8" fill="#FFB5C8" opacity="0.5"/><circle cx="42" cy="56" r="5" fill="#3D2B1F"/><circle cx="44" cy="54" r="2" fill="white"/><circle cx="58" cy="56" r="5" fill="#3D2B1F"/><circle cx="60" cy="54" r="2" fill="white"/><ellipse cx="50" cy="65" rx="3" ry="2" fill="#FF8FAD"/><path d="M 46 68 Q 50 73 54 68" stroke="#FF8FAD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
-      <div class="header-info">
-        <h1 id="familyNameHeader">ぽぽちゃん 🌸</h1>
-        <p><span class="status-dot"></span><span id="memberCountText">家族のAIアシスタント</span></p>
-      </div>
-      <button class="icon-btn" onclick="logout()" style="margin-left:auto;">ログアウト</button>
-    </div>
-    <div class="header-row2">
-      <button class="icon-btn" onclick="showScheduleModal()">➕ 予定</button>
-      <button class="icon-btn" onclick="showTemplateModal()">📋 テンプレ</button>
-      <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
-      <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧 メンバー</button>
-    </div>
+<!-- 2b. 予定の変更・削除 -->
+<div class="section" id="edit">
+  <div class="section-header">
+    <div class="section-num" style="font-size:13px;">2+</div>
+    <div class="section-title">✏️ 予定の変更・削除</div>
   </div>
 
-  <!-- セクションボタンバナー -->
-  <div class="schedule-sections" id="scheduleSections">
-    <span style="font-size:11px;color:rgba(255,255,255,0.8);">読み込み中...</span>
+  <div class="card">
+    <div class="card-title">✏️ ボタンから編集する</div>
+    <div class="card-body" style="margin-bottom:10px;">バナーをタップして一覧を開くと、各行の右端に薄い <strong>✏️</strong> ボタンが表示されます</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text">一覧の行右端の <strong>✏️</strong> をタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">変更したい項目を編集する</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">「💾 保存する」で確定</div></div>
+    </div>
+    <div class="tip">完了済みのタスクの ✏️ からも編集できます（「これまで」一覧も同様）</div>
   </div>
 
-  <div class="chat-area" id="chatArea"></div>
-
-  <div class="typing" id="typing">
-    <div class="msg-avatar"><svg viewBox="0 0 60 60"><ellipse cx="22" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="22" cy="18" rx="4" ry="9" fill="#FFB5C8"/><ellipse cx="38" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="38" cy="18" rx="4" ry="9" fill="#FFB5C8"/><circle cx="30" cy="38" r="18" fill="#FDE8F0"/><circle cx="24" cy="36" r="3" fill="#3D2B1F"/><circle cx="36" cy="36" r="3" fill="#3D2B1F"/><ellipse cx="30" cy="42" rx="2" ry="1.5" fill="#FF8FAD"/></svg></div>
-    <div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+  <div class="card">
+    <div class="card-title">変更できる項目</div>
+    <table class="table-simple">
+      <tr><th>項目</th><th>内容</th></tr>
+      <tr><td>📅 日付</td><td>予定の日付を変更</td></tr>
+      <tr><td>👤 担当者</td><td>メンバー一覧から選択して変更</td></tr>
+      <tr><td>✅ 完了状態</td><td>未完了 ⬜ ↔ 完了 ✅ の切り替え</td></tr>
+    </table>
+    <div class="tip">完了状態を「未完了→完了」に変えるとスタンプが付与され、「完了→未完了」に戻すと直近のスタンプが削除されます</div>
   </div>
 
-  <div class="quick-replies">
-    <button class="qr-btn" onclick="sendQuick('今週のやることを教えて！')">📝 やること確認</button>
-    <button class="qr-btn" onclick="showDutyModal()">📋 当番表</button>
-    <button class="qr-btn" onclick="showStampModal()">🌟 スタンプ帳</button>
-    <button class="qr-btn" onclick="sendQuick('今週のイベントは？')">🎉 イベント</button>
-    <button class="qr-btn" onclick="sendQuick('予定を全部見せて')">📋 一覧</button>
-    <a class="qr-btn" href="https://shin4john.github.io/poppo-app/guide.html" target="_blank" style="text-decoration:none;">📖 使い方</a>
-  </div>
-
-  <div class="input-area">
-    <div class="input-wrap">
-      <textarea id="msgInput" placeholder="ぽぽちゃんに話しかけてね..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-    </div>
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/></svg>
-    </button>
-  </div>
-</div>
-
-<!-- 予定追加モーダル -->
-<div class="modal-overlay hidden" id="scheduleModal">
-  <div class="modal">
-    <h2>➕ 予定を追加</h2>
-    <input class="input-field" type="text" id="scheduleTitle" placeholder="タイトル（例：算数プリント）"/>
-    <input class="input-field" type="date" id="scheduleDate"/>
-    <select id="scheduleCategory">
-      <option value="予定（やること）">📅 予定（やること）</option>
-      <option value="イベント">🎉 イベント</option>
-    </select>
-    <select class="input-field" id="scheduleAssigned">
-      <option value="">担当者を選ぶ</option>
-      <option value="パパ">パパ</option>
-      <option value="ママ">ママ</option>
-      <option value="晴輝">晴輝</option>
-      <option value="いずみ">いずみ</option>
-    </select>
-    <button class="btn btn-primary" onclick="addSchedule()">保存する ✨</button>
-    <button class="btn btn-secondary" onclick="hideScheduleModal()">キャンセル</button>
-  </div>
-</div>
-
-<!-- 家族情報モーダル -->
-<div class="modal-overlay hidden" id="familyModal">
-  <div class="modal">
-    <h2>👨‍👩‍👧 家族メンバー</h2>
-    <div class="member-list" id="memberList"></div>
-    <div id="familyNameEdit" style="display:none;flex-direction:column;gap:8px;">
-      <div class="divider">家族名の変更</div>
-      <input class="input-field" type="text" id="familyNameEditInput" placeholder="家族の名前"/>
-      <button class="btn btn-primary" onclick="updateFamilyName()">変更する ✨</button>
-    </div>
-    <div class="divider">招待コード</div>
-    <div class="invite-code-box">
-      <div class="code" id="inviteCodeDisplay">------</div>
-      <div class="hint">このコードを家族に教えてね！</div>
-    </div>
-    <button class="btn btn-secondary" onclick="hideFamilyModal()">閉じる</button>
-  </div>
-</div>
-
-<!-- スケジュール一覧モーダル -->
-<div class="modal-overlay hidden" id="scheduleListModal">
-  <div class="modal">
-    <h2 id="scheduleListTitle">今日の予定</h2>
-    <div id="scheduleListContent"></div>
-    <button class="btn btn-secondary" onclick="hideScheduleListModal()">閉じる</button>
-  </div>
-</div>
-
-<!-- 当番表モーダル -->
-<div class="modal-overlay hidden" id="dutyModal">
-  <div class="modal">
-    <div class="duty-modal-header">
-      <h2 style="margin:0;">📋 当番表</h2>
-      <button onclick="hideDutyModal()" style="background:none;border:none;font-size:22px;color:#bbb;cursor:pointer;padding:4px;">✕</button>
-    </div>
-    <div class="duty-week-nav">
-      <button class="duty-nav-btn" onclick="navigateDutyWeek(-1)">◀ 先週</button>
-      <span class="duty-week-label" id="dutyWeekLabel"></span>
-      <button class="duty-nav-btn" onclick="navigateDutyWeek(1)">来週 ▶</button>
-    </div>
-    <div class="duty-table-wrap">
-      <div id="dutyTableWrap"></div>
-    </div>
-    <div class="duty-add-section">
-      <div class="duty-add-row">
-        <button class="duty-toggle-btn" onclick="toggleAddDutyForm()">＋ 当番を追加</button>
-      </div>
-      <div id="addDutyForm" class="hidden duty-add-form">
-        <select id="dutyPersonSelect" style="width:100%;"></select>
-        <input id="dutyTitleInput" placeholder="当番内容（例：テーブルふき）" style="width:100%;box-sizing:border-box;">
-        <button class="duty-add-btn" onclick="addDuty()">追加する</button>
-      </div>
-    </div>
-    <div style="padding:0 16px 16px;flex-shrink:0;">
-      <button class="btn btn-secondary" onclick="hideDutyModal()">閉じる</button>
+  <div class="card">
+    <div class="card-title">🗑️ 予定を削除する</div>
+    <div class="card-body">
+      ✏️ ボタン → 編集モーダル下部の <strong>「🗑️ この予定を削除する」</strong> をタップ<br><br>
+      完了済み予定を削除すると、紐づくスタンプも合わせて削除されます
     </div>
   </div>
 </div>
 
-<!-- 当番セル選択メニュー -->
-<div class="modal-overlay hidden z400" id="dutyCellMenu">
-  <div class="duty-cell-menu">
-    <div class="duty-cell-menu-title" id="dutyCellMenuTitle"></div>
-    <button class="duty-cell-menu-btn done"   onclick="setDutyStatus('done')">✅ できた</button>
-    <button class="duty-cell-menu-btn failed" onclick="setDutyStatus('failed')">❌ できなかった</button>
-    <button class="duty-cell-menu-btn skip"   onclick="setDutyStatus('skip')">ー 対象外</button>
-    <button class="duty-cell-menu-btn reset"  onclick="setDutyStatus(null)">🔄 リセット（未入力に戻す）</button>
-    <button class="duty-cell-menu-btn cancel" onclick="closeDutyCellMenu()">キャンセル</button>
+<!-- 3. テンプレート -->
+<div class="section" id="template">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title">📋 週間テンプレート</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">毎週繰り返す予定を自動登録</div>
+    <div class="card-body" style="margin-bottom:10px;">「月水金は算数ドリル」のような繰り返し予定を登録しておくと、ワンタップで今週分が追加されます</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>「📋 テンプレ」</strong> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">タイトル・担当者・曜日を選んで <strong>「このテンプレートを登録」</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">登録したら <strong>「✨ テンプレを追加する」</strong> で今週〜来週分が一括追加</div></div>
+    </div>
+    <div class="tip">個別に「テンプレを追加する」ボタンを押すと1件ずつ追加もできます</div>
   </div>
 </div>
 
-<!-- 予定編集モーダル -->
-<div class="modal-overlay hidden z300" id="editScheduleModal">
-  <div class="modal">
-    <h2>✏️ 予定を変更</h2>
-    <p class="completion-task-title" id="editScheduleTitle"></p>
-    <div>
-      <div class="edit-field-label">日付</div>
-      <input type="date" id="editScheduleDate" style="width:100%;border:2px solid var(--lavender);border-radius:12px;padding:10px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;box-sizing:border-box;color:var(--text);">
-    </div>
-    <div>
-      <div class="edit-field-label">担当者</div>
-      <select id="editScheduleAssigned"></select>
-    </div>
-    <div>
-      <div class="edit-field-label">完了状態</div>
-      <div class="status-toggle">
-        <button id="editStatusUndone" class="status-toggle-btn" onclick="setEditStatus(false)">⬜ 未完了</button>
-        <button id="editStatusDone" class="status-toggle-btn" onclick="setEditStatus(true)">✅ 完了</button>
-      </div>
-    </div>
-    <div id="editStampTypeSection" style="display:none;flex-direction:column;gap:8px;background:var(--cream);border-radius:14px;padding:12px;">
-      <div class="edit-field-label" style="color:var(--brown);">どんなふうに完了した？</div>
-      <button id="editStampPerfect"    class="completion-btn perfect"    onclick="setEditStampType('perfect')">⭐ 完璧にできた！</button>
-      <button id="editStampHalf"       class="completion-btn half"       onclick="setEditStampType('half')">🌟 まあ半分くらい</button>
-      <button id="editStampIncomplete" class="completion-btn incomplete" onclick="setEditStampType('incomplete')">とりあえず完了にする</button>
-    </div>
-    <button class="btn" onclick="saveScheduleEdit()">💾 保存する</button>
-    <button class="delete-confirm-btn" onclick="confirmDeleteSchedule()">🗑️ この予定を削除する</button>
-    <button class="btn btn-secondary" onclick="cancelEditSchedule()">キャンセル</button>
+<!-- 4. Googleカレンダー -->
+<div class="section" id="gcal">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title">📱 Googleカレンダー連携</div>
   </div>
-</div>
 
-<!-- 完了選択モーダル（z-index高め） -->
-<div class="modal-overlay hidden z200" id="completionModal">
-  <div class="modal">
-    <h2>✅ どうだった？</h2>
-    <p class="completion-task-title" id="completionTaskTitle"></p>
-    <button class="completion-btn perfect" onclick="executeCompletion('perfect')">⭐ 完璧にできた！</button>
-    <button class="completion-btn half" onclick="executeCompletion('half')">🌟 まあ半分くらい</button>
-    <button class="completion-btn incomplete" onclick="executeCompletion('incomplete')">とりあえず完了にする</button>
-    <button class="completion-btn reschedule" onclick="executeCompletion('reschedule')">📅 やれてないから今日に追加</button>
-    <button class="btn btn-secondary" onclick="cancelCompletion()">キャンセル（もどる）</button>
-  </div>
-</div>
-
-<!-- スタンプ帳モーダル -->
-<div class="modal-overlay hidden" id="stampModal">
-  <div class="modal">
-    <h2>🌟 スタンプ帳</h2>
-    <div id="stampMemberCards" style="display:flex;flex-direction:column;gap:12px;"></div>
-    <div class="divider">🏆 ご褒美リスト</div>
-    <div id="rewardCards" style="display:flex;flex-direction:column;gap:8px;"></div>
-    <div id="addRewardSection" class="hidden" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="divider">➕ ご褒美を追加（おや専用）</div>
-      <input class="input-field" id="rewardTitleInput" placeholder="ご褒美の内容（例：好きなお菓子）"/>
-      <input class="input-field" type="number" id="rewardStampsInput" placeholder="必要スタンプ数（例：10）" min="1"/>
-      <button class="btn btn-outline" onclick="addReward()">ご褒美を追加 🎁</button>
+  <div class="card">
+    <div class="card-title">📅 GCal ボタンで取り込む</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>「📅 GCal」</strong> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Googleの認証画面で <strong>「許可」</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">今日から1ヶ月分のカレンダーとTodoリストが自動取り込み</div></div>
     </div>
-    <button class="btn btn-secondary" onclick="hideStampModal()">とじる</button>
-  </div>
-</div>
-
-<!-- テンプレートモーダル -->
-<div class="modal-overlay hidden" id="templateModal">
-  <div class="modal">
-    <!-- 上部：スクロール可能（タイトル＋リスト） -->
-    <div class="template-scroll-top">
-      <h2>📋 週間テンプレート</h2>
-      <button class="btn btn-primary" id="applyTemplateBtn" onclick="applyWeeklyTemplates()">✨ テンプレを追加する</button>
-      <div id="templateList"></div>
-    </div>
-    <!-- 下部：常に表示される入力フォーム -->
-    <div class="template-form-fixed">
-      <div style="font-size:12px;color:#888;font-weight:700;">➕ テンプレートを追加</div>
-      <input class="input-field" type="text" id="tmplTitle" placeholder="タイトル（例：算数ドリル）"/>
-      <select class="input-field" id="tmplAssigned">
-        <option value="">担当者を選ぶ</option>
-        <option value="パパ">パパ</option>
-        <option value="ママ">ママ</option>
-        <option value="晴輝">晴輝</option>
-        <option value="いずみ">いずみ</option>
-      </select>
-      <select class="input-field" id="tmplCategory">
-        <option value="予定（やること）">📅 予定（やること）</option>
-        <option value="イベント">🎉 イベント</option>
-      </select>
-      <div>
-        <div style="font-size:12px;color:#aaa;font-weight:700;margin-bottom:8px;">繰り返す曜日</div>
-        <div class="day-chips-row" id="dayChipsRow">
-          <div class="day-chip" data-day="1">月</div>
-          <div class="day-chip" data-day="2">火</div>
-          <div class="day-chip" data-day="3">水</div>
-          <div class="day-chip" data-day="4">木</div>
-          <div class="day-chip" data-day="5">金</div>
-          <div class="day-chip" data-day="6">土</div>
-          <div class="day-chip" data-day="0">日</div>
-        </div>
-      </div>
-      <button class="btn btn-outline" onclick="addTemplate()">このテンプレートを登録 ➕</button>
-      <button class="btn btn-secondary" onclick="hideTemplateModal()">閉じる</button>
+    <div class="highlight-box">
+      <p>📌 取り込みのルール</p>
+      <p style="font-weight:400;margin-top:6px;font-size:12px;">・同じタイトルの予定は重複して追加されません<br>・Todoのメモに「毎日」と書いてあると7日分展開<br>・取り込んだ予定の担当者は操作中のメンバー名</p>
     </div>
   </div>
 </div>
 
-<script>
-  const SUPABASE_URL = 'https://svuzjqwumfcidoqfwqqm.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dXpqcXd1bWZjaWRvcWZ3cXFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTQ1NjEsImV4cCI6MjA5Mzc5MDU2MX0.k7YTiXqZgFY9CY5R5cX9ldp7YLBO7HV5ic7E8AfQ7SM';
+<!-- 5. スタンプ -->
+<div class="section" id="stamp">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title">🌟 スタンプ・ご褒美</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">スタンプのしくみ</div>
+    <div class="flow">
+      <div class="flow-item">タスクを完了する</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-item">スタンプが貯まる <span class="badge gold">🌟 スタンプ帳</span></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-item">設定した数に達するとご褒美！🎁</div>
+    </div>
+    <div class="tip">会話で「算数終わったよ！」と話しかけるだけでもスタンプが自動でもらえます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔥 れんぞく記録（streak）</div>
+    <div class="card-body">毎日タスクを完了すると🔥が増えます。<span class="badge gold">🌟 スタンプ帳</span> を開くとメンバーごとの連続日数・最長記録が確認できます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏆 ご褒美を設定する（おや専用）</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><span class="badge gold">🌟 スタンプ帳</span> ボタンをタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">「ご褒美を追加」セクションにタイトルとスタンプ数を入力</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">スタンプが目標数に達するとぽぽちゃんがお知らせ</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. 会話 -->
+<div class="section" id="chat">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title">🐰 ぽぽちゃんとの会話</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">こんな話しかけ方ができるよ</div>
+    <table class="table-simple">
+      <tr><th>話しかけ方</th><th>ぽぽちゃんの反応</th></tr>
+      <tr><td>「今日の予定は？」</td><td>今日のタスクをまとめて教えてくれる</td></tr>
+      <tr><td>「算数終わったよ！」</td><td>褒めてスタンプをくれる</td></tr>
+      <tr><td>「今週のイベントは？」</td><td>今週の予定を確認してくれる</td></tr>
+      <tr><td>「〇〇を予定に入れて」</td><td>AIが予定を解析してサポート</td></tr>
+    </table>
+    <div class="tip">Shift+Enterで送信（Enterは改行）</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">クイックボタン</div>
+    <div class="card-body">
+      <span class="badge">📝 やること確認</span>
+      <span class="badge">📋 当番表</span>
+      <span class="badge gold">🌟 スタンプ帳</span>
+      <span class="badge">🎉 イベント</span>
+      <span class="badge">📋 一覧</span>
+      <span class="badge">📖 使い方</span>
+      <br><br>よく使う機能をワンタップで開けます
+    </div>
+  </div>
+</div>
+
+<!-- 7. LINE通知 -->
+<div class="section" id="line">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">🔔 LINE通知</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">毎朝7時に届く通知</div>
+    <div class="card-body" style="margin-bottom:10px;">家族のLINEグループに毎朝7時、ぽぽちゃんから今日・明日の予定が届きます</div>
+    <div class="highlight-box">
+      <p>通知のイメージ</p>
+      <p style="font-weight:400;font-size:12px;margin-top:6px;white-space:pre-line;">🐰 おはよう！ぽぽちゃんだよ🌸
+
+📅 今日 5/16(金)
+📚【晴輝】算数ドリル
+📅【パパ】打ち合わせ
+
+📅 明日 5/17(土)
+🎉【家族】BBQ
+
+今日も家族みんなで頑張ろうね💪✨</p>
+    </div>
+  </div>
+</div>
+
+<!-- 8. メンバー切り替え -->
+<div class="section" id="member">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">👨‍👩‍👧 メンバー切り替え</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">オーナーができること</div>
+    <div class="card-body">
+      <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → 「切り替え」ボタンで別のメンバーとして操作できます<br><br>
+      例：パパが晴輝に切り替えて、晴輝のタスクを完了にする
+    </div>
+    <div class="tip">切り替えるとスタンプやstreakも切り替わったメンバーのものが表示されます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">家族名を変更する</div>
+    <div class="card-body">
+      <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → 「家族名の変更」セクション（オーナーのみ表示）
+    </div>
+  </div>
+</div>
+
+<!-- 9. 当番表 -->
+<div class="section" id="duty">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <div class="section-title">📋 当番表</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">家族の当番をマトリクスで管理</div>
+    <div class="card-body" style="margin-bottom:10px;">担当者×当番内容を行として登録し、1週間分の完了状況をひとめで確認できます</div>
+    <div class="highlight-box">
+      <p>📌 当番表のイメージ</p>
+      <p style="font-weight:400;font-size:12px;margin-top:6px;white-space:pre-line;">            月  火  水  木  金  土  日
+パパ・ゴミ出し  ✅  ー  ✅  ー  ✅  ー  ー
+パパ・洗濯畳み  ✅  ✅  ❌  ✅  ✅  ー  ー
+晴輝・テーブルふき ✅ ✅  ✅  ・  ✅  ✅  ✅
+いずみ・花の水やり ー  ・  ✅  ー  ✅  ✅  ー</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 当番表を開く</div>
+    <div class="card-body">
+      クイックボタン <span class="badge">📋 当番表</span> をタップ
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">＋ 当番を追加する</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text">当番表下部の <strong>「＋ 当番を追加」</strong> をタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">担当者をプルダウンで選ぶ（家族メンバー一覧から）</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">当番内容を入力して <strong>「追加する」</strong></div></div>
+    </div>
+    <div class="tip">当番は毎日すべての列に表示されます。対象外の日は「ー 対象外」を選んで記録しましょう</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">セルをタップして状態を記録する</div>
+    <table class="table-simple">
+      <tr><th>選択肢</th><th>意味</th></tr>
+      <tr><td>✅ できた</td><td>その日の当番を完了</td></tr>
+      <tr><td>❌ できなかった</td><td>その日はできなかった</td></tr>
+      <tr><td>ー 対象外</td><td>その日はやらなくてOK</td></tr>
+      <tr><td>🔄 リセット</td><td>入力をクリアして未入力に戻す</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">◀ 先週 / 来週 ▶ で週をスライド</div>
+    <div class="card-body">
+      当番表上部のナビボタンで前後の週に移動できます。今日の列はピンクでハイライト表示されます
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗑 当番を削除する</div>
+    <div class="card-body">
+      各行の右端にある <strong>🗑</strong> ボタンをタップ → 確認後に削除されます<br>
+      削除すると、その当番のすべての記録（ログ）も一緒に削除されます
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="bunny-small">🐰</div>
+  <p style="margin-top:8px;">ぽぽちゃん ファミリーAIアシスタント</p>
+  <p style="margin-top:4px;">わからないことはぽぽちゃんに聞いてね！</p>
+</div>
 
- const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      storageKey: 'poppo-auth',
-      storage: window.localStorage,
-      autoRefreshToken: true,
-    }
-  });
-  
-  let currentUser = null;
-  let currentMember = null;
-  let realUserRole = null;       // ログインしたSupabaseユーザーの実際のrole
-  let realUserDisplayName = null; // 同 display_name
-  let familyId = null;
-  let familyData = null;
-  let claudeApiKey = '';
-  let conversationHistory = [];
-  let schedules = [];
-  let pastSchedules = [];
-  let pastDoneSchedules = [];
-  let pastDoneStamps = [];
-  let todayDoneSchedules = [];
-  // 削除済みIDセット：loadSchedules等でデータが戻ってきても画面に出さないためのセーフティネット
-  const _deletedIds = new Set();
-  let todayStamps = [];
-  let templates = [];
-  let members = [];
-  let isSignUp = false;
-  let myDisplayName = null;
-  let pendingCompletion = null; // { id, title, assignedTo }
-  let pendingEdit = null; // { id, title, assignedTo, category, isDone, originalIsDone, originalAssignedTo }
-  let duties = [];
-  let dutyLogs = {}; // key: `${dutyId}_${dateStr}` → { id, status }
-  let currentDutyWeekOffset = 0;
-  let pendingDutyCell = null; // { dutyId, date, personName, dutyTitle }
-  let currentListSection = null; // 'today' | 'tomorrow' | 'week'
-
-  // やる気機能
-  // stampData[name] = { total, perfect, half, incomplete }
-  let memberEmojiCustom = {};
-  let stampData = {};
-  let streakData = {};
-  let rewardsData = [];
-
-  const COMPLETION_KEYWORDS = ['終わった','おわった','できた','やった','かんりょう','完了','おわり','すんだ','できたよ','おわったよ'];
-  const NON_COMPLETION = ['？','?','なに','何','どうする','どうやって','教えて','おしえて','できない','わからない'];
-
-  const MEMBER_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶'];
-  const ANIMAL_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶','🐸','🐯','🦁','🐨','🐮','🐷','🐭','🐹','🦝','🐺','🐧','🦆','🐬','🦭','🐣','🦉'];
-  const CAT_ICONS = { '予定（やること）':'📅','予定':'📅','宿題':'📚','イベント':'🎉' };
-
-  // ===== 初期化 =====
-  async function init() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) await onLogin(session.user);
-    sb.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) await onLogin(session.user);
-      else if (event === 'SIGNED_OUT') showScreen('login');
-    });
-  }
-
-  async function onLogin(user) {
-    currentUser = user;
-    const { data: memberData } = await sb.from('family_members')
-      .select('family_id, role, display_name').eq('user_id', currentUser.id).single();
-    if (!memberData) { showScreen('family'); return; }
-    currentMember = { display_name: memberData.display_name, role: memberData.role };
-    realUserRole = memberData.role;
-    realUserDisplayName = memberData.display_name;
-    myDisplayName = memberData.display_name;
-    familyId = memberData.family_id;
-    const { data: fData } = await sb.from('families')
-      .select('id, family_name, invite_code').eq('id', familyId).single();
-    familyData = fData;
-    const { data: settings } = await sb.from('user_settings')
-      .select('claude_api_key').eq('user_id', currentUser.id).single();
-    if (settings?.claude_api_key) {
-      claudeApiKey = settings.claude_api_key;
-      await loadMembers();
-      loadEmojiCustom();
-      await autoCloseEvents();
-      await loadSchedules();
-      await loadPastSchedules();
-      await loadPastDone();
-      await loadTodayDone();
-      await loadTemplates();
-      await loadDuties();
-      await loadConversationHistory();
-      await loadStampData();
-      updateFamilyHeader();
-      showScreen('app');
-    } else {
-      showScreen('apiKey');
-    }
-  }
-
-  async function createFamily() {
-    const displayName = document.getElementById('displayNameInput').value.trim();
-    const errEl = document.getElementById('familyError');
-    errEl.classList.remove('show');
-    if (!displayName) { errEl.textContent='名前を入力してください'; errEl.classList.add('show'); return; }
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const { data: newFamily, error } = await sb.from('families')
-      .insert({ name: displayName+'の家族', family_name: displayName+'の家族', invite_code: code })
-      .select('id, invite_code, family_name').single();
-    if (error) { errEl.textContent='作成失敗: '+error.message; errEl.classList.add('show'); return; }
-    await sb.from('family_members').insert({ family_id: newFamily.id, user_id: currentUser.id, role: 'owner', display_name: displayName });
-    familyId = newFamily.id; familyData = newFamily;
-    showScreen('apiKey');
-  }
-
-  async function joinFamily() {
-    const displayName = document.getElementById('displayNameInput').value.trim();
-    const code = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
-    const errEl = document.getElementById('familyError');
-    const succEl = document.getElementById('familySuccess');
-    errEl.classList.remove('show'); succEl.classList.remove('show');
-    if (!displayName) { errEl.textContent='名前を入力してください'; errEl.classList.add('show'); return; }
-    if (!code) { errEl.textContent='招待コードを入力してください'; errEl.classList.add('show'); return; }
-    const { data: family, error } = await sb.from('families').select('id, family_name').eq('invite_code', code).single();
-    if (error || !family) { errEl.textContent='招待コードが見つかりません😢'; errEl.classList.add('show'); return; }
-    const { data: existing } = await sb.from('family_members').select('id').eq('family_id', family.id).eq('user_id', currentUser.id).single();
-    if (existing) { errEl.textContent='すでにこの家族に参加しています'; errEl.classList.add('show'); return; }
-    const { error: joinError } = await sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id, role: 'member', display_name: displayName });
-    if (joinError) { errEl.textContent='参加失敗: '+joinError.message; errEl.classList.add('show'); return; }
-    familyId = family.id; familyData = family;
-    await sb.from('conversations').insert({
-      family_id: family.id, role: 'assistant',
-      content: `🎉 ${displayName}さんが家族グループに参加したよ！みんなで仲良くしてね🐰💕`
-    });
-    succEl.textContent=`「${family.family_name}」に参加したよ！🎉`; succEl.classList.add('show');
-    setTimeout(() => showScreen('apiKey'), 1500);
-  }
-
-  async function loadMembers() {
-    const { data } = await sb.from('family_members').select('display_name, role').eq('family_id', familyId);
-    members = data || [];
-  }
-
-  function getMemberEmojiMap() {
-    const map = {};
-    members.forEach((m, i) => {
-      map[m.display_name] = memberEmojiCustom[m.display_name] || MEMBER_EMOJIS[i % MEMBER_EMOJIS.length];
-    });
-    return map;
-  }
-
-  function loadEmojiCustom() {
-    try {
-      const saved = localStorage.getItem('poppo_emojis_' + familyId);
-      memberEmojiCustom = saved ? JSON.parse(saved) : {};
-    } catch(e) { memberEmojiCustom = {}; }
-  }
-
-  function setMemberEmoji(idx, emoji) {
-    const name = members[idx]?.display_name;
-    if (!name) return;
-    memberEmojiCustom[name] = emoji;
-    localStorage.setItem('poppo_emojis_' + familyId, JSON.stringify(memberEmojiCustom));
-    renderFamilyModalContent();
-  }
-
-  function toggleEmojiPicker(idx) {
-    const el = document.getElementById('emoji-picker-' + idx);
-    if (!el) return;
-    el.classList.toggle('hidden');
-  }
-
-  function updateFamilyHeader() {
-    if (familyData?.family_name) document.getElementById('familyNameHeader').textContent = familyData.family_name + ' 🌸';
-    document.getElementById('memberCountText').textContent = `👨‍👩‍👧 ${members.length}人のメンバー`;
-  }
-
-  async function saveApiKey() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    const errEl = document.getElementById('apiKeyError');
-    errEl.style.display = 'none';
-    if (!key.startsWith('sk-ant-')) { errEl.textContent='APIキーは sk-ant- で始まる文字列です'; errEl.style.display='block'; return; }
-    const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
-    if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
-    claudeApiKey = key;
-    await loadMembers(); loadEmojiCustom(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadTemplates(); await loadDuties(); await loadConversationHistory();
-    await loadStampData();
-    updateFamilyHeader();
-    showScreen('app');
-  }
-
-  // ===== 予定読み込み =====
-  async function loadSchedules() {
-    const today = localDateStr(new Date());
-    const { data, error } = await sb.from('schedules').select('*')
-      .eq('family_id', familyId).eq('is_done', false)
-      .or(`event_date.gte.${today},event_date.is.null`)
-      .order('event_date', { ascending: true, nullsFirst: false }).limit(50);
-    if (error) console.error('schedules取得エラー:', error);
-    schedules = data || [];
-    renderScheduleSections();
-  }
-
-  async function loadTodayDone() {
-    const today = localDateStr(new Date());
-    const { data: doneData } = await sb.from('schedules').select('*')
-      .eq('family_id', familyId).eq('is_done', true).eq('event_date', today);
-    todayDoneSchedules = doneData || [];
-    // 今日獲得したスタンプ（ローカル日付の0時〜24時で絞る）
-    const midnight = new Date(); midnight.setHours(0,0,0,0);
-    const nextMidnight = new Date(midnight); nextMidnight.setDate(midnight.getDate()+1);
-    const { data: stampsData } = await sb.from('stamps').select('task_title, member_name, stamp_type')
-      .eq('family_id', familyId)
-      .gte('earned_at', midnight.toISOString())
-      .lt('earned_at', nextMidnight.toISOString());
-    todayStamps = stampsData || [];
-  }
-
-  async function autoCloseEvents() {
-    const today = localDateStr(new Date());
-    await sb.from('schedules').update({ is_done: true })
-      .eq('family_id', familyId).eq('category', 'イベント').eq('is_done', false).lt('event_date', today);
-  }
-
-  async function loadPastSchedules() {
-    const today = localDateStr(new Date());
-    const monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth()-1);
-    const monthAgoStr = localDateStr(monthAgo);
-    const { data, error } = await sb.from('schedules').select('*')
-      .eq('family_id', familyId).eq('is_done', false)
-      .lt('event_date', today)
-      .gte('event_date', monthAgoStr)
-      .order('event_date', { ascending: false }).limit(100);
-    if (error) console.error('pastSchedules取得エラー:', error);
-    pastSchedules = data || [];
-    renderScheduleSections();
-  }
-
-  async function loadPastDone() {
-    const today = localDateStr(new Date());
-    const monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth()-1);
-    const monthAgoStr = localDateStr(monthAgo);
-    const { data } = await sb.from('schedules').select('*')
-      .eq('family_id', familyId).eq('is_done', true)
-      .lt('event_date', today)
-      .gte('event_date', monthAgoStr)
-      .order('event_date', { ascending: false }).limit(200);
-    pastDoneSchedules = data || [];
-    // スタンプ情報（stamp_type）取得
-    const midnight = new Date(monthAgo); midnight.setHours(0,0,0,0);
-    const { data: stampsData } = await sb.from('stamps').select('task_title, member_name, stamp_type')
-      .eq('family_id', familyId)
-      .gte('earned_at', midnight.toISOString());
-    pastDoneStamps = stampsData || [];
-    renderScheduleSections();
-  }
-
-  // ローカル日付をYYYY-MM-DD形式で返す（toISOStringはUTC変換でズレるため使わない）
-  function localDateStr(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const day = String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
-  }
-
-  // ===== セクションボタンバナー =====
-  function getDateStrings() {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const todayStr = localDateStr(today);
-    const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
-    const tomorrowStr = localDateStr(tomorrow);
-    const weekLater = new Date(today); weekLater.setDate(today.getDate()+7);
-    const weekLaterStr = localDateStr(weekLater);
-    return { todayStr, tomorrowStr, weekLaterStr };
-  }
-
-  function filterBySection(key) {
-    // _deletedIds に入っているIDは常に除外（どのデータソースにあっても表示しない）
-    const notDeleted = s => !_deletedIds.has(s.id);
-    if (key === 'past') return pastSchedules.filter(notDeleted);
-    const { todayStr, tomorrowStr, weekLaterStr } = getDateStrings();
-    if (key === 'today') return schedules.filter(s => notDeleted(s) && (s.event_date === todayStr || !s.event_date));
-    if (key === 'tomorrow') return schedules.filter(s => notDeleted(s) && s.event_date === tomorrowStr);
-    return schedules.filter(s => notDeleted(s) && s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
-  }
-
-  function renderScheduleSections() {
-    const todayItems    = filterBySection('today');
-    const tomorrowItems = filterBySection('tomorrow');
-    const weekItems     = filterBySection('week');
-    const pastItems     = filterBySection('past');
-
-    function makeBtn(label, key, items, isPast) {
-      const n = items.length;
-      const countHtml = n > 0 ? `<span class="section-count${isPast ? ' past' : ''}">${n}</span>` : '';
-      const cls = n === 0 ? 'section-btn empty' : isPast ? 'section-btn past' : 'section-btn';
-      const onclick = n > 0 ? `showScheduleList('${key}')` : '';
-      return `<button class="${cls}" ${onclick ? `onclick="${onclick}"` : ''}>${label}${countHtml}</button>`;
-    }
-
-    // これまでは常に活性（未完了数バッジのみ条件付き）
-    const pastIncompleteCount = pastItems.length;
-    const pastBtnCountHtml = pastIncompleteCount > 0 ? `<span class="section-count past">${pastIncompleteCount}</span>` : '';
-    const pastBtnHtml = `<button class="section-btn past" onclick="showScheduleList('past')">これまで${pastBtnCountHtml}</button>`;
-
-    document.getElementById('scheduleSections').innerHTML =
-      pastBtnHtml +
-      makeBtn('今日', 'today', todayItems) +
-      makeBtn('明日', 'tomorrow', tomorrowItems) +
-      makeBtn('今週', 'week', weekItems) +
-      (todayItems.length + tomorrowItems.length + weekItems.length === 0
-        ? '<span style="font-size:11px;color:rgba(255,255,255,0.8);align-self:center;">🎉 今週の予定なし！</span>'
-        : '');
-  }
-
-  // ===== スケジュール一覧モーダル =====
-  function showScheduleList(key) {
-    currentListSection = key;
-    const labels = { today:'今日の予定', tomorrow:'明日の予定', week:'今週の予定', past:'これまでの予定' };
-    document.getElementById('scheduleListTitle').textContent = labels[key];
-
-    const emojiMap = getMemberEmojiMap();
-
-    let html = '';
-
-    if (key === 'past') {
-      const STAMP_ICONS = { perfect:'⭐', half:'🌟', incomplete:'💫' };
-      // 未完了と完了済みをマージして日付降順に並べる（削除済みは除外）
-      const incompleteItems = pastSchedules.filter(s => !_deletedIds.has(s.id)).map(s => ({ ...s, _done: false }));
-      const doneItems = pastDoneSchedules.filter(s => !_deletedIds.has(s.id)).map(s => ({ ...s, _done: true }));
-      const allItems = [...incompleteItems, ...doneItems].sort((a, b) => {
-        const da = a.event_date || '';
-        const db = b.event_date || '';
-        return db.localeCompare(da);
-      });
-      if (allItems.length === 0) {
-        html = '<p style="color:#aaa;font-size:13px;">過去1ヶ月の予定はありません</p>';
-      } else {
-        html = allItems.map(s => {
-          const icon = CAT_ICONS[s.category] || '📅';
-          const emoji = s.assigned_to ? (emojiMap[s.assigned_to] || '📋') : '📋';
-          const dateLabel = s.event_date ? s.event_date.slice(5).replace('-','/') : '';
-          if (s._done) {
-            const stamp = pastDoneStamps.find(st => st.task_title === s.title && st.member_name === s.assigned_to);
-            const resultIcon = stamp ? (STAMP_ICONS[stamp.stamp_type] || '✅') : (s.category === 'イベント' ? '🎉' : '✅');
-            const resultLabel = stamp ? ({ perfect:'完璧！', half:'半分', incomplete:'完了' }[stamp.stamp_type] || '完了') : '完了';
-            return `<div class="schedule-list-item done-item" style="opacity:0.8;">
-              <span style="font-size:11px;color:#aaa;font-weight:700;flex-shrink:0;min-width:36px;">${dateLabel}</span>
-              <span style="font-size:13px;flex-shrink:0;">${emoji}</span>
-              <span class="list-item-title" style="text-decoration:line-through;flex:1;font-size:13px;">${s.title}</span>
-              <span style="font-size:14px;flex-shrink:0;white-space:nowrap;">${resultIcon} ${resultLabel}</span>
-              <button class="edit-schedule-btn" onclick="openEditModal('${s.id}')">✏️</button>
-            </div>`;
-          } else {
-            const safe = s.title.replace(/'/g,"\\'");
-            const safeA = (s.assigned_to||'').replace(/'/g,"\\'");
-            const safeCat = (s.category||'').replace(/'/g,"\\'");
-            const isEvent = s.category === 'イベント';
-            const clickAttr = isEvent ? '' : `onclick="openCompletionModal('${s.id}','${safe}','${safeA}','${safeCat}')"`;
-            const checkEl = isEvent ? `<span style="font-size:16px;flex-shrink:0;">🎉</span>` : `<div class="list-check">✓</div>`;
-            return `<div class="schedule-list-item${isEvent ? ' event-item' : ''}" ${clickAttr} style="border-left:3px solid #f08;">
-              <span style="font-size:11px;color:#f08;font-weight:700;flex-shrink:0;min-width:36px;">${dateLabel}</span>
-              <span style="font-size:13px;flex-shrink:0;">${emoji}</span>
-              <span class="list-item-title" style="flex:1;font-size:13px;">${s.title}</span>
-              ${checkEl}
-              <button class="edit-schedule-btn" onclick="event.stopPropagation();openEditModal('${s.id}')">✏️</button>
-            </div>`;
-          }
-        }).join('');
-      }
-      document.getElementById('scheduleListContent').innerHTML = html;
-      document.getElementById('scheduleListModal').classList.remove('hidden');
-      return;
-    }
-
-    const items = filterBySection(key);
-
-    // 担当者ごとにグループ化
-    const groups = {};
-    items.forEach(s => {
-      const g = s.assigned_to || '（担当なし）';
-      if (!groups[g]) groups[g] = [];
-      groups[g].push(s);
-    });
-
-    for (const [assignee, list] of Object.entries(groups)) {
-      const emoji = emojiMap[assignee] || '📋';
-      html += `<div class="schedule-group">
-        <div class="schedule-group-header">${emoji} ${assignee}</div>
-        ${list.map(s => {
-          const icon = CAT_ICONS[s.category] || '📅';
-          const safe = s.title.replace(/'/g,"\\'");
-          const safeA = (s.assigned_to||'').replace(/'/g,"\\'");
-          const safeCat = (s.category||'').replace(/'/g,"\\'");
-          const isEvent = s.category === 'イベント';
-          const dateLabel = s.event_date
-            ? `<span style="font-size:11px;color:#aaa;font-weight:700;flex-shrink:0;">${s.event_date.slice(5).replace('-','/')}</span>`
-            : '';
-          const clickAttr = isEvent ? '' : `onclick="openCompletionModal('${s.id}','${safe}','${safeA}','${safeCat}')"`;
-          const checkEl = isEvent
-            ? `<span style="font-size:16px;flex-shrink:0;">🎉</span>`
-            : `<div class="list-check">✓</div>`;
-          return `<div class="schedule-list-item${isEvent ? ' event-item' : ''}" ${clickAttr}>
-            <div class="list-item-left"><span>${icon}</span><span class="list-item-title">${s.title}</span></div>
-            ${dateLabel}${checkEl}
-            <button class="edit-schedule-btn" onclick="event.stopPropagation();openEditModal('${s.id}')">✏️</button>
-          </div>`;
-        }).join('')}
-      </div>`;
-    }
-    // 今日の完了済みを追加表示
-    const todayDoneVisible = todayDoneSchedules.filter(s => !_deletedIds.has(s.id));
-    if (key === 'today' && todayDoneVisible.length > 0) {
-      const STAMP_ICONS = { perfect:'⭐', half:'🌟', incomplete:'💫' };
-      html += `<div class="schedule-group">
-        <div class="done-section-header">✅ 完了済み</div>
-        ${todayDoneVisible.map(s => {
-          const stamp = todayStamps.find(st => st.task_title === s.title);
-          const resultIcon = stamp ? (STAMP_ICONS[stamp.stamp_type] || '✅') : (s.category === 'イベント' ? '🎉' : '✅');
-          const resultLabel = stamp ? ({ perfect:'完璧！', half:'半分', incomplete:'完了' }[stamp.stamp_type] || '') : '';
-          const icon = CAT_ICONS[s.category] || '📅';
-          const assigneeLabel = s.assigned_to ? `<span style="font-size:11px;color:#aaa;flex-shrink:0;">${s.assigned_to}</span>` : '';
-          return `<div class="schedule-list-item done-item">
-            <div class="list-item-left"><span>${icon}</span><span class="list-item-title" style="text-decoration:line-through;">${s.title}</span></div>
-            ${assigneeLabel}<span style="font-size:15px;flex-shrink:0;white-space:nowrap;">${resultIcon} ${resultLabel}</span>
-            <button class="edit-schedule-btn" onclick="openEditModal('${s.id}')">✏️</button>
-          </div>`;
-        }).join('')}
-      </div>`;
-    }
-    document.getElementById('scheduleListContent').innerHTML = html || '<p style="color:#aaa;font-size:13px;">予定がありません</p>';
-    document.getElementById('scheduleListModal').classList.remove('hidden');
-  }
-
-  function hideScheduleListModal() {
-    document.getElementById('scheduleListModal').classList.add('hidden');
-    currentListSection = null;
-  }
-
-  // ===== 予定編集・削除 =====
-  function openEditModal(id) {
-    const all = [...schedules, ...pastSchedules, ...todayDoneSchedules, ...pastDoneSchedules];
-    const s = all.find(x => x.id === id);
-    if (!s) return;
-    // 既存スタンプ種別を探す（完了済みの場合）
-    const existingStamp = [...todayStamps, ...pastDoneStamps].find(
-      st => st.task_title === s.title && st.member_name === s.assigned_to
-    );
-    pendingEdit = {
-      id: s.id, title: s.title,
-      category: s.category || '予定（やること）',
-      isDone: s.is_done,
-      originalIsDone: s.is_done,
-      originalAssignedTo: s.assigned_to || '',
-      stampType: existingStamp?.stamp_type || 'perfect'
-    };
-    document.getElementById('editScheduleTitle').textContent = `「${s.title}」`;
-    document.getElementById('editScheduleDate').value = s.event_date || '';
-    const sel = document.getElementById('editScheduleAssigned');
-    sel.innerHTML = '<option value="">なし</option>' +
-      members.map(m => `<option value="${m.display_name}"${s.assigned_to === m.display_name ? ' selected' : ''}>${m.display_name}</option>`).join('');
-    setEditStatus(s.is_done);
-    if (s.is_done) setEditStampType(pendingEdit.stampType);
-    document.getElementById('editScheduleModal').classList.remove('hidden');
-  }
-
-  function setEditStatus(isDone) {
-    if (!pendingEdit) return;
-    pendingEdit.isDone = isDone;
-    document.getElementById('editStatusUndone').className = 'status-toggle-btn' + (!isDone ? ' active-undone' : '');
-    document.getElementById('editStatusDone').className   = 'status-toggle-btn' + ( isDone ? ' active-done'   : '');
-    const stampSection = document.getElementById('editStampTypeSection');
-    stampSection.style.display = isDone ? 'flex' : 'none';
-    if (isDone) setEditStampType(pendingEdit.stampType || 'perfect');
-  }
-
-  function setEditStampType(type) {
-    if (!pendingEdit) return;
-    pendingEdit.stampType = type;
-    ['perfect', 'half', 'incomplete'].forEach(t => {
-      const btn = document.getElementById('editStamp' + t.charAt(0).toUpperCase() + t.slice(1));
-      if (!btn) return;
-      btn.style.opacity = t === type ? '1' : '0.35';
-      btn.style.transform = t === type ? 'scale(1.02)' : 'scale(1)';
-      btn.style.outline = t === type ? '2px solid var(--pink-dark)' : 'none';
-    });
-  }
-
-  function cancelEditSchedule() {
-    pendingEdit = null;
-    document.getElementById('editScheduleModal').classList.add('hidden');
-  }
-
-  async function saveScheduleEdit() {
-    if (!pendingEdit) return;
-    const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
-    const section     = currentListSection; // await 前にキャプチャ
-    const newDate     = document.getElementById('editScheduleDate').value || null;
-    const newAssigned = document.getElementById('editScheduleAssigned').value || null;
-    const newIsDone   = pendingEdit.isDone;
-    const oldMember   = originalAssignedTo || currentMember?.display_name;
-    const newMember   = newAssigned || currentMember?.display_name;
-
-    await sb.from('schedules').update({ event_date: newDate, assigned_to: newAssigned, is_done: newIsDone }).eq('id', id);
-
-    if (!originalIsDone && newIsDone) {
-      // 未完了→完了：選択されたスタンプ種別で付与
-      if (newMember && category !== 'イベント') await addStamp(newMember, title, pendingEdit.stampType || 'perfect');
-    } else if (originalIsDone && !newIsDone) {
-      // 完了→未完了：スタンプ削除
-      if (oldMember) {
-        const { data: rows } = await sb.from('stamps').select('id')
-          .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
-          .order('earned_at', { ascending: false }).limit(1);
-        if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
-      }
-    } else if (originalIsDone && newIsDone && oldMember !== newMember) {
-      // 完了のまま担当者変更：スタンプを付け替え
-      const { data: rows } = await sb.from('stamps').select('id, stamp_type')
-        .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
-        .order('earned_at', { ascending: false }).limit(1);
-      if (rows?.length) {
-        await sb.from('stamps').delete().eq('id', rows[0].id);
-        if (newMember && category !== 'イベント')
-          await sb.from('stamps').insert({ family_id: familyId, member_name: newMember, task_title: title, stamp_type: rows[0].stamp_type });
-      }
-    }
-
-    pendingEdit = null;
-    document.getElementById('editScheduleModal').classList.add('hidden');
-    await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadStampData();
-    _refreshListModal(section);
-  }
-
-  async function confirmDeleteSchedule() {
-    if (!pendingEdit) return;
-    const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
-    const section   = currentListSection;
-    const oldMember = originalAssignedTo || currentMember?.display_name;
-
-    // ① 両モーダルを即座に閉じる（古いリストを見せない）
-    pendingEdit = null;
-    document.getElementById('editScheduleModal').classList.add('hidden');
-    document.getElementById('scheduleListModal').classList.add('hidden');
-    currentListSection = null;
-
-    try {
-      // ② スタンプ削除（完了済みやることのみ）
-      if (originalIsDone && oldMember && category !== 'イベント') {
-        const { data: rows } = await sb.from('stamps').select('id')
-          .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
-          .order('earned_at', { ascending: false }).limit(1);
-        if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
-      }
-
-      // ③ DBから削除。.select('id') で「実際に削除されたか」を確認
-      //    RLSがDELETEをブロックするとerror=nullのまま0件返る（silent failure）ので必須
-      const { data: deleted, error: delErr } = await sb.from('schedules')
-        .delete().eq('id', id).select('id');
-
-      if (delErr) {
-        addMessageToUI(`削除できませんでした😢（${delErr.message}）`, 'ai');
-        return;
-      }
-
-      if (!deleted?.length) {
-        // Supabase RLS が DELETE を無音でブロックしている
-        addMessageToUI(
-          '⚠️ 削除の権限がありません。\nSupabase の SQL Editor で supabase_schedules_fix.sql を実行してから再度お試しください。',
-          'ai'
-        );
-        return;
-      }
-
-      // ④ 削除確認済み → IDをセーフティネットに登録してから配列も除去
-      //    _deletedIds に入れることで、万一 loadSchedules でデータが戻っても画面には出ない
-      _deletedIds.add(id);
-      schedules          = schedules.filter(s => s.id !== id);
-      pastSchedules      = pastSchedules.filter(s => s.id !== id);
-      todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
-      pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
-      renderScheduleSections();
-
-      addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
-
-      // ⑤ 元のセクションに残りの予定があればリストを再表示（ローカル配列から描画）
-      if (section) {
-        const remaining = section === 'past'
-          ? [...pastSchedules, ...pastDoneSchedules]
-          : filterBySection(section);
-        if (remaining.length > 0 || section === 'today' || section === 'past') {
-          showScheduleList(section);
-        }
-      }
-
-      if (originalIsDone) loadStampData();
-
-    } catch(e) {
-      console.error('削除例外:', e);
-      addMessageToUI(`削除に失敗しました😢（${e.message}）`, 'ai');
-    }
-  }
-
-  // リストモーダルの再描画ヘルパー（delete / save 共通）
-  function _refreshListModal(section) {
-    if (!section) return;
-    const remaining = section === 'past'
-      ? [...pastSchedules, ...pastDoneSchedules]
-      : filterBySection(section);
-    if (remaining.length > 0 || section === 'today' || section === 'past') {
-      showScheduleList(section);
-    } else {
-      document.getElementById('scheduleListModal').classList.add('hidden');
-      currentListSection = null;
-    }
-  }
-
-  // ===== 完了選択モーダル =====
-  function openCompletionModal(id, title, assignedTo, category) {
-    pendingCompletion = { id, title, assignedTo, category };
-    document.getElementById('completionTaskTitle').textContent = `「${title}」`;
-    document.getElementById('completionModal').classList.remove('hidden');
-  }
-
-  function cancelCompletion() {
-    pendingCompletion = null;
-    document.getElementById('completionModal').classList.add('hidden');
-  }
-
-  async function executeCompletion(type) {
-    if (!pendingCompletion) return;
-    const { id, title, assignedTo, category } = pendingCompletion;
-    pendingCompletion = null;
-    document.getElementById('completionModal').classList.add('hidden');
-
-    if (type === 'reschedule') {
-      const today = localDateStr(new Date());
-      await sb.from('schedules').update({ event_date: today }).eq('id', id);
-      await loadSchedules();
-      await loadPastSchedules();
-      if (currentListSection) showScheduleList(currentListSection);
-      addMessageToUI(`「${title}」を今日の予定に追加したよ！次はがんばれ🐰`, 'ai');
-      return;
-    }
-
-    // 完了処理
-    await sb.from('schedules').update({ is_done: true }).eq('id', id);
-    schedules = schedules.filter(s => s.id !== id);
-    pastSchedules = pastSchedules.filter(s => s.id !== id);
-
-    const stampTarget = assignedTo || currentMember?.display_name;
-    if (stampTarget && category !== 'イベント') await addStamp(stampTarget, title, type);
-    await loadTodayDone();
-    await loadPastDone();
-
-    // 一覧を開いていた場合は再描画
-    if (currentListSection) {
-      const remaining = filterBySection(currentListSection);
-      if (remaining.length > 0 || currentListSection === 'today') showScheduleList(currentListSection);
-      else hideScheduleListModal();
-    }
-    renderScheduleSections();
-
-    const count = stampData[stampTarget]?.total || 0;
-    const streak = streakData[stampTarget]?.current || 0;
-    const msgs = {
-      perfect:    `「${title}」完璧！⭐ めちゃくちゃえらい！スタンプ${count}こ・🔥${streak}日れんぞく！`,
-      half:       `「${title}」半分できたね🌟 それでもすごい！スタンプ${count}こゲット！`,
-      incomplete: `「${title}」完了にしたね💫 おつかれさま！次はがんばろう！`
-    };
-    addMessageToUI(msgs[type] || `「${title}」完了！`, 'ai');
-  }
-
-  async function addSchedule() {
-    const title = document.getElementById('scheduleTitle').value.trim();
-    if (!title) return;
-    const { error } = await sb.from('schedules').insert({
-      family_id: familyId, title,
-      event_date: document.getElementById('scheduleDate').value || null,
-      category: document.getElementById('scheduleCategory').value,
-      assigned_to: document.getElementById('scheduleAssigned').value.trim() || null
-    });
-    if (error) { alert('予定の保存に失敗: '+error.message); return; }
-    hideScheduleModal();
-    await loadSchedules();
-    addMessageToUI(`「${title}」を予定に追加したよ！🐰✨`, 'ai');
-  }
-
-  // ===== テンプレート機能 =====
-  const DAY_LABELS = {0:'日', 1:'月', 2:'火', 3:'水', 4:'木', 5:'金', 6:'土'};
-
-  function getThisMonday() {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const day = today.getDay();
-    const offset = (day === 0) ? -6 : 1 - day;
-    const monday = new Date(today); monday.setDate(today.getDate() + offset);
-    return monday;
-  }
-
-  async function loadTemplates() {
-    const { data } = await sb.from('schedule_templates').select('*').eq('family_id', familyId).order('created_at');
-    templates = data || [];
-  }
-
-  function showTemplateModal() {
-    renderTemplateList();
-    document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
-    document.getElementById('tmplTitle').value = '';
-    document.getElementById('tmplAssigned').value = '';
-    document.getElementById('tmplCategory').value = '予定（やること）';
-    document.getElementById('templateModal').classList.remove('hidden');
-  }
-  function hideTemplateModal() { document.getElementById('templateModal').classList.add('hidden'); }
-
-  function renderTemplateList() {
-    if (templates.length === 0) {
-      document.getElementById('templateList').innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:8px 0;">まだテンプレートがないよ🐰<br>下のフォームから追加してね！</p>';
-      return;
-    }
-    document.getElementById('templateList').innerHTML = templates.map(t => {
-      const days = t.days_of_week.split(',').map(d => DAY_LABELS[Number(d)]).join('・');
-      const assignee = t.assigned_to ? ` ／ 👤${t.assigned_to}` : '';
-      const icon = CAT_ICONS[t.category] || '📅';
-      return `<div class="template-item" id="tmpl-item-${t.id}">
-        <div class="template-item-info">
-          <div class="template-item-title">${icon} ${t.title}</div>
-          <div class="template-item-meta">${days}${assignee}</div>
-        </div>
-        <button class="template-add-btn" id="tmpl-add-${t.id}" onclick="applyOneTemplate('${t.id}')">テンプレを追加する</button>
-        <button class="template-del-btn" onclick="deleteTemplate('${t.id}')">🗑️</button>
-      </div>`;
-    }).join('');
-  }
-
-  async function addTemplate() {
-    const title = document.getElementById('tmplTitle').value.trim();
-    const assignedTo = document.getElementById('tmplAssigned').value || null;
-    const category = document.getElementById('tmplCategory').value;
-    const selectedDays = [...document.querySelectorAll('.day-chip.active')].map(c => c.dataset.day);
-    if (!title) { alert('タイトルを入力してね'); return; }
-    if (selectedDays.length === 0) { alert('曜日を選んでね'); return; }
-    const { data, error } = await sb.from('schedule_templates').insert({
-      family_id: familyId, title, assigned_to: assignedTo, category, days_of_week: selectedDays.join(',')
-    }).select().single();
-    if (error) { alert('保存に失敗: ' + error.message); return; }
-    templates.push(data);
-    renderTemplateList();
-    document.getElementById('tmplTitle').value = '';
-    document.getElementById('tmplAssigned').value = '';
-    document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
-  }
-
-  // 今日〜2回目の日曜日までの範囲でテンプレを登録する共通処理
-  async function applyTemplateItems(tmplList) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const dow = today.getDay(); // 0=日
-    const daysToFirstSun = dow === 0 ? 7 : 7 - dow;
-    const endDate = new Date(today); endDate.setDate(today.getDate() + daysToFirstSun + 7);
-    let addedCount = 0;
-    for (const tmpl of tmplList) {
-      const days = new Set(tmpl.days_of_week.split(',').map(Number));
-      const cur = new Date(today);
-      while (cur.getTime() <= endDate.getTime()) {
-        if (days.has(cur.getDay())) {
-          const dateStr = localDateStr(cur);
-          const { data: ex } = await sb.from('schedules').select('id')
-            .eq('family_id', familyId).eq('title', tmpl.title).eq('event_date', dateStr);
-          if (!ex || ex.length === 0) {
-            await sb.from('schedules').insert({
-              family_id: familyId, title: tmpl.title, event_date: dateStr,
-              category: tmpl.category, assigned_to: tmpl.assigned_to, is_done: false
-            });
-            addedCount++;
-          }
-        }
-        cur.setDate(cur.getDate() + 1);
-      }
-    }
-    return addedCount;
-  }
-
-  async function applyOneTemplate(id) {
-    const tmpl = templates.find(t => t.id === id);
-    if (!tmpl) return;
-    const btn = document.getElementById('tmpl-add-' + id);
-    if (btn) { btn.disabled = true; btn.textContent = '追加中…'; }
-    const count = await applyTemplateItems([tmpl]);
-    if (btn) { btn.classList.add('done'); btn.textContent = count > 0 ? `✓ ${count}件追加` : '✓ 追加済み'; btn.disabled = true; }
-    await loadSchedules();
-    await loadPastSchedules();
-  }
-
-  async function deleteTemplate(id) {
-    if (!confirm('このテンプレートを削除しますか？')) return;
-    await sb.from('schedule_templates').delete().eq('id', id);
-    templates = templates.filter(t => t.id !== id);
-    renderTemplateList();
-  }
-
-  async function applyWeeklyTemplates() {
-    if (templates.length === 0) {
-      addMessageToUI('テンプレートがまだ登録されていないよ🐰 まず登録してね！', 'ai');
-      return;
-    }
-    const btn = document.getElementById('applyTemplateBtn');
-    btn.disabled = true; btn.textContent = '追加中…';
-    const count = await applyTemplateItems(templates);
-    btn.disabled = false; btn.textContent = 'テンプレを追加する';
-    hideTemplateModal();
-    await loadSchedules();
-    await loadPastSchedules();
-    addMessageToUI(`予定を${count}件追加したよ！🐰✨`, 'ai');
-  }
-
-  // ===== スタンプ・ストリーク機能 =====
-  async function loadStampData() {
-    const { data: stamps } = await sb.from('stamps').select('member_name, stamp_type').eq('family_id', familyId);
-    stampData = {};
-    (stamps || []).forEach(s => {
-      if (!stampData[s.member_name]) stampData[s.member_name] = { total: 0, perfect: 0, half: 0, incomplete: 0 };
-      stampData[s.member_name].total++;
-      const t = s.stamp_type;
-      if (t === 'perfect' || t === 'half' || t === 'incomplete') stampData[s.member_name][t]++;
-      else stampData[s.member_name].perfect++; // 旧 'star' 型は perfect 扱い
-    });
-
-    const { data: streaks } = await sb.from('streaks').select('*').eq('family_id', familyId);
-    streakData = {};
-    (streaks || []).forEach(s => {
-      streakData[s.member_name] = { current: s.current_streak, longest: s.longest_streak, last_date: s.last_completed_date };
-    });
-
-    const { data: rewards } = await sb.from('rewards').select('*').eq('family_id', familyId).eq('is_active', true).order('required_stamps');
-    rewardsData = rewards || [];
-
-    updateStampBadge();
-  }
-
-  async function addStamp(memberName, taskTitle, stampType = 'perfect') {
-    await sb.from('stamps').insert({ family_id: familyId, member_name: memberName, task_title: taskTitle, stamp_type: stampType });
-    if (!stampData[memberName]) stampData[memberName] = { total: 0, perfect: 0, half: 0, incomplete: 0 };
-    stampData[memberName].total++;
-    stampData[memberName][stampType] = (stampData[memberName][stampType] || 0) + 1;
-    await updateStreak(memberName);
-    showStampAnimation(stampType);
-    updateStampBadge();
-    checkRewards(memberName);
-  }
-
-  async function updateStreak(memberName) {
-    const today = localDateStr(new Date());
-    const existing = streakData[memberName];
-    if (existing?.last_date === today) return;
-    let newStreak = 1;
-    if (existing?.last_date) {
-      const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
-      if (existing.last_date === localDateStr(yesterday)) newStreak = (existing.current||0)+1;
-    }
-    const longest = Math.max(existing?.longest || 0, newStreak);
-    streakData[memberName] = { current: newStreak, longest, last_date: today };
-    await sb.from('streaks').upsert({
-      family_id: familyId, member_name: memberName,
-      current_streak: newStreak, longest_streak: longest,
-      last_completed_date: today, updated_at: new Date().toISOString()
-    }, { onConflict: 'family_id,member_name' });
-  }
-
-  function checkRewards(memberName) {
-    const count = stampData[memberName]?.total || 0;
-    const hit = rewardsData.find(r => r.required_stamps === count);
-    if (hit) setTimeout(() => addMessageToUI(`🎊 スタンプ${count}こで「${hit.title}」のご褒美がもらえるよ！おめでとう🎉✨`, 'ai'), 600);
-  }
-
-  function updateStampBadge() {
-    if (!currentMember) return;
-    const d = stampData[currentMember.display_name] || { total: 0 };
-    const streak = streakData[currentMember.display_name]?.current || 0;
-  }
-
-  function showStampAnimation(type = 'perfect') {
-    const icons = { perfect: '⭐', half: '🌟', incomplete: '💫' };
-    const el = document.createElement('div');
-    el.className = 'stamp-float';
-    el.textContent = icons[type] || '🌟';
-    el.style.left = (Math.random() * 60 + 20) + '%';
-    el.style.top = '40%';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 900);
-  }
-
-  function showStampModal() {
-    const emojiMap = getMemberEmojiMap();
-    document.getElementById('stampMemberCards').innerHTML = members.map((m, i) => {
-      const d = stampData[m.display_name] || { total: 0, perfect: 0, half: 0, incomplete: 0 };
-      const streak = streakData[m.display_name] || {};
-      return `<div class="stamp-member-card">
-        <div class="stamp-member-header">
-          <div class="member-avatar" style="font-size:18px;">${emojiMap[m.display_name]||'🐰'}</div>
-          <span class="stamp-member-name">${m.display_name}</span>
-          <span class="stamp-count-big">🌟${d.total}</span>
-        </div>
-        <div class="stamp-type-row">
-          <span class="stamp-type-chip perfect">⭐ 完璧 ${d.perfect}</span>
-          <span class="stamp-type-chip half">🌟 半分 ${d.half}</span>
-          <span class="stamp-type-chip incomplete">💫 完了 ${d.incomplete}</span>
-        </div>
-        <div class="streak-row">
-          🔥れんぞく <span class="streak-count">${streak.current||0}日</span>
-          　さいちょう <span class="streak-count">${streak.longest||0}日</span>
-        </div>
-      </div>`;
-    }).join('') || '<p style="color:#aaa;font-size:13px;">メンバーを読み込み中...</p>';
-
-    const myCount = stampData[currentMember?.display_name]?.total || 0;
-    document.getElementById('rewardCards').innerHTML = rewardsData.length === 0
-      ? '<p style="color:#aaa;font-size:13px;">ご褒美がまだ設定されていないよ</p>'
-      : rewardsData.map(r => {
-          const ratio = Math.min(myCount / r.required_stamps, 1);
-          const achieved = myCount >= r.required_stamps;
-          return `<div class="reward-card ${achieved?'reward-achieved':''}">
-            <div class="reward-title">${r.title}</div>
-            <div class="reward-progress-bar"><div class="reward-progress-fill" style="width:${ratio*100}%"></div></div>
-            <div class="reward-label"><span>🌟${myCount} / ${r.required_stamps}こ</span><span>${achieved?'✅ たっせい！':`あと${r.required_stamps-myCount}こ`}</span></div>
-          </div>`;
-        }).join('');
-
-    if (currentMember?.role === 'owner') document.getElementById('addRewardSection').classList.remove('hidden');
-    document.getElementById('stampModal').classList.remove('hidden');
-  }
-
-  function hideStampModal() { document.getElementById('stampModal').classList.add('hidden'); }
-
-  async function addReward() {
-    const title = document.getElementById('rewardTitleInput').value.trim();
-    const stamps = parseInt(document.getElementById('rewardStampsInput').value);
-    if (!title || !stamps || stamps < 1) { alert('ご褒美の内容とスタンプ数を入力してね！'); return; }
-    const { error } = await sb.from('rewards').insert({ family_id: familyId, title, required_stamps: stamps });
-    if (error) { alert('保存に失敗: '+error.message); return; }
-    document.getElementById('rewardTitleInput').value = '';
-    document.getElementById('rewardStampsInput').value = '';
-    await loadStampData();
-    hideStampModal();
-    addMessageToUI(`ご褒美「${title}」を追加したよ！🎁 スタンプ${stamps}こでゲットできるよ✨`, 'ai');
-  }
-
-  // ===== 会話 =====
-  async function loadConversationHistory() {
-    const { data } = await sb.from('conversations').select('role,content')
-      .eq('family_id', familyId).order('created_at').limit(20);
-    conversationHistory = data || [];
-    document.getElementById('chatArea').innerHTML = '';
-    if (conversationHistory.length === 0) {
-      const name = familyData?.family_name || 'みんな';
-      addMessageToUI(`こんにちは！ぽぽちゃんだよ🐰💕\n${name}のこと、なんでも相談してね！\n上のボタンをタップすると予定の一覧が見られるよ📅\nタスクが終わったら「算数おわったよ！」と話しかけてね🌟`, 'ai');
-    } else {
-      conversationHistory.forEach(m => addMessageToUI(m.content, m.role === 'assistant' ? 'ai' : 'user'));
-    }
-  }
-
-  function detectTaskCompletion(text) {
-    return COMPLETION_KEYWORDS.some(k => text.includes(k)) && !NON_COMPLETION.some(k => text.includes(k));
-  }
-
-  async function sendMessage() {
-    const input = document.getElementById('msgInput');
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = ''; input.style.height = 'auto';
-    const sendBtn = document.getElementById('sendBtn');
-    sendBtn.disabled = true;
-
-    try {
-      addMessageToUI(text, 'user');
-      conversationHistory.push({ role: 'user', content: text });
-      sb.from('conversations').insert({ family_id: familyId, role: 'user', content: text }).then(() => {});
-      document.getElementById('typing').classList.add('active');
-      document.getElementById('chatArea').scrollTop = 99999;
-
-      if (detectTaskCompletion(text) && currentMember) {
-        await addStamp(currentMember.display_name, text.substring(0, 30), 'perfect');
-      }
-
-      const memberNames = members.map(m => m.display_name).join('、');
-      const todayStr = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
-      const myD = stampData[currentMember?.display_name] || { total: 0 };
-      const myStreak = streakData[currentMember?.display_name]?.current || 0;
-      const systemPrompt = `あなたは「ぽぽちゃん」という名前のかわいいうさぎのAIアシスタントです。「${familyData?.family_name||'この家族'}」のサポートをしています。家族メンバー：${memberNames}。やさしく、ひらがなを多めに使い、絵文字を適度に使います。今日の日付：${todayStr}。現在の予定: ${JSON.stringify(schedules.map(s=>({タイトル:s.title,日付:s.event_date,カテゴリ:s.category,担当:s.assigned_to})))}。
-
-話しかけているのは「${currentMember?.display_name||'ユーザー'}」さんです。スタンプ合計：${myD.total}個（⭐${myD.perfect} 🌟${myD.half} 💫${myD.incomplete}）、連続達成：${myStreak}日。
-タスク完了の報告を受けたときは、がんばりを具体的に褒めてスタンプとれんぞくについて嬉しそうに言及してください。`;
-
-      let reply;
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-        const res = await fetch('https://poppo-api.onoshin2.workers.dev', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-5', max_tokens: 500,
-            system: systemPrompt,
-            messages: conversationHistory.map(m => ({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
-          })
-        });
-        clearTimeout(timeoutId);
-        const data = await res.json();
-        reply = res.ok ? (data.content?.[0]?.text||'ごめんね😢') : `エラー ${res.status}: ${data.error?.message||''}`;
-      } catch(e) {
-        reply = e.name === 'AbortError' ? 'タイムアウトしちゃった😢 もう一度送ってね！' : `通信エラー: ${e.message}`;
-      }
-
-      document.getElementById('typing').classList.remove('active');
-      addMessageToUI(reply, 'ai');
-      conversationHistory.push({ role: 'assistant', content: reply });
-      sb.from('conversations').insert({ family_id: familyId, role: 'assistant', content: reply }).then(() => {});
-    } finally {
-      document.getElementById('typing').classList.remove('active');
-      sendBtn.disabled = false;
-    }
-  }
-
-  function addMessageToUI(text, role) {
-    const area = document.getElementById('chatArea');
-    const div = document.createElement('div');
-    div.className = `message ${role}`;
-    const avatar = `<div class="msg-avatar"><svg viewBox="0 0 60 60"><ellipse cx="22" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="22" cy="18" rx="4" ry="9" fill="#FFB5C8"/><ellipse cx="38" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="38" cy="18" rx="4" ry="9" fill="#FFB5C8"/><circle cx="30" cy="38" r="18" fill="#FDE8F0"/><circle cx="24" cy="36" r="3" fill="#3D2B1F"/><circle cx="36" cy="36" r="3" fill="#3D2B1F"/><ellipse cx="30" cy="42" rx="2" ry="1.5" fill="#FF8FAD"/></svg></div>`;
-    div.innerHTML = role==='ai' ? `${avatar}<div class="bubble">${text.replace(/\n/g,'<br>')}</div>` : `<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
-    area.appendChild(div);
-    area.scrollTop = area.scrollHeight;
-  }
-
-  function renderFamilyModalContent() {
-    updateFamilyHeader();
-    document.getElementById('inviteCodeDisplay').textContent = familyData?.invite_code || '------';
-    const emojiMap = getMemberEmojiMap();
-    const isOwner = realUserRole === 'owner';
-    document.getElementById('memberList').innerHTML = members.length > 0
-      ? members.map((m, i) => {
-          const isActive = m.display_name === currentMember?.display_name;
-          const currentEmoji = emojiMap[m.display_name] || '🐰';
-          const badge = isActive
-            ? `<span class="member-active-badge">✅ いまここ</span>`
-            : isOwner
-              ? `<button class="member-switch-btn" onclick="switchToMember('${m.display_name}','${m.role}')">切り替え</button>`
-              : '';
-          const pickerHtml = ANIMAL_EMOJIS.map(e =>
-            `<div class="emoji-opt${e===currentEmoji?' selected':''}" onclick="setMemberEmoji(${i},'${e}')">${e}</div>`
-          ).join('');
-          return `<div class="member-item" style="flex-wrap:wrap;">
-            <div class="member-avatar" onclick="toggleEmojiPicker(${i})" title="タップでアイコン変更">${currentEmoji}</div>
-            <div style="flex:1"><div class="member-name">${m.display_name}</div><div class="member-role">${m.role==='owner'?'👑 オーナー':'メンバー'}</div></div>
-            ${badge}
-            <div class="emoji-picker hidden" id="emoji-picker-${i}">${pickerHtml}</div>
-          </div>`;
-        }).join('')
-      : '<p style="color:#aaa;font-size:13px;">読み込み中...</p>';
-    // オーナー編集欄（キャッシュ済みroleで判定）
-    const editSection = document.getElementById('familyNameEdit');
-    if (realUserRole === 'owner') {
-      document.getElementById('familyNameEditInput').value = familyData?.family_name || '';
-      editSection.style.display = 'flex';
-    } else { editSection.style.display = 'none'; }
-  }
-
-  function showFamilyModal() {
-    // キャッシュ済みデータで即座に開く
-    renderFamilyModalContent();
-    document.getElementById('familyModal').classList.remove('hidden');
-    // バックグラウンドで最新データに更新
-    loadMembers().then(() => {
-      if (!document.getElementById('familyModal').classList.contains('hidden')) {
-        renderFamilyModalContent();
-      }
-    }).catch(() => {});
-  }
-  function hideFamilyModal() { document.getElementById('familyModal').classList.add('hidden'); }
-
-  async function switchToMember(displayName, role) {
-    currentMember = { display_name: displayName, role };
-    hideFamilyModal();
-    await loadStampData();
-    updateStampBadge();
-    updateFamilyHeader();
-    addMessageToUI(`${displayName}に切り替えたよ🐰`, 'ai');
-  }
-
-  async function updateFamilyName() {
-    const newName = document.getElementById('familyNameEditInput').value.trim();
-    if (!newName) return;
-    const { error } = await sb.from('families').update({ family_name: newName, name: newName }).eq('id', familyId);
-    if (error) { alert('変更に失敗: '+error.message); return; }
-    familyData.family_name = newName;
-    updateFamilyHeader();
-    hideFamilyModal();
-    addMessageToUI(`家族名を「${newName}」に変更したよ！🌸🐰`, 'ai');
-  }
-
-  function showScreen(name) {
-    ['loginScreen','apiKeyScreen','familyScreen','appScreen'].forEach(id => {
-      const el = document.getElementById(id);
-      if (id===name+'Screen'||(name==='app'&&id==='appScreen')) el.classList.remove('hidden');
-      else el.classList.add('hidden');
-    });
-  }
-
-  function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
-  function handleKey(e) { if(e.key==='Enter'&&e.shiftKey){e.preventDefault();sendMessage();} }
-  function sendQuick(text) { document.getElementById('msgInput').value=text; sendMessage(); }
-  function showScheduleModal() { document.getElementById('scheduleModal').classList.remove('hidden'); }
-  function hideScheduleModal() {
-    document.getElementById('scheduleModal').classList.add('hidden');
-    ['scheduleTitle','scheduleDate','scheduleAssigned'].forEach(id => document.getElementById(id).value='');
-  }
-
-  // モーダル外タップで閉じる
-  document.getElementById('scheduleModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideScheduleModal(); });
-  document.getElementById('familyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideFamilyModal(); });
-  document.getElementById('scheduleListModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideScheduleListModal(); });
-  document.getElementById('completionModal').addEventListener('click', e => { if(e.target===e.currentTarget) cancelCompletion(); });
-  document.getElementById('stampModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideStampModal(); });
-  document.getElementById('templateModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideTemplateModal(); });
-  document.getElementById('dutyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideDutyModal(); });
-  document.getElementById('dutyCellMenu').addEventListener('click', e => { if(e.target===e.currentTarget) closeDutyCellMenu(); });
-  document.querySelectorAll('.day-chip').forEach(chip => {
-    chip.addEventListener('click', () => chip.classList.toggle('active'));
-  });
-
-  // バックグラウンド復帰時の共通リセット処理
-  let lastHiddenAt = Date.now();
-  async function onResumeFromBackground() {
-    document.getElementById('sendBtn').disabled = false;
-    document.getElementById('typing').classList.remove('active');
-    if (!currentUser || !familyId) return;
-    try {
-      await sb.auth.refreshSession();
-      if (Date.now() - lastHiddenAt > 30000) {
-        await loadSchedules();
-        await loadPastSchedules();
-        await loadPastDone();
-        await loadTodayDone();
-      }
-    } catch(e) { console.warn('resume error:', e); }
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      lastHiddenAt = Date.now();
-    } else if (document.visibilityState === 'visible') {
-      onResumeFromBackground();
-    }
-  });
-  // bfcache（Safari の戻る/前に進む キャッシュ）から復帰
-  window.addEventListener('pageshow', (e) => {
-    if (e.persisted) onResumeFromBackground();
-  });
-  // ※ window.focus イベントは削除処理と競合してデータを上書きする問題があるため使用しない
-  //   （visibilitychange + pageshow で十分カバーできる）
-
-  function toggleMode() {
-    isSignUp = !isSignUp;
-    document.getElementById('loginTitle').textContent = isSignUp?'新規登録':'ログイン';
-    document.getElementById('emailBtn').textContent = isSignUp?'アカウントを作成':'ログイン';
-    document.querySelector('.toggle-mode').innerHTML = isSignUp
-      ? 'すでにアカウントがある方は <span onclick="toggleMode()">ログイン</span>'
-      : 'アカウントがない方は <span onclick="toggleMode()">新規登録</span>';
-  }
-
-  async function handleEmailAuth() {
-    const email = document.getElementById('emailInput').value.trim();
-    const password = document.getElementById('passwordInput').value;
-    const errEl = document.getElementById('errorMsg');
-    const btn = document.getElementById('emailBtn');
-    errEl.classList.remove('show');
-    if (!email||!password) { errEl.textContent='メールとパスワードを入力してください'; errEl.classList.add('show'); return; }
-    btn.disabled=true; btn.textContent='処理中...';
-    try {
-      if (isSignUp) {
-        const { data, error } = await sb.auth.signUp({ email, password });
-        if (error) { errEl.textContent='エラー: '+error.message; errEl.classList.add('show'); }
-        else if (data?.session) { await onLogin(data.session.user); }
-        else { errEl.textContent='アカウント作成！ログインモードで再度お試しください'; errEl.classList.add('show'); toggleMode(); }
-      } else {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) { errEl.textContent='エラー: '+error.message; errEl.classList.add('show'); }
-        else if (data?.session) { await onLogin(data.session.user); }
-      }
-    } catch(e) { errEl.textContent='予期しないエラー: '+e.message; errEl.classList.add('show'); }
-    btn.disabled=false;
-    btn.textContent=isSignUp?'アカウントを作成':'ログイン';
-  }
-
-  async function handleGoogleLogin() {
-    await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: 'https://shin4john.github.io/poppo-app/', skipBrowserRedirect: false, scopes: 'email profile' }
-    });
-  }
-
-  async function logout() {
-    await sb.auth.signOut();
-    conversationHistory=[]; schedules=[]; claudeApiKey=''; familyId=null; familyData=null; members=[];
-    currentMember=null; myDisplayName=null; stampData={}; streakData={}; rewardsData=[];
-    showScreen('login');
-  }
-
-  // ===== Googleカレンダー連携 =====
-  const GOOGLE_CLIENT_ID = '791931272330-u8inhpjmnvosol4ul3gm2q9sslgjaqfp.apps.googleusercontent.com';
-  const CALENDAR_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks.readonly';
-  let googleTokenClient = null;
-  let googleAccessToken = null;
-
-  function initGoogleAuth() {
-    googleTokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope: CALENDAR_SCOPES,
-      callback: async (response) => {
-        if (response.error) { addMessageToUI('Googleカレンダーの認証に失敗しました😢', 'ai'); return; }
-        googleAccessToken = response.access_token;
-        await fetchGoogleCalendarEvents();
-      }
-    });
-  }
-
-  async function syncGoogleCalendar() {
-    if (!googleTokenClient) { addMessageToUI('Googleカレンダーの初期化中です。少し待ってからもう一度試してね🐰', 'ai'); return; }
-    addMessageToUI('Googleカレンダーに接続するよ！認証画面が開いたら許可してね📅', 'ai');
-    googleTokenClient.requestAccessToken();
-  }
-
-  async function fetchGoogleCalendarEvents() {
-    try {
-      addMessageToUI('カレンダーから予定を取得中...🔄', 'ai');
-      const today = new Date(); today.setHours(0,0,0,0);
-      const oneMonthLater = new Date(today); oneMonthLater.setMonth(today.getMonth()+1); oneMonthLater.setHours(23,59,59,999);
-      const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${today.toISOString()}&timeMax=${oneMonthLater.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`,
-        { headers: { Authorization: `Bearer ${googleAccessToken}` } }
-      );
-      const data = await res.json();
-      let addedCount = 0;
-      for (const event of (data.items || [])) {
-        const title = event.summary;
-        const eventDate = event.start?.date || event.start?.dateTime?.split('T')[0];
-        if (!title) continue;
-        const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', title).eq('event_date', eventDate);
-        if (ex && ex.length > 0) continue;
-        const { error } = await sb.from('schedules').insert({ family_id: familyId, title, event_date: eventDate||null, category: '予定', assigned_to: myDisplayName });
-        if (!error) addedCount++;
-      }
-      const taskCount = await fetchGoogleTasks();
-      await loadSchedules();
-      addMessageToUI(`Googleカレンダーから${addedCount}件の予定と、Todoリストから${taskCount}件のタスクを取り込んだよ！📅✨`, 'ai');
-    } catch(e) { addMessageToUI(`カレンダーの取得に失敗したよ😢 ${e.message}`, 'ai'); }
-  }
-
-  async function fetchGoogleTasks() {
-    try {
-      const listsRes = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists', { headers: { Authorization: `Bearer ${googleAccessToken}` } });
-      const listsData = await listsRes.json();
-      const taskLists = listsData.items || [];
-      if (taskLists.length === 0) return 0;
-      const today = new Date(); today.setHours(0,0,0,0);
-      const oneMonthLater = new Date(today); oneMonthLater.setMonth(today.getMonth()+1);
-      const oneMonthStr = oneMonthLater.toISOString().split('T')[0];
-      let addedCount = 0;
-      for (const list of taskLists) {
-        const tasksRes = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks?showCompleted=false&maxResults=50`, { headers: { Authorization: `Bearer ${googleAccessToken}` } });
-        const tasksData = await tasksRes.json();
-        for (const task of (tasksData.items || [])) {
-          if (!task.title || task.status==='completed') continue;
-          const dueDate = task.due ? task.due.split('T')[0] : null;
-          if (dueDate && dueDate > oneMonthStr) continue;
-          const isRecurring = task.notes?.includes('毎日') || task.notes?.includes('繰り返し');
-          if (isRecurring && dueDate) {
-            for (let i = 0; i < 7; i++) {
-              const d = new Date(today); d.setDate(today.getDate()+i);
-              const ds = d.toISOString().split('T')[0];
-              const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', task.title).eq('event_date', ds);
-              if (ex && ex.length > 0) continue;
-              const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: ds, category: '予定（やること）', assigned_to: myDisplayName });
-              if (!error) addedCount++;
-            }
-          } else {
-            const { data: ex } = await sb.from('schedules').select('id').eq('family_id', familyId).eq('title', task.title);
-            if (ex && ex.length > 0) continue;
-            const { error } = await sb.from('schedules').insert({ family_id: familyId, title: task.title, event_date: dueDate, category: '予定（やること）', assigned_to: myDisplayName });
-            if (!error) addedCount++;
-          }
-        }
-      }
-      return addedCount;
-    } catch(e) { console.error('Tasks取得エラー:', e); return 0; }
-  }
-
-  // ===== 当番表 =====
-  const DAY_LABELS_DUTY = ['日','月','火','水','木','金','土'];
-
-  function getDutyWeekDates(offset = 0) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const dow = today.getDay(); // 0=Sun
-    const daysToMon = dow === 0 ? -6 : 1 - dow;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + daysToMon + offset * 7);
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday); d.setDate(monday.getDate() + i);
-      dates.push(localDateStr(d));
-    }
-    return dates;
-  }
-
-  async function loadDuties() {
-    const { data } = await sb.from('duties').select('*').eq('family_id', familyId).order('sort_order').order('created_at');
-    duties = data || [];
-  }
-
-  async function loadDutyLogs(dateStrings) {
-    if (!duties.length) { dutyLogs = {}; return; }
-    const { data } = await sb.from('duty_logs').select('*')
-      .eq('family_id', familyId)
-      .in('log_date', dateStrings);
-    dutyLogs = {};
-    (data || []).forEach(r => { dutyLogs[`${r.duty_id}_${r.log_date}`] = { id: r.id, status: r.status }; });
-  }
-
-  async function showDutyModal() {
-    currentDutyWeekOffset = 0;
-    document.getElementById('dutyModal').classList.remove('hidden');
-    // 追加フォームを閉じる
-    document.getElementById('addDutyForm').classList.add('hidden');
-    // 担当者プルダウンを更新
-    const sel = document.getElementById('dutyPersonSelect');
-    sel.innerHTML = members.map(m => `<option value="${m.display_name}">${m.display_name}</option>`).join('');
-    await renderDutyTable();
-  }
-
-  function hideDutyModal() {
-    document.getElementById('dutyModal').classList.add('hidden');
-  }
-
-  async function renderDutyTable() {
-    const dates = getDutyWeekDates(currentDutyWeekOffset);
-    const todayStr = localDateStr(new Date());
-    await loadDutyLogs(dates);
-
-    // 週ラベル
-    const d0 = dates[0].slice(5).replace('-','/');
-    const d6 = dates[6].slice(5).replace('-','/');
-    document.getElementById('dutyWeekLabel').textContent = `${d0} 〜 ${d6}`;
-
-    if (!duties.length) {
-      document.getElementById('dutyTableWrap').innerHTML =
-        '<p style="padding:20px;color:#aaa;font-size:13px;text-align:center;">当番がまだ登録されていません。＋ボタンから追加してください。</p>';
-      return;
-    }
-
-    const emojiMap = getMemberEmojiMap();
-    const STATUS_ICON = { done: '✅', failed: '❌', skip: 'ー' };
-
-    let html = '<table class="duty-table"><thead><tr>';
-    html += '<th class="col-duty">担当 / 当番</th>';
-    dates.forEach(d => {
-      const dayLabel = DAY_LABELS_DUTY[new Date(d + 'T00:00:00').getDay()];
-      const mmdd = d.slice(5).replace('-','/');
-      const isToday = d === todayStr;
-      html += `<th style="${isToday ? 'background:var(--pink);color:white;' : ''}">${dayLabel}<br>${mmdd}</th>`;
-    });
-    html += '</tr></thead><tbody>';
-
-    duties.forEach(duty => {
-      const emoji = emojiMap[duty.person_name] || '📋';
-      html += '<tr>';
-      html += `<td class="col-duty">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;">
-          <div>
-            <div class="duty-person-tag">${emoji} ${duty.person_name}</div>
-            <div class="duty-title-tag">${duty.title}</div>
-          </div>
-          <button class="duty-delete-btn" onclick="deleteDuty('${duty.id}')">🗑</button>
-        </div>
-      </td>`;
-      dates.forEach(d => {
-        const key = `${duty.id}_${d}`;
-        const log = dutyLogs[key];
-        const icon = log ? STATUS_ICON[log.status] : '・';
-        const cls = log ? '' : ' empty';
-        const isToday = d === todayStr;
-        html += `<td style="${isToday ? 'background:rgba(255,180,200,0.12);' : ''}">
-          <span class="duty-cell${cls}" onclick="openDutyCellMenu('${duty.id}','${d}','${duty.person_name}','${duty.title.replace(/'/g,"\\'")}')">${icon}</span>
-        </td>`;
-      });
-      html += '</tr>';
-    });
-
-    html += '</tbody></table>';
-    document.getElementById('dutyTableWrap').innerHTML = html;
-  }
-
-  async function navigateDutyWeek(delta) {
-    currentDutyWeekOffset += delta;
-    await renderDutyTable();
-  }
-
-  function openDutyCellMenu(dutyId, date, personName, dutyTitle) {
-    pendingDutyCell = { dutyId, date, personName, dutyTitle };
-    const log = dutyLogs[`${dutyId}_${date}`];
-    const mmdd = date.slice(5).replace('-','/');
-    const statusLabel = log ? { done:'✅ できた', failed:'❌ できなかった', skip:'ー 対象外' }[log.status] || '' : '未入力';
-    document.getElementById('dutyCellMenuTitle').textContent = `${personName}・${dutyTitle}（${mmdd}）— ${statusLabel}`;
-    document.getElementById('dutyCellMenu').classList.remove('hidden');
-  }
-
-  function closeDutyCellMenu() {
-    pendingDutyCell = null;
-    document.getElementById('dutyCellMenu').classList.add('hidden');
-  }
-
-  async function setDutyStatus(status) {
-    if (!pendingDutyCell) return;
-    const { dutyId, date } = pendingDutyCell;
-    const key = `${dutyId}_${date}`;
-    closeDutyCellMenu();
-
-    if (status === null) {
-      // リセット：ログを削除
-      if (dutyLogs[key]) {
-        await sb.from('duty_logs').delete().eq('id', dutyLogs[key].id);
-        delete dutyLogs[key];
-      }
-    } else {
-      // upsert
-      const { data, error } = await sb.from('duty_logs').upsert(
-        { family_id: familyId, duty_id: dutyId, log_date: date, status },
-        { onConflict: 'duty_id,log_date' }
-      ).select('id, status').single();
-      if (!error && data) dutyLogs[key] = { id: data.id, status: data.status };
-    }
-
-    // テーブルを再描画
-    const STATUS_ICON = { done: '✅', failed: '❌', skip: 'ー' };
-    const log = dutyLogs[key];
-    const icon = log ? STATUS_ICON[log.status] : '・';
-    const cls = log ? '' : ' empty';
-    // セルだけ即時更新（全再描画は重いため）
-    document.querySelectorAll(`.duty-cell`).forEach(el => {
-      const onclick = el.getAttribute('onclick') || '';
-      if (onclick.includes(`'${dutyId}','${date}'`)) {
-        el.className = `duty-cell${cls}`;
-        el.textContent = icon;
-      }
-    });
-  }
-
-  function toggleAddDutyForm() {
-    const f = document.getElementById('addDutyForm');
-    f.classList.toggle('hidden');
-    if (!f.classList.contains('hidden')) {
-      document.getElementById('dutyTitleInput').focus();
-    }
-  }
-
-  async function addDuty() {
-    const personName = document.getElementById('dutyPersonSelect').value;
-    const title = document.getElementById('dutyTitleInput').value.trim();
-    if (!title) { alert('当番内容を入力してください'); return; }
-    const { data, error } = await sb.from('duties').insert({
-      family_id: familyId, person_name: personName, title,
-      sort_order: duties.length
-    }).select('*').single();
-    if (error) { alert('追加に失敗しました: ' + error.message); return; }
-    duties.push(data);
-    document.getElementById('dutyTitleInput').value = '';
-    document.getElementById('addDutyForm').classList.add('hidden');
-    await renderDutyTable();
-  }
-
-  async function deleteDuty(id) {
-    if (!confirm('この当番を削除しますか？記録もすべて消えます。')) return;
-    await sb.from('duties').delete().eq('id', id);
-    duties = duties.filter(d => d.id !== id);
-    // 関連するログをキャッシュから削除
-    Object.keys(dutyLogs).forEach(k => { if (k.startsWith(id)) delete dutyLogs[k]; });
-    await renderDutyTable();
-  }
-
-  window.addEventListener('load', () => {
-    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID });
-    initGoogleAuth();
-  });
-
-  init();
-</script>
 </body>
 </html>
