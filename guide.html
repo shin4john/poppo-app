@@ -571,6 +571,8 @@
   let pastDoneSchedules = [];
   let pastDoneStamps = [];
   let todayDoneSchedules = [];
+  // 削除済みIDセット：loadSchedules等でデータが戻ってきても画面に出さないためのセーフティネット
+  const _deletedIds = new Set();
   let todayStamps = [];
   let templates = [];
   let members = [];
@@ -820,11 +822,13 @@
   }
 
   function filterBySection(key) {
-    if (key === 'past') return pastSchedules;
+    // _deletedIds に入っているIDは常に除外（どのデータソースにあっても表示しない）
+    const notDeleted = s => !_deletedIds.has(s.id);
+    if (key === 'past') return pastSchedules.filter(notDeleted);
     const { todayStr, tomorrowStr, weekLaterStr } = getDateStrings();
-    if (key === 'today') return schedules.filter(s => s.event_date === todayStr || !s.event_date);
-    if (key === 'tomorrow') return schedules.filter(s => s.event_date === tomorrowStr);
-    return schedules.filter(s => s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
+    if (key === 'today') return schedules.filter(s => notDeleted(s) && (s.event_date === todayStr || !s.event_date));
+    if (key === 'tomorrow') return schedules.filter(s => notDeleted(s) && s.event_date === tomorrowStr);
+    return schedules.filter(s => notDeleted(s) && s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
   }
 
   function renderScheduleSections() {
@@ -868,9 +872,9 @@
 
     if (key === 'past') {
       const STAMP_ICONS = { perfect:'⭐', half:'🌟', incomplete:'💫' };
-      // 未完了と完了済みをマージして日付降順に並べる
-      const incompleteItems = pastSchedules.map(s => ({ ...s, _done: false }));
-      const doneItems = pastDoneSchedules.map(s => ({ ...s, _done: true }));
+      // 未完了と完了済みをマージして日付降順に並べる（削除済みは除外）
+      const incompleteItems = pastSchedules.filter(s => !_deletedIds.has(s.id)).map(s => ({ ...s, _done: false }));
+      const doneItems = pastDoneSchedules.filter(s => !_deletedIds.has(s.id)).map(s => ({ ...s, _done: true }));
       const allItems = [...incompleteItems, ...doneItems].sort((a, b) => {
         const da = a.event_date || '';
         const db = b.event_date || '';
@@ -952,11 +956,12 @@
       </div>`;
     }
     // 今日の完了済みを追加表示
-    if (key === 'today' && todayDoneSchedules.length > 0) {
+    const todayDoneVisible = todayDoneSchedules.filter(s => !_deletedIds.has(s.id));
+    if (key === 'today' && todayDoneVisible.length > 0) {
       const STAMP_ICONS = { perfect:'⭐', half:'🌟', incomplete:'💫' };
       html += `<div class="schedule-group">
         <div class="done-section-header">✅ 完了済み</div>
-        ${todayDoneSchedules.map(s => {
+        ${todayDoneVisible.map(s => {
           const stamp = todayStamps.find(st => st.task_title === s.title);
           const resultIcon = stamp ? (STAMP_ICONS[stamp.stamp_type] || '✅') : (s.category === 'イベント' ? '🎉' : '✅');
           const resultLabel = stamp ? ({ perfect:'完璧！', half:'半分', incomplete:'完了' }[stamp.stamp_type] || '') : '';
@@ -1114,8 +1119,9 @@
         return;
       }
 
-      // ④ 削除確認済み → ローカル配列からだけ除去（loadSchedules は呼ばない）
-      //    loadSchedules を呼ぶと並行処理でアイテムが復活するリスクがあるため
+      // ④ 削除確認済み → IDをセーフティネットに登録してから配列も除去
+      //    _deletedIds に入れることで、万一 loadSchedules でデータが戻っても画面には出ない
+      _deletedIds.add(id);
       schedules          = schedules.filter(s => s.id !== id);
       pastSchedules      = pastSchedules.filter(s => s.id !== id);
       todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
