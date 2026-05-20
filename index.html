@@ -226,6 +226,23 @@
   .stamp-float{position:fixed;font-size:32px;pointer-events:none;z-index:999;animation:stampFly 0.8s ease forwards;}
   @keyframes stampFly{0%{transform:scale(0) translateY(0);opacity:1}60%{transform:scale(1.4) translateY(-40px);opacity:1}100%{transform:scale(0.8) translateY(-80px);opacity:0}}
 
+  /* ルーレット */
+  .ticket-badge{background:linear-gradient(135deg,#E8F5E9,#A5D6A7);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:#1B5E20;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;box-shadow:0 2px 8px rgba(76,175,80,0.3);}
+  .roulette-wheel-container{position:relative;width:260px;height:260px;margin:0 auto;flex-shrink:0;}
+  .roulette-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:26px;z-index:2;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.25));line-height:1;}
+  #rouletteWheelEl{width:260px;height:260px;transform-origin:50% 50%;will-change:transform;}
+  .roulette-result{min-height:80px;display:flex;align-items:center;justify-content:center;width:100%;}
+  .ticket-float{position:fixed;font-size:32px;pointer-events:none;z-index:999;animation:stampFly 0.8s ease forwards;}
+  .prize-history-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--cream);border-radius:12px;font-size:13px;}
+  .prize-history-rank{font-size:11px;font-weight:800;color:white;background:var(--pink-dark);border-radius:8px;padding:2px 7px;white-space:nowrap;flex-shrink:0;}
+  .prize-history-rank.jackpot{background:linear-gradient(135deg,#FFD700,#FFA000);}
+  .prize-history-info{flex:1;min-width:0;}
+  .prize-history-name{font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .prize-history-meta{font-size:11px;color:#aaa;margin-top:2px;}
+  .stamp-tab-row{display:flex;gap:8px;background:var(--cream);border-radius:14px;padding:4px;}
+  .stamp-tab{flex:1;padding:8px;border-radius:10px;border:none;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:#aaa;background:none;transition:all 0.2s;}
+  .stamp-tab.active{background:white;color:var(--brown);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+
   /* テンプレート機能 */
   .day-chips-row{display:flex;gap:6px;flex-wrap:wrap;}
   .day-chip{width:36px;height:36px;border-radius:50%;background:var(--cream);border:2px solid var(--lavender);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--brown);cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;}
@@ -313,6 +330,7 @@
       <button class="icon-btn" onclick="showTemplateModal()">📋 テンプレ</button>
       <button class="icon-btn" onclick="syncGoogleCalendar()">📅 GCal</button>
       <button class="icon-btn" onclick="showFamilyModal()">👨‍👩‍👧 メンバー</button>
+      <button class="ticket-badge" id="ticketBadge" onclick="showRouletteModal()" style="display:none;">🎰 <span id="ticketCountBadge">0</span>枚</button>
     </div>
   </div>
 
@@ -332,6 +350,7 @@
     <button class="qr-btn" onclick="sendQuick('今週のやることを教えて！')">📝 やること確認</button>
     <button class="qr-btn" onclick="showDutyModal()">📋 当番表</button>
     <button class="qr-btn" onclick="showStampModal()">🌟 スタンプ帳</button>
+    <button class="qr-btn" onclick="showRouletteModal()">🎰 ルーレット</button>
     <button class="qr-btn" onclick="sendQuick('今週のイベントは？')">🎉 イベント</button>
     <button class="qr-btn" onclick="sendQuick('予定を全部見せて')">📋 一覧</button>
     <a class="qr-btn" href="https://shin4john.github.io/poppo-app/guide.html" target="_blank" style="text-decoration:none;">📖 使い方</a>
@@ -489,16 +508,46 @@
 <div class="modal-overlay hidden" id="stampModal">
   <div class="modal">
     <h2>🌟 スタンプ帳</h2>
-    <div id="stampMemberCards" style="display:flex;flex-direction:column;gap:12px;"></div>
-    <div class="divider">🏆 ご褒美リスト</div>
-    <div id="rewardCards" style="display:flex;flex-direction:column;gap:8px;"></div>
-    <div id="addRewardSection" class="hidden" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="divider">➕ ご褒美を追加（おや専用）</div>
-      <input class="input-field" id="rewardTitleInput" placeholder="ご褒美の内容（例：好きなお菓子）"/>
-      <input class="input-field" type="number" id="rewardStampsInput" placeholder="必要スタンプ数（例：10）" min="1"/>
-      <button class="btn btn-outline" onclick="addReward()">ご褒美を追加 🎁</button>
+    <!-- タブ切り替え -->
+    <div class="stamp-tab-row">
+      <button class="stamp-tab active" id="stampTabStamp" onclick="switchStampTab('stamp')">🌟 スタンプ</button>
+      <button class="stamp-tab" id="stampTabPrize" onclick="switchStampTab('prize')">🎰 景品</button>
+    </div>
+    <!-- スタンプページ -->
+    <div id="stampPage">
+      <div id="stampMemberCards" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div class="divider">🏆 ご褒美リスト</div>
+      <div id="rewardCards" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="addRewardSection" class="hidden" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="divider">➕ ご褒美を追加（おや専用）</div>
+        <input class="input-field" id="rewardTitleInput" placeholder="ご褒美の内容（例：好きなお菓子）"/>
+        <input class="input-field" type="number" id="rewardStampsInput" placeholder="必要スタンプ数（例：10）" min="1"/>
+        <button class="btn btn-outline" onclick="addReward()">ご褒美を追加 🎁</button>
+      </div>
+    </div>
+    <!-- 景品ページ -->
+    <div id="prizePage" class="hidden">
+      <div id="prizeHistoryList" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
     <button class="btn btn-secondary" onclick="hideStampModal()">とじる</button>
+  </div>
+</div>
+
+<!-- ルーレットモーダル -->
+<div class="modal-overlay hidden" id="rouletteModal">
+  <div class="modal" style="align-items:center;">
+    <h2>🎰 ルーレット</h2>
+    <p style="text-align:center;font-size:13px;color:#888;margin:-4px 0 0;">チケット：<span id="rouletteTicketDisplay" style="font-weight:800;color:#1B5E20;font-size:15px;">0</span>枚</p>
+    <div class="roulette-wheel-container">
+      <div class="roulette-pointer">▼</div>
+      <div id="rouletteWheelEl"></div>
+    </div>
+    <div style="display:flex;gap:10px;width:100%;">
+      <button class="btn btn-primary" id="rouletteStartBtn" onclick="startRoulette()" style="flex:1;">▶ スタート</button>
+      <button class="btn btn-outline" id="rouletteStopBtn" onclick="stopRoulette()" style="flex:1;" disabled>⏹ ストップ</button>
+    </div>
+    <div id="rouletteResult" class="roulette-result"></div>
+    <button class="btn btn-secondary" onclick="hideRouletteModal()">とじる</button>
   </div>
 </div>
 
@@ -599,6 +648,343 @@
   const MEMBER_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶'];
   const ANIMAL_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶','🐸','🐯','🦁','🐨','🐮','🐷','🐭','🐹','🦝','🐺','🐧','🦆','🐬','🦭','🐣','🦉'];
   const CAT_ICONS = { '予定（やること）':'📅','予定':'📅','宿題':'📚','イベント':'🎉' };
+
+  // ===== ルーレット =====
+  const PRIZES = [
+    { emoji:'🥩', name:'お肉', label:'大当たり１等！', color:'#FFCDD2',
+      svg:`<svg viewBox="0 0 80 80" width="90" height="90">
+        <ellipse cx="40" cy="68" rx="28" ry="7" fill="#e0c8b0" opacity="0.5"/>
+        <ellipse cx="20" cy="22" rx="8" ry="7" fill="#f0dfc0"/>
+        <ellipse cx="20" cy="58" rx="8" ry="7" fill="#f0dfc0"/>
+        <rect x="17" y="22" width="6" height="36" rx="3" fill="#f0dfc0"/>
+        <path d="M22,52 Q18,38 24,26 Q36,14 55,20 Q68,26 66,40 Q64,54 50,60 Q36,67 22,60 Z" fill="#c0392b"/>
+        <path d="M22,52 Q18,38 24,26 Q30,20 40,19 Q38,28 30,36 Q22,44 22,62 Z" fill="#e8b896"/>
+        <line x1="32" y1="30" x2="60" y2="26" stroke="#8b1a1a" stroke-width="3.5" stroke-linecap="round" opacity="0.55"/>
+        <line x1="30" y1="42" x2="62" y2="38" stroke="#8b1a1a" stroke-width="3.5" stroke-linecap="round" opacity="0.55"/>
+        <ellipse cx="50" cy="30" rx="10" ry="6" fill="white" opacity="0.15" transform="rotate(-15,50,30)"/>
+      </svg>`
+    },
+    { emoji:'🎂', name:'ケーキ', label:'当たり２等！', color:'#FFE082',
+      svg:`<svg viewBox="0 0 80 80" width="90" height="90">
+        <rect x="14" y="46" width="52" height="22" rx="5" fill="#f9d77e"/>
+        <rect x="14" y="40" width="52" height="10" rx="3" fill="white"/>
+        <rect x="14" y="30" width="52" height="12" rx="3" fill="#f8bbd0"/>
+        <path d="M14,30 Q20,22 26,30 Q32,22 38,30 Q44,22 50,30 Q56,22 62,30 Q64,22 66,30 L66,34 L14,34 Z" fill="white"/>
+        <rect x="27" y="16" width="5" height="16" rx="2.5" fill="#ff6b9d"/>
+        <rect x="48" y="16" width="5" height="16" rx="2.5" fill="#a78bfa"/>
+        <ellipse cx="29.5" cy="15" rx="4" ry="5" fill="#ff9900"/>
+        <ellipse cx="50.5" cy="15" rx="4" ry="5" fill="#ff9900"/>
+        <ellipse cx="29.5" cy="15" rx="2" ry="3" fill="#ffff88"/>
+        <ellipse cx="50.5" cy="15" rx="2" ry="3" fill="#ffff88"/>
+        <ellipse cx="36" cy="27" rx="5" ry="5" fill="#e74c3c"/>
+        <ellipse cx="22" cy="28" rx="4" ry="4" fill="#e74c3c"/>
+        <ellipse cx="52" cy="28" rx="4" ry="4" fill="#e74c3c"/>
+        <line x1="24" y1="52" x2="56" y2="52" stroke="#f0c060" stroke-width="1.5" opacity="0.5"/>
+        <line x1="24" y1="58" x2="56" y2="58" stroke="#f0c060" stroke-width="1.5" opacity="0.5"/>
+      </svg>`
+    },
+    { emoji:'🍦', name:'アイスクリーム', label:'当たり３等！', color:'#C8E6C9',
+      svg:`<svg viewBox="0 0 80 80" width="90" height="90">
+        <path d="M28,50 L52,50 L40,74 Z" fill="#deb887"/>
+        <line x1="34" y1="50" x2="38" y2="71" stroke="#c8a060" stroke-width="1.5" opacity="0.7"/>
+        <line x1="40" y1="50" x2="40" y2="73" stroke="#c8a060" stroke-width="1.5" opacity="0.7"/>
+        <line x1="46" y1="50" x2="42" y2="71" stroke="#c8a060" stroke-width="1.5" opacity="0.7"/>
+        <circle cx="52" cy="40" r="16" fill="#ffe4e1"/>
+        <circle cx="28" cy="42" r="14" fill="#a5d6a7"/>
+        <circle cx="40" cy="34" r="16" fill="#ffb5c8"/>
+        <path d="M34,20 Q30,26 31,33 Q33,37 37,35" stroke="#8b4513" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M46,18 Q50,24 49,32 Q47,36 43,34" stroke="#8b4513" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="47" cy="30" r="4" fill="white" opacity="0.45"/>
+        <circle cx="30" cy="38" r="3" fill="white" opacity="0.35"/>
+      </svg>`
+    },
+    { emoji:'🍟', name:'ポテト', label:'当たり４等！', color:'#B3E5FC',
+      svg:`<svg viewBox="0 0 80 80" width="90" height="90">
+        <path d="M20,44 L25,72 L55,72 L60,44 Z" fill="#e53935"/>
+        <path d="M20,44 L25,72 L37,72 L34,44 Z" fill="#ef5350"/>
+        <path d="M34,44 L37,72 L43,72 L43,44 Z" fill="#c62828"/>
+        <path d="M28,54 Q33,50 38,54 Q43,50 52,54" stroke="#ffd740" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <rect x="26" y="18" width="7" height="28" rx="3.5" fill="#ffc107"/>
+        <rect x="36" y="12" width="7" height="34" rx="3.5" fill="#ffd740"/>
+        <rect x="47" y="15" width="7" height="31" rx="3.5" fill="#ffc107"/>
+        <ellipse cx="29.5" cy="20" rx="1.5" ry="1.5" fill="white" opacity="0.7"/>
+        <ellipse cx="39.5" cy="16" rx="1.5" ry="1.5" fill="white" opacity="0.7"/>
+        <ellipse cx="50.5" cy="19" rx="1.5" ry="1.5" fill="white" opacity="0.7"/>
+        <ellipse cx="32" cy="28" rx="1.2" ry="1.2" fill="white" opacity="0.6"/>
+        <ellipse cx="50" cy="27" rx="1.2" ry="1.2" fill="white" opacity="0.6"/>
+      </svg>`
+    },
+    { emoji:'🍬', name:'お菓子', label:'当たり５等！', color:'#E1BEE7',
+      svg:`<svg viewBox="0 0 80 80" width="90" height="90">
+        <path d="M18,56 Q18,72 40,72 Q62,72 62,56 L57,34 Q52,28 40,28 Q28,28 23,34 Z" fill="#f3e5f5"/>
+        <line x1="28" y1="62" x2="28" y2="44" stroke="#bdbdbd" stroke-width="2"/>
+        <circle cx="28" cy="40" r="10" fill="#f06292"/>
+        <circle cx="28" cy="40" r="10" fill="none" stroke="#e91e63" stroke-width="2.5" stroke-dasharray="5,4"/>
+        <circle cx="28" cy="40" r="4" fill="white" opacity="0.4"/>
+        <rect x="38" y="50" width="20" height="14" rx="4" fill="#8d6e63"/>
+        <line x1="48" y1="50" x2="48" y2="64" stroke="#6d4c41" stroke-width="2"/>
+        <line x1="38" y1="57" x2="58" y2="57" stroke="#6d4c41" stroke-width="2"/>
+        <ellipse cx="50" cy="40" rx="7" ry="6" fill="#ff9800" transform="rotate(-30,50,40)"/>
+        <ellipse cx="50" cy="40" rx="7" ry="6" fill="none" stroke="#e65100" stroke-width="1.5" transform="rotate(-30,50,40)"/>
+        <ellipse cx="50" cy="40" rx="3" ry="2.5" fill="white" opacity="0.35" transform="rotate(-30,50,40)"/>
+      </svg>`
+    },
+    { emoji:'💧', name:'お水', label:'当たり６等…', color:'#CFD8DC',
+      svg:`<svg viewBox="0 0 80 80" width="90" height="90">
+        <path d="M22,18 L26,70 L54,70 L58,18 Z" fill="#e3f2fd" opacity="0.55"/>
+        <path d="M25,42 L28,70 L52,70 L55,42 Q40,36 25,42 Z" fill="#64b5f6" opacity="0.75"/>
+        <path d="M25,42 Q32,38 40,42 Q48,46 55,42" stroke="#42a5f5" stroke-width="2.5" fill="none"/>
+        <circle cx="34" cy="54" r="3.5" fill="white" opacity="0.55"/>
+        <circle cx="44" cy="61" r="2.5" fill="white" opacity="0.55"/>
+        <circle cx="38" cy="65" r="2" fill="white" opacity="0.5"/>
+        <path d="M22,18 L26,70 L54,70 L58,18 Z" fill="none" stroke="#90caf9" stroke-width="2.5"/>
+        <ellipse cx="40" cy="18" rx="18" ry="4.5" fill="#e3f2fd" stroke="#90caf9" stroke-width="2"/>
+        <rect x="47" y="8" width="5" height="44" rx="2.5" fill="#f48fb1" opacity="0.85"/>
+        <ellipse cx="49.5" cy="8" rx="2.5" ry="2.5" fill="#f48fb1"/>
+        <path d="M25,26 L27,58" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+      </svg>`
+    },
+  ];
+  let rouletteRotation = 0;
+  let rouletteRAF = null;
+  let rouletteSpinning = false;
+
+  // ── チケット（localStorage） ──────────────────────────────────
+  function _ticketKey(memberName) { return `poppo_tickets_${familyId}_${memberName}`; }
+  function getTicketCount(memberName) {
+    if (!memberName) return 0;
+    return parseInt(localStorage.getItem(_ticketKey(memberName)) || '0');
+  }
+  function setTicketCount(memberName, count) {
+    if (!memberName) return;
+    localStorage.setItem(_ticketKey(memberName), String(Math.max(0, count)));
+  }
+
+  function updateTicketBadge() {
+    if (!currentMember) return;
+    const count = getTicketCount(currentMember.display_name);
+    const badge   = document.getElementById('ticketBadge');
+    const countEl = document.getElementById('ticketCountBadge');
+    if (!badge || !countEl) return;
+    countEl.textContent  = count;
+    badge.style.display  = count > 0 ? 'flex' : 'none';
+  }
+
+  function awardTicket(memberName) {
+    if (!memberName) return;
+    const count = getTicketCount(memberName) + 1;
+    setTicketCount(memberName, count);
+    updateTicketBadge();
+    // チケット取得アニメ
+    const el = document.createElement('div');
+    el.className = 'ticket-float';
+    el.textContent = '🎰';
+    el.style.left = (Math.random() * 60 + 20) + '%';
+    el.style.top  = '40%';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+    // メッセージは完了メッセージのあとに表示
+    setTimeout(() => {
+      addMessageToUI(`🎰 ルーレットチケットを1枚ゲット！（のこり ${count} 枚）\n「ルーレット」ボタンから回してみてね✨`, 'ai');
+    }, 800);
+  }
+
+  // ── 景品履歴（localStorage） ──────────────────────────────────
+  function _prizeResultKey() { return `poppo_prize_results_${familyId}`; }
+
+  function saveRouletteResult(memberName, prize) {
+    const key = _prizeResultKey();
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+    list.unshift({
+      member_name:  memberName,
+      prize_emoji:  prize.emoji,
+      prize_name:   prize.name,
+      prize_label:  prize.label,
+      date:         localDateStr(new Date()),
+      timestamp:    Date.now()
+    });
+    // 最大200件まで保持
+    if (list.length > 200) list = list.slice(0, 200);
+    localStorage.setItem(key, JSON.stringify(list));
+  }
+
+  function getPrizeResults() {
+    try { return JSON.parse(localStorage.getItem(_prizeResultKey()) || '[]'); } catch(e) { return []; }
+  }
+
+  function renderPrizeHistory() {
+    const list = getPrizeResults();
+    const el = document.getElementById('prizeHistoryList');
+    if (!el) return;
+    if (list.length === 0) {
+      el.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:16px 0;">まだ景品はありません🎰<br>ルーレットを回してゲットしてね！</p>';
+      return;
+    }
+    el.innerHTML = list.map(r => {
+      const isJackpot = r.prize_label.includes('大当たり');
+      return `<div class="prize-history-item">
+        <span style="font-size:28px;flex-shrink:0;">${r.prize_emoji}</span>
+        <div class="prize-history-info">
+          <div class="prize-history-name">${r.prize_name}</div>
+          <div class="prize-history-meta">${r.prize_label}　👤${r.member_name}　📅${r.date}</div>
+        </div>
+        <span class="prize-history-rank${isJackpot ? ' jackpot' : ''}">${r.prize_label.replace('！','').replace('…','')}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function switchStampTab(tab) {
+    const isStamp = tab === 'stamp';
+    document.getElementById('stampPage').classList.toggle('hidden', !isStamp);
+    document.getElementById('prizePage').classList.toggle('hidden',  isStamp);
+    document.getElementById('stampTabStamp').classList.toggle('active',  isStamp);
+    document.getElementById('stampTabPrize').classList.toggle('active', !isStamp);
+    if (!isStamp) renderPrizeHistory();
+  }
+
+  // ── ホイール描画 ──────────────────────────────────────────────
+  function buildRouletteWheel() {
+    const cx = 130, cy = 130, r = 118;
+    let svg = '';
+    PRIZES.forEach((prize, i) => {
+      // セグメント i の中心はホイール上端 (0°) から i*60° 時計回り
+      // SVG座標系（0°=右）では -90° + i*60° が中心
+      const midDeg  = -90 + i * 60;
+      const startDeg = midDeg - 30;
+      const endDeg   = midDeg + 30;
+      const s = (deg) => ({ x: cx + r * Math.cos(deg * Math.PI / 180), y: cy + r * Math.sin(deg * Math.PI / 180) });
+      const p1 = s(startDeg), p2 = s(endDeg);
+      svg += `<path d="M${cx},${cy} L${p1.x.toFixed(1)},${p1.y.toFixed(1)} A${r},${r} 0 0,1 ${p2.x.toFixed(1)},${p2.y.toFixed(1)} Z" fill="${prize.color}" stroke="white" stroke-width="3"/>`;
+      // 絵文字（外側寄り）
+      const er = r * 0.65;
+      const ex = cx + er * Math.cos(midDeg * Math.PI / 180);
+      const ey = cy + er * Math.sin(midDeg * Math.PI / 180);
+      svg += `<text x="${ex.toFixed(1)}" y="${ey.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="28">${prize.emoji}</text>`;
+      // 等数ラベル（内側）
+      const nr = r * 0.33;
+      const nx = cx + nr * Math.cos(midDeg * Math.PI / 180);
+      const ny = cy + nr * Math.sin(midDeg * Math.PI / 180);
+      svg += `<text x="${nx.toFixed(1)}" y="${ny.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="bold" fill="rgba(0,0,0,0.45)">${i + 1}等</text>`;
+    });
+    // 中心の丸
+    svg += `<circle cx="${cx}" cy="${cy}" r="22" fill="white" stroke="#ddd" stroke-width="3"/>`;
+    svg += `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="15">🎰</text>`;
+    document.getElementById('rouletteWheelEl').innerHTML =
+      `<svg viewBox="0 0 260 260" width="260" height="260">${svg}</svg>`;
+  }
+
+  // ── モーダル表示 ─────────────────────────────────────────────
+  function showRouletteModal() {
+    buildRouletteWheel();
+    rouletteRotation = 0;
+    rouletteSpinning = false;
+    if (rouletteRAF) { cancelAnimationFrame(rouletteRAF); rouletteRAF = null; }
+    const wheelEl = document.getElementById('rouletteWheelEl');
+    wheelEl.style.transition = 'none';
+    wheelEl.style.transform  = 'rotate(0deg)';
+    document.getElementById('rouletteResult').innerHTML = '';
+    document.getElementById('rouletteStartBtn').disabled = false;
+    document.getElementById('rouletteStopBtn').disabled  = true;
+    _syncRouletteTicketDisplay();
+    document.getElementById('rouletteModal').classList.remove('hidden');
+  }
+
+  function hideRouletteModal() {
+    if (rouletteRAF) { cancelAnimationFrame(rouletteRAF); rouletteRAF = null; }
+    rouletteSpinning = false;
+    document.getElementById('rouletteModal').classList.add('hidden');
+  }
+
+  function _syncRouletteTicketDisplay() {
+    const count = getTicketCount(currentMember?.display_name || '');
+    const el = document.getElementById('rouletteTicketDisplay');
+    if (el) el.textContent = count;
+  }
+
+  // ── スタート ─────────────────────────────────────────────────
+  function startRoulette() {
+    const memberName = currentMember?.display_name || '';
+    if (getTicketCount(memberName) < 1) {
+      document.getElementById('rouletteResult').innerHTML =
+        `<p style="text-align:center;color:#e53935;font-size:13px;font-weight:700;line-height:1.8;">チケットがありません！🎟️<br>その日の予定を<strong>完璧</strong>か<strong>半分</strong>で完了するともらえるよ🐰</p>`;
+      return;
+    }
+    if (rouletteSpinning) return;
+    rouletteSpinning = true;
+    document.getElementById('rouletteResult').innerHTML = '';
+    document.getElementById('rouletteStartBtn').disabled = true;
+    document.getElementById('rouletteStopBtn').disabled  = false;
+    const wheelEl = document.getElementById('rouletteWheelEl');
+    wheelEl.style.transition = 'none';
+    const speed = 14; // deg/frame
+    function spin() {
+      if (!rouletteSpinning) return;
+      rouletteRotation += speed;
+      wheelEl.style.transform = `rotate(${rouletteRotation}deg)`;
+      rouletteRAF = requestAnimationFrame(spin);
+    }
+    rouletteRAF = requestAnimationFrame(spin);
+  }
+
+  // ── ストップ ─────────────────────────────────────────────────
+  function stopRoulette() {
+    if (!rouletteSpinning) return;
+    rouletteSpinning = false;
+    cancelAnimationFrame(rouletteRAF);
+    rouletteRAF = null;
+
+    // ランダムに当選セグメントを決定
+    const winIndex = Math.floor(Math.random() * 6);
+
+    // winIndex がホイール上端（ポインター）に来る回転量を計算
+    // rotation=0 でセグメント0が上端、60°回転ごとに1つ進む（時計回り）
+    // winIndex を上端にするには: finalRotation ≡ (6-winIndex)%6 * 60 (mod 360)
+    const targetRemainder = ((6 - winIndex) % 6) * 60;
+    const currentRemainder = ((rouletteRotation % 360) + 360) % 360;
+    let delta = targetRemainder - currentRemainder;
+    if (delta < 0) delta += 360;
+    if (delta < 180) delta += 360; // 減速距離を確保
+    const finalRotation = rouletteRotation + delta + 360 * 3; // 3回転追加でかっこよく
+
+    const wheelEl = document.getElementById('rouletteWheelEl');
+    wheelEl.style.transition = 'transform 3.2s cubic-bezier(0.17, 0.67, 0.12, 1.0)';
+    wheelEl.style.transform  = `rotate(${finalRotation}deg)`;
+    rouletteRotation = finalRotation;
+
+    // チケット消費
+    const memberName = currentMember?.display_name || '';
+    const remaining = Math.max(0, getTicketCount(memberName) - 1);
+    setTicketCount(memberName, remaining);
+    updateTicketBadge();
+    _syncRouletteTicketDisplay();
+    document.getElementById('rouletteStopBtn').disabled = true;
+
+    // アニメ終了後に結果表示
+    setTimeout(() => {
+      document.getElementById('rouletteStartBtn').disabled = false;
+      const prize = PRIZES[winIndex];
+      const isJackpot = winIndex === 0;
+      const bg = isJackpot
+        ? 'background:linear-gradient(135deg,#FFF9E6,#FFD700);'
+        : `background:linear-gradient(135deg,white,${prize.color});`;
+      document.getElementById('rouletteResult').innerHTML = `
+        <div style="text-align:center;padding:18px 12px;${bg}border-radius:18px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.1);">
+          <div style="display:flex;justify-content:center;margin-bottom:4px;">${prize.svg}</div>
+          <div style="font-size:16px;font-weight:800;color:#7B5800;margin-top:2px;">${prize.label}</div>
+          <div style="font-size:22px;font-weight:800;color:var(--brown);margin-top:4px;">${prize.name}！</div>
+          ${remaining > 0 ? `<div style="font-size:12px;color:#888;margin-top:8px;">🎟️ 残りチケット：${remaining}枚</div>` : '<div style="font-size:12px;color:#aaa;margin-top:8px;">チケット0枚</div>'}
+        </div>`;
+      // 景品履歴に保存
+      saveRouletteResult(memberName, prize);
+
+      if (isJackpot) {
+        addMessageToUI(`🎊 大当たり！！${prize.emoji} ${prize.name}をゲット！すごすぎる！！やったね🎉🎉`, 'ai');
+      } else {
+        addMessageToUI(`🎰 ルーレット結果：${prize.label} ${prize.emoji} ${prize.name}！おめでとう！`, 'ai');
+      }
+    }, 3400);
+  }
 
   // ===== 初期化 =====
   async function init() {
@@ -1191,12 +1577,25 @@
     }
 
     // 完了処理
+    // チケット判定用に event_date を先に取得（配列から消える前に）
+    const completingSchedule = schedules.find(x => x.id === id) || pastSchedules.find(x => x.id === id);
+    const completingDate = completingSchedule?.event_date || null;
+
     await sb.from('schedules').update({ is_done: true }).eq('id', id);
     schedules = schedules.filter(s => s.id !== id);
     pastSchedules = pastSchedules.filter(s => s.id !== id);
 
     const stampTarget = assignedTo || currentMember?.display_name;
     if (stampTarget && category !== 'イベント') await addStamp(stampTarget, title, type);
+
+    // ── ルーレットチケット付与 ──
+    // 「完璧」か「半分」かつ、予定日当日に完了した場合のみ付与
+    if ((type === 'perfect' || type === 'half') && category !== 'イベント') {
+      const todayStr = localDateStr(new Date());
+      if (completingDate === todayStr && stampTarget) {
+        setTimeout(() => awardTicket(stampTarget), 400);
+      }
+    }
     await loadTodayDone();
     await loadPastDone();
 
@@ -1422,6 +1821,7 @@
     if (!currentMember) return;
     const d = stampData[currentMember.display_name] || { total: 0 };
     const streak = streakData[currentMember.display_name]?.current || 0;
+    updateTicketBadge();
   }
 
   function showStampAnimation(type = 'perfect') {
@@ -1436,6 +1836,8 @@
   }
 
   function showStampModal() {
+    // タブをスタンプ側にリセット
+    switchStampTab('stamp');
     const emojiMap = getMemberEmojiMap();
     document.getElementById('stampMemberCards').innerHTML = members.map((m, i) => {
       const d = stampData[m.display_name] || { total: 0, perfect: 0, half: 0, incomplete: 0 };
@@ -1669,6 +2071,7 @@
   document.getElementById('templateModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideTemplateModal(); });
   document.getElementById('dutyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideDutyModal(); });
   document.getElementById('dutyCellMenu').addEventListener('click', e => { if(e.target===e.currentTarget) closeDutyCellMenu(); });
+  document.getElementById('rouletteModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideRouletteModal(); });
   document.querySelectorAll('.day-chip').forEach(chip => {
     chip.addEventListener('click', () => chip.classList.toggle('active'));
   });
@@ -1746,6 +2149,8 @@
 
   async function logout() {
     await sb.auth.signOut();
+    if (rouletteRAF) { cancelAnimationFrame(rouletteRAF); rouletteRAF = null; }
+    rouletteSpinning = false;
     conversationHistory=[]; schedules=[]; claudeApiKey=''; familyId=null; familyData=null; members=[];
     currentMember=null; myDisplayName=null; stampData={}; streakData={}; rewardsData=[];
     showScreen('login');
