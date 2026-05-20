@@ -1077,37 +1077,52 @@
   async function confirmDeleteSchedule() {
     if (!pendingEdit) return;
     const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
-    const section   = currentListSection; // await より前にキャプチャ
+    const section   = currentListSection;
     const oldMember = originalAssignedTo || currentMember?.display_name;
 
-    // ① モーダルを即座に閉じる（await より前 → ghost-click / currentListSection 変化を防止）
+    // エディットモーダルを閉じる
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
 
-    // ② ローカル配列から即座に除去して UI を更新（await に依存しない）
-    schedules          = schedules.filter(s => s.id !== id);
-    pastSchedules      = pastSchedules.filter(s => s.id !== id);
-    todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
-    pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
-    renderScheduleSections();
-    _refreshListModal(section);
+    try {
+      // ① スタンプ削除（完了済みやることのみ）
+      if (originalIsDone && oldMember && category !== 'イベント') {
+        const { data: rows } = await sb.from('stamps').select('id')
+          .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
+          .order('earned_at', { ascending: false }).limit(1);
+        if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
+      }
 
-    // ③ DB 処理（バックグラウンドで実行 — UI はすでに更新済み）
-    if (originalIsDone && oldMember && category !== 'イベント') {
-      sb.from('stamps').select('id')
-        .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
-        .order('earned_at', { ascending: false }).limit(1)
-        .then(({ data: rows }) => {
-          if (rows?.length) sb.from('stamps').delete().eq('id', rows[0].id);
-        });
+      // ② DB から削除（先に確認してから UI を更新する）
+      const { data: deleted, error: delErr } = await sb.from('schedules').delete().eq('id', id).select('id');
+
+      if (delErr) {
+        console.error('削除エラー:', delErr);
+        addMessageToUI('削除に失敗しました😢', 'ai');
+        return;
+      }
+      if (!deleted?.length) {
+        // RLS が DELETE を許可していない → SQLファイルを実行してもらう
+        console.error('RLS blocked: 0 rows deleted');
+        addMessageToUI('削除できませんでした😢 SupabaseでRLSの設定が必要です。supabase_schedules_fix.sql をSQL Editorで実行してください', 'ai');
+        return;
+      }
+
+      // ③ DB削除確認後にのみローカル配列・UIを更新（ここで初めて画面から消す）
+      schedules          = schedules.filter(s => s.id !== id);
+      pastSchedules      = pastSchedules.filter(s => s.id !== id);
+      todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
+      pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
+      renderScheduleSections();
+      _refreshListModal(section);
+
+      addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+      if (originalIsDone) loadStampData(); // スタンプ枚数バッジを更新
+
+    } catch(e) {
+      console.error('削除例外:', e);
+      addMessageToUI('削除に失敗しました😢', 'ai');
     }
-    sb.from('schedules').delete().eq('id', id).then(({ error }) => {
-      if (error) console.error('削除エラー:', error);
-      // DB 確定後にバックグラウンドで再ロード（最終整合性保証）
-      loadSchedules(); loadPastSchedules(); loadPastDone(); loadTodayDone(); loadStampData();
-    });
-
-    addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
   }
 
   // リストモーダルの再描画ヘルパー（delete / save 共通）
