@@ -1113,8 +1113,12 @@
         return;
       }
 
-      // DB削除成功 → ローカルは既に正しい状態。スタンプバッジだけ更新
+      // DB削除成功 → DBから再取得して schedules を正確な状態に同期
+      // （並行して走っていた loadSchedules が古いデータを戻していても、ここで上書きする）
       addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+      await Promise.all([loadSchedules(), loadPastSchedules(), loadPastDone(), loadTodayDone()]);
+      renderScheduleSections();
+      _refreshListModal(section);
       if (originalIsDone) loadStampData();
 
     } catch(e) {
@@ -1649,17 +1653,13 @@
   });
 
   // バックグラウンド復帰時の共通リセット処理
-  // Date.now() で初期化することで、起動直後の focus イベントで loadSchedules が走らないようにする
   let lastHiddenAt = Date.now();
   async function onResumeFromBackground() {
-    // UIを即座にリセット（ボタン・タイピング）
     document.getElementById('sendBtn').disabled = false;
     document.getElementById('typing').classList.remove('active');
     if (!currentUser || !familyId) return;
     try {
-      // セッション更新
       await sb.auth.refreshSession();
-      // 30秒以上バックグラウンドにいた場合のみデータを再取得
       if (Date.now() - lastHiddenAt > 30000) {
         await loadSchedules();
         await loadPastSchedules();
@@ -1680,8 +1680,8 @@
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) onResumeFromBackground();
   });
-  // フォーカス復帰（PWA・ホーム画面追加時に有効）
-  window.addEventListener('focus', () => onResumeFromBackground());
+  // ※ window.focus イベントは削除処理と競合してデータを上書きする問題があるため使用しない
+  //   （visibilitychange + pageshow で十分カバーできる）
 
   function toggleMode() {
     isSignUp = !isSignUp;
