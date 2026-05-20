@@ -460,6 +460,12 @@
         <button id="editStatusDone" class="status-toggle-btn" onclick="setEditStatus(true)">✅ 完了</button>
       </div>
     </div>
+    <div id="editStampTypeSection" style="display:none;flex-direction:column;gap:8px;background:var(--cream);border-radius:14px;padding:12px;">
+      <div class="edit-field-label" style="color:var(--brown);">どんなふうに完了した？</div>
+      <button id="editStampPerfect"    class="completion-btn perfect"    onclick="setEditStampType('perfect')">⭐ 完璧にできた！</button>
+      <button id="editStampHalf"       class="completion-btn half"       onclick="setEditStampType('half')">🌟 まあ半分くらい</button>
+      <button id="editStampIncomplete" class="completion-btn incomplete" onclick="setEditStampType('incomplete')">とりあえず完了にする</button>
+    </div>
     <button class="btn" onclick="saveScheduleEdit()">💾 保存する</button>
     <button class="delete-confirm-btn" onclick="confirmDeleteSchedule()">🗑️ この予定を削除する</button>
     <button class="btn btn-secondary" onclick="cancelEditSchedule()">キャンセル</button>
@@ -565,6 +571,8 @@
   let pastDoneSchedules = [];
   let pastDoneStamps = [];
   let todayDoneSchedules = [];
+  // 削除済みIDセット：loadSchedules等でデータが戻ってきても画面に出さないためのセーフティネット
+  const _deletedIds = new Set();
   let todayStamps = [];
   let templates = [];
   let members = [];
@@ -814,11 +822,13 @@
   }
 
   function filterBySection(key) {
-    if (key === 'past') return pastSchedules;
+    // _deletedIds に入っているIDは常に除外（どのデータソースにあっても表示しない）
+    const notDeleted = s => !_deletedIds.has(s.id);
+    if (key === 'past') return pastSchedules.filter(notDeleted);
     const { todayStr, tomorrowStr, weekLaterStr } = getDateStrings();
-    if (key === 'today') return schedules.filter(s => s.event_date === todayStr || !s.event_date);
-    if (key === 'tomorrow') return schedules.filter(s => s.event_date === tomorrowStr);
-    return schedules.filter(s => s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
+    if (key === 'today') return schedules.filter(s => notDeleted(s) && (s.event_date === todayStr || !s.event_date));
+    if (key === 'tomorrow') return schedules.filter(s => notDeleted(s) && s.event_date === tomorrowStr);
+    return schedules.filter(s => notDeleted(s) && s.event_date > tomorrowStr && s.event_date <= weekLaterStr);
   }
 
   function renderScheduleSections() {
@@ -862,9 +872,9 @@
 
     if (key === 'past') {
       const STAMP_ICONS = { perfect:'⭐', half:'🌟', incomplete:'💫' };
-      // 未完了と完了済みをマージして日付降順に並べる
-      const incompleteItems = pastSchedules.map(s => ({ ...s, _done: false }));
-      const doneItems = pastDoneSchedules.map(s => ({ ...s, _done: true }));
+      // 未完了と完了済みをマージして日付降順に並べる（削除済みは除外）
+      const incompleteItems = pastSchedules.filter(s => !_deletedIds.has(s.id)).map(s => ({ ...s, _done: false }));
+      const doneItems = pastDoneSchedules.filter(s => !_deletedIds.has(s.id)).map(s => ({ ...s, _done: true }));
       const allItems = [...incompleteItems, ...doneItems].sort((a, b) => {
         const da = a.event_date || '';
         const db = b.event_date || '';
@@ -946,11 +956,12 @@
       </div>`;
     }
     // 今日の完了済みを追加表示
-    if (key === 'today' && todayDoneSchedules.length > 0) {
+    const todayDoneVisible = todayDoneSchedules.filter(s => !_deletedIds.has(s.id));
+    if (key === 'today' && todayDoneVisible.length > 0) {
       const STAMP_ICONS = { perfect:'⭐', half:'🌟', incomplete:'💫' };
       html += `<div class="schedule-group">
         <div class="done-section-header">✅ 完了済み</div>
-        ${todayDoneSchedules.map(s => {
+        ${todayDoneVisible.map(s => {
           const stamp = todayStamps.find(st => st.task_title === s.title);
           const resultIcon = stamp ? (STAMP_ICONS[stamp.stamp_type] || '✅') : (s.category === 'イベント' ? '🎉' : '✅');
           const resultLabel = stamp ? ({ perfect:'完璧！', half:'半分', incomplete:'完了' }[stamp.stamp_type] || '') : '';
@@ -978,12 +989,17 @@
     const all = [...schedules, ...pastSchedules, ...todayDoneSchedules, ...pastDoneSchedules];
     const s = all.find(x => x.id === id);
     if (!s) return;
+    // 既存スタンプ種別を探す（完了済みの場合）
+    const existingStamp = [...todayStamps, ...pastDoneStamps].find(
+      st => st.task_title === s.title && st.member_name === s.assigned_to
+    );
     pendingEdit = {
       id: s.id, title: s.title,
       category: s.category || '予定（やること）',
       isDone: s.is_done,
       originalIsDone: s.is_done,
-      originalAssignedTo: s.assigned_to || ''
+      originalAssignedTo: s.assigned_to || '',
+      stampType: existingStamp?.stamp_type || 'perfect'
     };
     document.getElementById('editScheduleTitle').textContent = `「${s.title}」`;
     document.getElementById('editScheduleDate').value = s.event_date || '';
@@ -991,6 +1007,7 @@
     sel.innerHTML = '<option value="">なし</option>' +
       members.map(m => `<option value="${m.display_name}"${s.assigned_to === m.display_name ? ' selected' : ''}>${m.display_name}</option>`).join('');
     setEditStatus(s.is_done);
+    if (s.is_done) setEditStampType(pendingEdit.stampType);
     document.getElementById('editScheduleModal').classList.remove('hidden');
   }
 
@@ -999,6 +1016,21 @@
     pendingEdit.isDone = isDone;
     document.getElementById('editStatusUndone').className = 'status-toggle-btn' + (!isDone ? ' active-undone' : '');
     document.getElementById('editStatusDone').className   = 'status-toggle-btn' + ( isDone ? ' active-done'   : '');
+    const stampSection = document.getElementById('editStampTypeSection');
+    stampSection.style.display = isDone ? 'flex' : 'none';
+    if (isDone) setEditStampType(pendingEdit.stampType || 'perfect');
+  }
+
+  function setEditStampType(type) {
+    if (!pendingEdit) return;
+    pendingEdit.stampType = type;
+    ['perfect', 'half', 'incomplete'].forEach(t => {
+      const btn = document.getElementById('editStamp' + t.charAt(0).toUpperCase() + t.slice(1));
+      if (!btn) return;
+      btn.style.opacity = t === type ? '1' : '0.35';
+      btn.style.transform = t === type ? 'scale(1.02)' : 'scale(1)';
+      btn.style.outline = t === type ? '2px solid var(--pink-dark)' : 'none';
+    });
   }
 
   function cancelEditSchedule() {
@@ -1009,6 +1041,7 @@
   async function saveScheduleEdit() {
     if (!pendingEdit) return;
     const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
+    const section     = currentListSection; // await 前にキャプチャ
     const newDate     = document.getElementById('editScheduleDate').value || null;
     const newAssigned = document.getElementById('editScheduleAssigned').value || null;
     const newIsDone   = pendingEdit.isDone;
@@ -1018,8 +1051,8 @@
     await sb.from('schedules').update({ event_date: newDate, assigned_to: newAssigned, is_done: newIsDone }).eq('id', id);
 
     if (!originalIsDone && newIsDone) {
-      // 未完了→完了：スタンプ付与（管理上の完了なので incomplete 扱い）
-      if (newMember && category !== 'イベント') await addStamp(newMember, title, 'incomplete');
+      // 未完了→完了：選択されたスタンプ種別で付与
+      if (newMember && category !== 'イベント') await addStamp(newMember, title, pendingEdit.stampType || 'perfect');
     } else if (originalIsDone && !newIsDone) {
       // 完了→未完了：スタンプ削除
       if (oldMember) {
@@ -1043,33 +1076,90 @@
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
     await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadStampData();
-    if (currentListSection) showScheduleList(currentListSection);
+    _refreshListModal(section);
   }
 
   async function confirmDeleteSchedule() {
     if (!pendingEdit) return;
     const { id, title, category, originalIsDone, originalAssignedTo } = pendingEdit;
+    const section   = currentListSection;
     const oldMember = originalAssignedTo || currentMember?.display_name;
 
-    if (originalIsDone && oldMember && category !== 'イベント') {
-      const { data: rows } = await sb.from('stamps').select('id')
-        .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
-        .order('earned_at', { ascending: false }).limit(1);
-      if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
-    }
-
-    await sb.from('schedules').delete().eq('id', id);
+    // ① 両モーダルを即座に閉じる（古いリストを見せない）
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
-    await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadStampData();
-    if (currentListSection) {
-      const remaining = currentListSection === 'past'
-        ? [...pastSchedules, ...pastDoneSchedules]
-        : filterBySection(currentListSection);
-      if (remaining.length > 0 || currentListSection === 'today' || currentListSection === 'past') showScheduleList(currentListSection);
-      else hideScheduleListModal();
+    document.getElementById('scheduleListModal').classList.add('hidden');
+    currentListSection = null;
+
+    try {
+      // ② スタンプ削除（完了済みやることのみ）
+      if (originalIsDone && oldMember && category !== 'イベント') {
+        const { data: rows } = await sb.from('stamps').select('id')
+          .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
+          .order('earned_at', { ascending: false }).limit(1);
+        if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
+      }
+
+      // ③ DBから削除。.select('id') で「実際に削除されたか」を確認
+      //    RLSがDELETEをブロックするとerror=nullのまま0件返る（silent failure）ので必須
+      const { data: deleted, error: delErr } = await sb.from('schedules')
+        .delete().eq('id', id).select('id');
+
+      if (delErr) {
+        addMessageToUI(`削除できませんでした😢（${delErr.message}）`, 'ai');
+        return;
+      }
+
+      if (!deleted?.length) {
+        // Supabase RLS が DELETE を無音でブロックしている
+        addMessageToUI(
+          '⚠️ 削除の権限がありません。\nSupabase の SQL Editor で supabase_schedules_fix.sql を実行してから再度お試しください。',
+          'ai'
+        );
+        return;
+      }
+
+      // ④ 削除確認済み → IDをセーフティネットに登録してから配列も除去
+      //    _deletedIds に入れることで、万一 loadSchedules でデータが戻っても画面には出ない
+      _deletedIds.add(id);
+      schedules          = schedules.filter(s => s.id !== id);
+      pastSchedules      = pastSchedules.filter(s => s.id !== id);
+      todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
+      pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
+      renderScheduleSections();
+
+      addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+
+      // ⑤ 元のセクションに残りの予定があればリストを再表示（ローカル配列から描画）
+      if (section) {
+        const remaining = section === 'past'
+          ? [...pastSchedules, ...pastDoneSchedules]
+          : filterBySection(section);
+        if (remaining.length > 0 || section === 'today' || section === 'past') {
+          showScheduleList(section);
+        }
+      }
+
+      if (originalIsDone) loadStampData();
+
+    } catch(e) {
+      console.error('削除例外:', e);
+      addMessageToUI(`削除に失敗しました😢（${e.message}）`, 'ai');
     }
-    addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+  }
+
+  // リストモーダルの再描画ヘルパー（delete / save 共通）
+  function _refreshListModal(section) {
+    if (!section) return;
+    const remaining = section === 'past'
+      ? [...pastSchedules, ...pastDoneSchedules]
+      : filterBySection(section);
+    if (remaining.length > 0 || section === 'today' || section === 'past') {
+      showScheduleList(section);
+    } else {
+      document.getElementById('scheduleListModal').classList.add('hidden');
+      currentListSection = null;
+    }
   }
 
   // ===== 完了選択モーダル =====
@@ -1584,16 +1674,13 @@
   });
 
   // バックグラウンド復帰時の共通リセット処理
-  let lastHiddenAt = 0;
+  let lastHiddenAt = Date.now();
   async function onResumeFromBackground() {
-    // UIを即座にリセット（ボタン・タイピング）
     document.getElementById('sendBtn').disabled = false;
     document.getElementById('typing').classList.remove('active');
     if (!currentUser || !familyId) return;
     try {
-      // セッション更新
       await sb.auth.refreshSession();
-      // 30秒以上バックグラウンドにいた場合はデータを再取得
       if (Date.now() - lastHiddenAt > 30000) {
         await loadSchedules();
         await loadPastSchedules();
@@ -1614,8 +1701,8 @@
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) onResumeFromBackground();
   });
-  // フォーカス復帰（PWA・ホーム画面追加時に有効）
-  window.addEventListener('focus', () => onResumeFromBackground());
+  // ※ window.focus イベントは削除処理と競合してデータを上書きする問題があるため使用しない
+  //   （visibilitychange + pageshow で十分カバーできる）
 
   function toggleMode() {
     isSignUp = !isSignUp;
