@@ -1080,19 +1080,14 @@
     const section   = currentListSection;
     const oldMember = originalAssignedTo || currentMember?.display_name;
 
-    // ① モーダルを閉じ、ローカル配列から即座に除去 → リスト画面を即時更新
-    //    （await より前 = 同期処理なので、ボタン押下と同時に画面から消える）
+    // ① 編集モーダル・リストモーダル両方を即座に閉じる
+    //    （古いリストが一切見えない状態にしてから DB 処理へ）
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
+    document.getElementById('scheduleListModal').classList.add('hidden');
+    currentListSection = null;
 
-    schedules          = schedules.filter(s => s.id !== id);
-    pastSchedules      = pastSchedules.filter(s => s.id !== id);
-    todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
-    pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
-    renderScheduleSections();
-    _refreshListModal(section);
-
-    // ② DB削除をバックグラウンドで実行
+    // ② DB削除
     try {
       if (originalIsDone && oldMember && category !== 'イベント') {
         const { data: rows } = await sb.from('stamps').select('id')
@@ -1101,24 +1096,32 @@
         if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
       }
 
-      const { data: deleted, error: delErr } = await sb.from('schedules').delete().eq('id', id).select('id');
+      const { error: delErr } = await sb.from('schedules').delete().eq('id', id);
 
-      if (delErr || !deleted?.length) {
-        // DB削除失敗 → DBから再取得してリストを元に戻す
-        console.error('削除失敗:', delErr || 'RLS blocked (0 rows)');
+      if (delErr) {
+        console.error('削除エラー:', delErr);
+        // 失敗時はDBから再取得して正しい状態に戻す
         await Promise.all([loadSchedules(), loadPastSchedules(), loadPastDone(), loadTodayDone()]);
         renderScheduleSections();
-        _refreshListModal(section);
-        addMessageToUI('削除できませんでした😢 supabase_schedules_fix.sql をSupabaseで実行してください', 'ai');
+        addMessageToUI('削除できませんでした😢 もう一度試してください', 'ai');
         return;
       }
 
-      // DB削除成功 → DBから再取得して schedules を正確な状態に同期
-      // （並行して走っていた loadSchedules が古いデータを戻していても、ここで上書きする）
-      addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+      // ③ 削除成功 → DBから最新データを取得してバナー＋リストを更新
       await Promise.all([loadSchedules(), loadPastSchedules(), loadPastDone(), loadTodayDone()]);
       renderScheduleSections();
-      _refreshListModal(section);
+      addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
+
+      // 削除前に開いていたセクションに残りの予定があれば、リストを再表示
+      if (section) {
+        const remaining = section === 'past'
+          ? [...pastSchedules, ...pastDoneSchedules]
+          : filterBySection(section);
+        if (remaining.length > 0 || section === 'today' || section === 'past') {
+          showScheduleList(section);
+        }
+      }
+
       if (originalIsDone) loadStampData();
 
     } catch(e) {
