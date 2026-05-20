@@ -1080,12 +1080,20 @@
     const section   = currentListSection;
     const oldMember = originalAssignedTo || currentMember?.display_name;
 
-    // エディットモーダルを閉じる
+    // ① モーダルを閉じ、ローカル配列から即座に除去 → リスト画面を即時更新
+    //    （await より前 = 同期処理なので、ボタン押下と同時に画面から消える）
     pendingEdit = null;
     document.getElementById('editScheduleModal').classList.add('hidden');
 
+    schedules          = schedules.filter(s => s.id !== id);
+    pastSchedules      = pastSchedules.filter(s => s.id !== id);
+    todayDoneSchedules = todayDoneSchedules.filter(s => s.id !== id);
+    pastDoneSchedules  = pastDoneSchedules.filter(s => s.id !== id);
+    renderScheduleSections();
+    _refreshListModal(section);
+
+    // ② DB削除をバックグラウンドで実行
     try {
-      // ① スタンプ削除（完了済みやることのみ）
       if (originalIsDone && oldMember && category !== 'イベント') {
         const { data: rows } = await sb.from('stamps').select('id')
           .eq('family_id', familyId).eq('member_name', oldMember).eq('task_title', title)
@@ -1093,34 +1101,21 @@
         if (rows?.length) await sb.from('stamps').delete().eq('id', rows[0].id);
       }
 
-      // ② DB から削除（先に確認してから UI を更新する）
       const { data: deleted, error: delErr } = await sb.from('schedules').delete().eq('id', id).select('id');
 
-      if (delErr) {
-        console.error('削除エラー:', delErr);
-        addMessageToUI('削除に失敗しました😢', 'ai');
-        return;
-      }
-      if (!deleted?.length) {
-        // RLS が DELETE を許可していない → SQLファイルを実行してもらう
-        console.error('RLS blocked: 0 rows deleted');
-        addMessageToUI('削除できませんでした😢 SupabaseでRLSの設定が必要です。supabase_schedules_fix.sql をSQL Editorで実行してください', 'ai');
+      if (delErr || !deleted?.length) {
+        // DB削除失敗 → DBから再取得してリストを元に戻す
+        console.error('削除失敗:', delErr || 'RLS blocked (0 rows)');
+        await Promise.all([loadSchedules(), loadPastSchedules(), loadPastDone(), loadTodayDone()]);
+        renderScheduleSections();
+        _refreshListModal(section);
+        addMessageToUI('削除できませんでした😢 supabase_schedules_fix.sql をSupabaseで実行してください', 'ai');
         return;
       }
 
-      // ③ DB削除確認後 → DBから最新データを再取得してUIを更新
-      //    （ローカル配列の手動フィルタは使わず、DB取得データで上書きすることで確実に消す）
-      await Promise.all([
-        loadSchedules(),
-        loadPastSchedules(),
-        loadPastDone(),
-        loadTodayDone(),
-      ]);
-      renderScheduleSections();
-      _refreshListModal(section);
-
+      // DB削除成功 → ローカルは既に正しい状態。スタンプバッジだけ更新
       addMessageToUI(`「${title}」を削除したよ🗑️`, 'ai');
-      if (originalIsDone) loadStampData(); // スタンプ枚数バッジを更新
+      if (originalIsDone) loadStampData();
 
     } catch(e) {
       console.error('削除例外:', e);
@@ -1654,7 +1649,8 @@
   });
 
   // バックグラウンド復帰時の共通リセット処理
-  let lastHiddenAt = 0;
+  // Date.now() で初期化することで、起動直後の focus イベントで loadSchedules が走らないようにする
+  let lastHiddenAt = Date.now();
   async function onResumeFromBackground() {
     // UIを即座にリセット（ボタン・タイピング）
     document.getElementById('sendBtn').disabled = false;
@@ -1663,7 +1659,7 @@
     try {
       // セッション更新
       await sb.auth.refreshSession();
-      // 30秒以上バックグラウンドにいた場合はデータを再取得
+      // 30秒以上バックグラウンドにいた場合のみデータを再取得
       if (Date.now() - lastHiddenAt > 30000) {
         await loadSchedules();
         await loadPastSchedules();
