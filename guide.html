@@ -46,7 +46,8 @@
   .badge.pink{background:var(--pink);color:white;}
   .badge.gold{background:linear-gradient(135deg,#FFF3CD,#FFE58A);color:#8B6914;}
   .badge.green{background:#E8FFE8;color:#2A7;}
-  .badge.fire{background:linear-gradient(135deg,#FFE4D6,#FFBDA0);color:#8B3000;}
+  .badge.coin{background:linear-gradient(135deg,#FFF8E1,#FFE082);color:#E65100;}
+  .badge.orange{background:linear-gradient(135deg,#FFF3E0,#FFCC80);color:#E65100;}
 
   .tip{background:linear-gradient(135deg,#FFF9E6,#FFF3CD);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:12px 14px;font-size:13px;color:#7B5800;margin-top:10px;}
   .tip::before{content:'💡 ';font-weight:700;}
@@ -62,6 +63,13 @@
 
   .highlight-box{background:linear-gradient(135deg,var(--lavender),rgba(255,181,200,0.3));border-radius:16px;padding:16px;margin-top:10px;}
   .highlight-box p{font-size:13px;color:var(--brown);font-weight:600;}
+
+  .agent-card{border-radius:14px;padding:14px;margin-bottom:10px;}
+  .agent-cheer{background:linear-gradient(135deg,#FFF9E6,#FFE082);border:2px solid #FFD700;}
+  .agent-shik{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:2px solid #81C784;}
+  .agent-conv{background:linear-gradient(135deg,#E8EAF6,#C5CAE9);border:2px solid #9FA8DA;}
+  .agent-title{font-size:13px;font-weight:700;color:var(--brown);margin-bottom:4px;}
+  .agent-body{font-size:12px;color:#666;line-height:1.7;}
 
   .footer{text-align:center;padding:32px 16px;color:#ccc;font-size:12px;}
   .footer .bunny-small{font-size:24px;}
@@ -87,6 +95,8 @@
     <a class="toc-item" href="#gcal">📱 Googleカレンダー</a>
     <a class="toc-item" href="#stamp">🌟 スタンプ</a>
     <a class="toc-item" href="#duty">📋 当番表</a>
+    <a class="toc-item" href="#coins">🪙 コイン</a>
+    <a class="toc-item" href="#agent">🤖 AIエージェント</a>
     <a class="toc-item" href="#chat">🐰 会話</a>
     <a class="toc-item" href="#line">🔔 LINE通知</a>
     <a class="toc-item" href="#member">👨‍👩‍👧 メンバー</a>
@@ -140,7 +150,7 @@
     <div class="card-body" style="margin-bottom:10px;">画面上部のバナーに4つのボタンがあります</div>
     <table class="table-simple">
       <tr><th>ボタン</th><th>内容</th></tr>
-      <tr><td><span class="badge" style="background:#FFE4D6;color:#8B3000;">これまで</span></td><td>過去1ヶ月の予定すべて（完了・未完了）日付が新しい順。未完了件数をバッジ表示</td></tr>
+      <tr><td><span class="badge orange">これまで</span></td><td>過去1ヶ月の予定すべて（完了・未完了）日付が新しい順。未完了件数をバッジ表示</td></tr>
       <tr><td><span class="badge pink">今日</span></td><td>今日の予定・タスク</td></tr>
       <tr><td><span class="badge">明日</span></td><td>明日の予定</td></tr>
       <tr><td><span class="badge">今週</span></td><td>今週中の予定</td></tr>
@@ -187,7 +197,6 @@
       <tr><td>👤 担当者</td><td>メンバー一覧から選択して変更</td></tr>
       <tr><td>✅ 完了状態</td><td>未完了 ⬜ ↔ 完了 ✅ の切り替え</td></tr>
     </table>
-    <div class="tip">完了状態を「未完了→完了」に変えるとスタンプが付与され、「完了→未完了」に戻すと直近のスタンプが削除されます</div>
   </div>
 
   <div class="card">
@@ -264,6 +273,16 @@
   </div>
 
   <div class="card">
+    <div class="card-title">スタンプ帳の3つのタブ</div>
+    <table class="table-simple">
+      <tr><th>タブ</th><th>内容</th></tr>
+      <tr><td><span class="badge gold">🌟 スタンプ</span></td><td>メンバーごとのスタンプ数・streak・ご褒美リスト</td></tr>
+      <tr><td><span class="badge">🎰 景品</span></td><td>ルーレットで当たった景品の履歴</td></tr>
+      <tr><td><span class="badge coin">🪙 コイン</span></td><td>当番完了で貯まるコインの残高・履歴</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
     <div class="card-title">🏆 ご褒美を設定する（おや専用）</div>
     <div class="step-list">
       <div class="step"><div class="step-num">1</div><div class="step-text"><span class="badge gold">🌟 スタンプ帳</span> ボタンをタップ</div></div>
@@ -273,10 +292,169 @@
   </div>
 </div>
 
-<!-- 6. 会話 -->
-<div class="section" id="chat">
+<!-- 6. 当番表 -->
+<div class="section" id="duty">
   <div class="section-header">
     <div class="section-num">6</div>
+    <div class="section-title">📋 当番表</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">家族の当番をマトリクスで管理</div>
+    <div class="card-body" style="margin-bottom:10px;">担当者×当番内容を行として登録し、完了状況をひとめで確認できます。<strong>日次・週次・月次・年次</strong>の4種類の期間に対応しています</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 4つの期間タブ</div>
+    <table class="table-simple">
+      <tr><th>タブ</th><th>列の単位</th><th>ナビゲーション</th></tr>
+      <tr><td><span class="badge pink">日次</span></td><td>月〜日（1週間）</td><td>◀ 先週 / 来週 ▶</td></tr>
+      <tr><td><span class="badge">週次</span></td><td>その月の全日曜日<br><small>例：5月1週(5/3)</small></td><td>◀ 先月 / 来月 ▶</td></tr>
+      <tr><td><span class="badge">月次</span></td><td>1月〜12月</td><td>◀ 昨年 / 来年 ▶</td></tr>
+      <tr><td><span class="badge">年次</span></td><td>2026〜2036年（固定）</td><td>なし</td></tr>
+    </table>
+    <div class="tip">当番を追加するとき「頻度」を選ぶと、それぞれのタブに表示されます</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">＋ 当番を追加する</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-text">当番表下部の <strong>「＋ 当番を追加」</strong> をタップ</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">担当者・当番内容を入力</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>「頻度」</strong>（日次／週次／月次／年次）を選んで <strong>「追加する」</strong></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔃 ソート（並び替え）ボタン</div>
+    <div class="card-body" style="margin-bottom:8px;">「担当 / 当番」列ヘッダーの <strong>🔃</strong> ボタンを押すたびに並び順が変わります</div>
+    <div class="flow">
+      <div class="flow-item"><span class="badge">登録順</span> → <span class="badge">担当者あいうえお順</span> → <span class="badge">当番内容あいうえお順</span> → 登録順…</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">セルをタップして状態を記録する</div>
+    <table class="table-simple">
+      <tr><th>選択肢</th><th>意味</th><th>コイン</th></tr>
+      <tr><td>✅ できた</td><td>その日・週・月の当番を完了</td><td>🪙 1コイン</td></tr>
+      <tr><td>🤝 当番以外の人がやった</td><td>担当者以外が代わりにやった</td><td>🪙 0.5コイン</td></tr>
+      <tr><td>❌ できなかった</td><td>その期間はできなかった</td><td>なし</td></tr>
+      <tr><td>ー 対象外</td><td>その期間はやらなくてOK</td><td>なし</td></tr>
+      <tr><td>🔄 リセット</td><td>入力をクリアして未入力に戻す</td><td>なし</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗑 当番を削除する</div>
+    <div class="card-body">
+      各行の右端にある <strong>🗑</strong> ボタンをタップ → 確認後に削除されます<br>
+      削除すると、その当番のすべての記録（ログ）も一緒に削除されます
+    </div>
+  </div>
+</div>
+
+<!-- 7. コイン -->
+<div class="section" id="coins">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">🪙 コインシステム</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">当番をがんばるとコインが貯まる</div>
+    <div class="flow">
+      <div class="flow-item">当番を完了にする</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-item">集計タイミングに自動でコイン付与</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-item"><span class="badge coin">🪙 コイン</span> タブで確認</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">コインの獲得ルール</div>
+    <table class="table-simple">
+      <tr><th>状態</th><th>獲得コイン</th></tr>
+      <tr><td>✅ できた</td><td>🪙 1コイン</td></tr>
+      <tr><td>🤝 当番以外の人がやった</td><td>🪙 0.5コイン</td></tr>
+      <tr><td>❌ できなかった / ー 対象外</td><td>なし</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">集計のタイミング</div>
+    <table class="table-simple">
+      <tr><th>当番の種類</th><th>集計日時</th></tr>
+      <tr><td>日次・週次</td><td>毎週土曜日 朝6時</td></tr>
+      <tr><td>月次</td><td>毎月末日 朝6時</td></tr>
+      <tr><td>年次</td><td>12月31日 朝6時</td></tr>
+    </table>
+    <div class="tip">集計はCloudflare Workerが自動で実行します。手動での操作は不要です</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🪙 コイン残高を確認する</div>
+    <div class="card-body">
+      <span class="badge gold">🌟 スタンプ帳</span> ボタン → <span class="badge coin">🪙 コイン</span> タブ<br><br>
+      メンバーごとのコイン合計と直近の獲得履歴が表示されます
+    </div>
+  </div>
+</div>
+
+<!-- 8. AIエージェント -->
+<div class="section" id="agent">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">🤖 AIエージェント</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ログイン後に自動で動く3つのエージェント</div>
+    <div class="card-body" style="margin-bottom:12px;">アプリを開くと1日1回、3つのAIエージェントが自動で分析して話しかけてくれます</div>
+
+    <div class="agent-card agent-cheer">
+      <div class="agent-title">⭐ チアリーダー役</div>
+      <div class="agent-body">
+        子どもを朝から元気よく応援！<br>
+        ・連続記録（streak）が3日以上→ <strong>大絶賛モード</strong>🎉<br>
+        ・やることがある・頑張ってる→ <strong>やさしく背中を押す</strong>🐰<br>
+        ・夜20時以降に未完了が多い→ <strong>「明日に移す？」</strong>と提案
+      </div>
+    </div>
+
+    <div class="agent-card agent-shik">
+      <div class="agent-title">📋 しっかりもの役</div>
+      <div class="agent-body">
+        パパ・ママの準備漏れを先回りサポート！<br>
+        明日・明後日の予定に「お弁当」「体操服」「遠足」「集金」などが含まれていると、やさしくリマインドしてくれます
+      </div>
+    </div>
+
+    <div class="agent-card agent-conv">
+      <div class="agent-title">💬 会話の元ネタ</div>
+      <div class="agent-body">
+        今日の予定をもとに、家族みんなが朝から笑顔で話せる<br>
+        <strong>「今日の会話ネタ」</strong>を1つ提案してくれます
+      </div>
+    </div>
+    <div class="tip">エージェントは1日1回だけ動きます。2回目以降のログインでは表示されません</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌙 翌日スライド提案</div>
+    <div class="card-body">
+      夜遅くに未完了タスクが3件以上あるとき、チアリーダーが<br>
+      「今日はお疲れ様！明日に移す？」と提案します。<br>
+      <strong>「🌅 明日に移す」</strong>を押すと、選ばれたタスクの日付が自動で翌日に変わります
+    </div>
+  </div>
+</div>
+
+<!-- 9. 会話 -->
+<div class="section" id="chat">
+  <div class="section-header">
+    <div class="section-num">9</div>
     <div class="section-title">🐰 ぽぽちゃんとの会話</div>
   </div>
 
@@ -298,44 +476,55 @@
       <span class="badge">📝 やること確認</span>
       <span class="badge">📋 当番表</span>
       <span class="badge gold">🌟 スタンプ帳</span>
+      <span class="badge">🎰 ルーレット</span>
       <span class="badge">🎉 イベント</span>
       <span class="badge">📋 一覧</span>
       <span class="badge">📖 使い方</span>
+      <span class="badge">🎯 目的</span>
       <br><br>よく使う機能をワンタップで開けます
     </div>
   </div>
 </div>
 
-<!-- 7. LINE通知 -->
+<!-- 10. LINE通知 -->
 <div class="section" id="line">
   <div class="section-header">
-    <div class="section-num">7</div>
+    <div class="section-num">10</div>
     <div class="section-title">🔔 LINE通知</div>
   </div>
 
   <div class="card">
     <div class="card-title">毎朝7時に届く通知</div>
-    <div class="card-body" style="margin-bottom:10px;">家族のLINEグループに毎朝7時、ぽぽちゃんから今日・明日の予定が届きます</div>
+    <div class="card-body" style="margin-bottom:10px;">家族のLINEグループに毎朝7時、ぽぽちゃんから今日・明日の予定と3つのエージェントメッセージが届きます</div>
     <div class="highlight-box">
       <p>通知のイメージ</p>
       <p style="font-weight:400;font-size:12px;margin-top:6px;white-space:pre-line;">🐰 おはよう！ぽぽちゃんだよ🌸
 
-📅 今日 5/16(金)
+📅 今日 5/30(金)
 📚【晴輝】算数ドリル
 📅【パパ】打ち合わせ
 
-📅 明日 5/17(土)
+📅 明日 5/31(土)
 🎉【家族】BBQ
 
-今日も家族みんなで頑張ろうね💪✨</p>
+今日も家族みんなで頑張ろうね💪✨
+
+─────────────
+⭐ 晴輝ちゃん5日れんぞく！すごすぎる〜！🎉
+
+─────────────
+📋 明日のBBQの準備は大丈夫？持ち物確認しておこう！
+
+─────────────
+💬 今日はパパの打ち合わせだね！帰ってきたらどんな話だった？きいてみよう🐰</p>
     </div>
   </div>
 </div>
 
-<!-- 8. メンバー切り替え -->
+<!-- 11. メンバー切り替え -->
 <div class="section" id="member">
   <div class="section-header">
-    <div class="section-num">8</div>
+    <div class="section-num">11</div>
     <div class="section-title">👨‍👩‍👧 メンバー切り替え</div>
   </div>
 
@@ -352,70 +541,6 @@
     <div class="card-title">家族名を変更する</div>
     <div class="card-body">
       <span class="badge">👨‍👩‍👧 メンバー</span> ボタン → 「家族名の変更」セクション（オーナーのみ表示）
-    </div>
-  </div>
-</div>
-
-<!-- 9. 当番表 -->
-<div class="section" id="duty">
-  <div class="section-header">
-    <div class="section-num">9</div>
-    <div class="section-title">📋 当番表</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">家族の当番をマトリクスで管理</div>
-    <div class="card-body" style="margin-bottom:10px;">担当者×当番内容を行として登録し、1週間分の完了状況をひとめで確認できます</div>
-    <div class="highlight-box">
-      <p>📌 当番表のイメージ</p>
-      <p style="font-weight:400;font-size:12px;margin-top:6px;white-space:pre-line;">            月  火  水  木  金  土  日
-パパ・ゴミ出し  ✅  ー  ✅  ー  ✅  ー  ー
-パパ・洗濯畳み  ✅  ✅  ❌  ✅  ✅  ー  ー
-晴輝・テーブルふき ✅ ✅  ✅  ・  ✅  ✅  ✅
-いずみ・花の水やり ー  ・  ✅  ー  ✅  ✅  ー</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📋 当番表を開く</div>
-    <div class="card-body">
-      クイックボタン <span class="badge">📋 当番表</span> をタップ
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">＋ 当番を追加する</div>
-    <div class="step-list">
-      <div class="step"><div class="step-num">1</div><div class="step-text">当番表下部の <strong>「＋ 当番を追加」</strong> をタップ</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text">担当者をプルダウンで選ぶ（家族メンバー一覧から）</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text">当番内容を入力して <strong>「追加する」</strong></div></div>
-    </div>
-    <div class="tip">当番は毎日すべての列に表示されます。対象外の日は「ー 対象外」を選んで記録しましょう</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">セルをタップして状態を記録する</div>
-    <table class="table-simple">
-      <tr><th>選択肢</th><th>意味</th></tr>
-      <tr><td>✅ できた</td><td>その日の当番を完了</td></tr>
-      <tr><td>❌ できなかった</td><td>その日はできなかった</td></tr>
-      <tr><td>ー 対象外</td><td>その日はやらなくてOK</td></tr>
-      <tr><td>🔄 リセット</td><td>入力をクリアして未入力に戻す</td></tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="card-title">◀ 先週 / 来週 ▶ で週をスライド</div>
-    <div class="card-body">
-      当番表上部のナビボタンで前後の週に移動できます。今日の列はピンクでハイライト表示されます
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🗑 当番を削除する</div>
-    <div class="card-body">
-      各行の右端にある <strong>🗑</strong> ボタンをタップ → 確認後に削除されます<br>
-      削除すると、その当番のすべての記録（ログ）も一緒に削除されます
     </div>
   </div>
 </div>
