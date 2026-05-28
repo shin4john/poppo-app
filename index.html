@@ -239,6 +239,12 @@
   .prize-history-info{flex:1;min-width:0;}
   .prize-history-name{font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .prize-history-meta{font-size:11px;color:#aaa;margin-top:2px;}
+  /* エージェント */
+  .agent-msg-cheerleader .bubble{background:linear-gradient(135deg,#FFF9E6,#FFE082) !important;border:2px solid #FFD700;}
+  .agent-msg-shikkari .bubble{background:linear-gradient(135deg,#E8F5E9,#C8E6C9) !important;border:2px solid #81C784;}
+  .agent-msg-collab .bubble{background:linear-gradient(135deg,#E8EAF6,#C5CAE9) !important;border:2px solid #9FA8DA;}
+  .slide-task-item{background:var(--cream);border-radius:10px;padding:9px 13px;font-size:13px;color:var(--brown);display:flex;align-items:center;gap:8px;}
+
   .stamp-tab-row{display:flex;gap:8px;background:var(--cream);border-radius:14px;padding:4px;}
   .stamp-tab{flex:1;padding:8px;border-radius:10px;border:none;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:#aaa;background:none;transition:all 0.2s;}
   .stamp-tab.active{background:white;color:var(--brown);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
@@ -533,6 +539,17 @@
   </div>
 </div>
 
+<!-- 翌日スライド提案モーダル -->
+<div class="modal-overlay hidden z200" id="slideProposalModal">
+  <div class="modal">
+    <h2>🌙 今日はお疲れ様！</h2>
+    <p id="slideProposalText" style="font-size:14px;color:var(--brown);line-height:1.8;"></p>
+    <div id="slideTaskList" style="display:flex;flex-direction:column;gap:8px;margin:4px 0;"></div>
+    <button class="btn btn-primary" onclick="executeAutoSlide()">🌅 明日に移す</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('slideProposalModal').classList.add('hidden')">そのままにしておく</button>
+  </div>
+</div>
+
 <!-- ルーレットモーダル -->
 <div class="modal-overlay hidden" id="rouletteModal">
   <div class="modal" style="align-items:center;">
@@ -648,6 +665,233 @@
   const MEMBER_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶'];
   const ANIMAL_EMOJIS = ['🐰','🐻','🐼','🦊','🐱','🐶','🐸','🐯','🦁','🐨','🐮','🐷','🐭','🐹','🦝','🐺','🐧','🦆','🐬','🦭','🐣','🦉'];
   const CAT_ICONS = { '予定（やること）':'📅','予定':'📅','宿題':'📚','イベント':'🎉' };
+
+  // ===================================================
+  // ===== マルチエージェントシステム =====
+  // ===================================================
+
+  // ── 共通ユーティリティ ────────────────────────────────────────
+
+  // 1日1回フラグ（localStorage）
+  function _agentRunKey() { return `poppo_agent_run_${familyId}_${localDateStr(new Date())}`; }
+  function _agentAlreadyRan() { return !!localStorage.getItem(_agentRunKey()); }
+  function _markAgentRan()    { localStorage.setItem(_agentRunKey(), '1'); }
+
+  // Claude API 呼び出し（Cloudflare Worker 経由）
+  async function _callAgent(systemPrompt, userMessage, maxTokens = 250) {
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 20000);
+      const res = await fetch('https://poppo-api.onoshin2.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: maxTokens,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userMessage }]
+        })
+      });
+      clearTimeout(tid);
+      const data = await res.json();
+      return res.ok ? (data.content?.[0]?.text || '') : '';
+    } catch(e) {
+      console.warn('[agent] error:', e.message);
+      return '';
+    }
+  }
+
+  // エージェント用メッセージをチャットに追加（スタイルクラス付き）
+  function addAgentMessage(text, agentClass) {
+    const area = document.getElementById('chatArea');
+    const div = document.createElement('div');
+    div.className = `message ai ${agentClass}`;
+    const avatar = `<div class="msg-avatar"><svg viewBox="0 0 60 60"><ellipse cx="22" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="22" cy="18" rx="4" ry="9" fill="#FFB5C8"/><ellipse cx="38" cy="18" rx="6" ry="12" fill="#F8D0DC"/><ellipse cx="38" cy="18" rx="4" ry="9" fill="#FFB5C8"/><circle cx="30" cy="38" r="18" fill="#FDE8F0"/><circle cx="24" cy="36" r="3" fill="#3D2B1F"/><circle cx="36" cy="36" r="3" fill="#3D2B1F"/><ellipse cx="30" cy="42" rx="2" ry="1.5" fill="#FF8FAD"/></svg></div>`;
+    div.innerHTML = `${avatar}<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+    area.appendChild(div);
+    area.scrollTop = area.scrollHeight;
+  }
+
+  // ── メイン実行（1日1回） ─────────────────────────────────────
+  async function runDailyAgents() {
+    if (_agentAlreadyRan()) return;
+    if (!familyId || !claudeApiKey || members.length === 0) return;
+    _markAgentRan();
+
+    // 初回ウォームアップ後に順次実行
+    await new Promise(r => setTimeout(r, 2000));
+    await runCheerleaderAgent();
+    await new Promise(r => setTimeout(r, 800));
+    await runShikkariAgent();
+    await new Promise(r => setTimeout(r, 800));
+    await runConversationStarter();
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // エージェント①：チアリーダー役（子どものモチベーション・メンタルケア）
+  // ──────────────────────────────────────────────────────────────
+  async function runCheerleaderAgent() {
+    const now     = new Date();
+    const hour    = now.getHours();
+    const todayStr = localDateStr(now);
+    const emojiMap = getMemberEmojiMap();
+
+    // 子どもメンバーを抽出（ownerでないメンバー、またはstreakデータがある人）
+    const childCandidates = members.filter(m => m.role !== 'owner');
+    const targets = childCandidates.length > 0 ? childCandidates : members;
+
+    for (const member of targets) {
+      const name    = member.display_name;
+      const emoji   = emojiMap[name] || '🐰';
+      const streak  = streakData[name]?.current  || 0;
+      const longest = streakData[name]?.longest  || 0;
+      const stamps  = stampData[name]?.total     || 0;
+      const myUndone = schedules.filter(s => s.event_date === todayStr && s.assigned_to === name);
+      const myDone   = todayDoneSchedules.filter(s => s.assigned_to === name);
+      const totalToday = myUndone.length + myDone.length;
+
+      // ────────────────────────────
+      // ロジックA：大絶賛モード
+      // 条件: streak3日以上 OR 今日のタスクを全完了
+      // ────────────────────────────
+      if (streak >= 3 || (totalToday > 0 && myUndone.length === 0)) {
+        const sys = `あなたは「ぽぽちゃん」というかわいいうさぎのAIアシスタントで、子どもの「チアリーダー役」です。
+子どもの頑張りを全力で大絶賛し、やる気を最大限に引き出すことが得意です。
+ルール: ひらがな多め・絵文字たっぷり・短く元気よく（2文以内）・具体的な数字や実績を褒める。`;
+        const usr = `${name}ちゃん（${emoji}）は今日のタスクを${myDone.length}件完了！`
+          + `連続記録${streak}日（最長${longest}日）、スタンプ合計${stamps}個です。`
+          + `${streak >= 3 ? `${streak}日連続はすごすぎる！` : '今日のタスク全完了！'}`
+          + `スタンプ帳と連動した大絶賛メッセージをお願いします！`;
+        const msg = await _callAgent(sys, usr);
+        if (msg) addAgentMessage(`${emoji} ${msg}`, 'agent-msg-cheerleader');
+        break; // 1人分で十分
+      }
+
+      // ────────────────────────────
+      // ロジックB：寄り添い・リカバリーモード
+      // 条件: 夜20時以降で未完了あり OR 未完了3件以上
+      // ────────────────────────────
+      if ((hour >= 20 && myUndone.length > 0) || myUndone.length >= 3) {
+        const isLate = hour >= 20;
+        const sys = `あなたは「ぽぽちゃん」というかわいいうさぎのAIアシスタントで、子どもに寄り添う「チアリーダー役」です。
+絶対に子どもを責めず、疲れを全力で労い、罪悪感をゼロにしてあげることが使命です。
+ルール: ひらがな多め・絵文字あり・やさしく短く（2文以内）・明日への希望を持たせる。`;
+        const usr = `${name}ちゃんは${isLate ? '夜' + hour + '時になっても' : '今日は忙しくて'}`
+          + `「${myUndone.map(s => s.title).join('・')}」（${myUndone.length}件）がまだ残っています。`
+          + `${myDone.length > 0 ? `でも${myDone.length}件はできました！` : ''}`
+          + `寄り添うメッセージをお願いします。絶対に責めないで。`;
+        const msg = await _callAgent(sys, usr);
+        if (msg) {
+          addAgentMessage(`${emoji} ${msg}`, 'agent-msg-cheerleader');
+          // 翌日スライドを提案（少し遅らせて表示）
+          if (myUndone.length > 0) {
+            setTimeout(() => showSlideProposal(name, myUndone), 1200);
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  // 翌日スライド提案モーダル
+  let _pendingSlideSchedules = [];
+  function showSlideProposal(memberName, undoneList) {
+    _pendingSlideSchedules = undoneList;
+    document.getElementById('slideProposalText').textContent =
+      `${memberName}ちゃんの今日の残りやること（${undoneList.length}件）を明日に移してあげようか？😊`;
+    document.getElementById('slideTaskList').innerHTML = undoneList.map(s =>
+      `<div class="slide-task-item">📅 <span>${s.title}</span></div>`
+    ).join('');
+    document.getElementById('slideProposalModal').classList.remove('hidden');
+  }
+
+  async function executeAutoSlide() {
+    document.getElementById('slideProposalModal').classList.add('hidden');
+    if (_pendingSlideSchedules.length === 0) return;
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = localDateStr(tomorrow);
+    for (const s of _pendingSlideSchedules) {
+      await sb.from('schedules').update({ event_date: tomorrowStr }).eq('id', s.id);
+    }
+    _pendingSlideSchedules = [];
+    await loadSchedules();
+    await loadPastSchedules();
+    addMessageToUI(`明日に移したよ🌅 今日もよくがんばったね！ゆっくり休んでね💕`, 'ai');
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // エージェント②：しっかりもの役（大人のスケジュール漏れ防止）
+  // ──────────────────────────────────────────────────────────────
+  async function runShikkariAgent() {
+    // オーナー（親）がいなければスキップ
+    const ownerMembers = members.filter(m => m.role === 'owner');
+    if (ownerMembers.length === 0) return;
+
+    const tomorrow   = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayAfter   = new Date(); dayAfter.setDate(dayAfter.getDate() + 2);
+    const tomorrowStr  = localDateStr(tomorrow);
+    const dayAfterStr  = localDateStr(dayAfter);
+
+    // 明日・明後日の予定を取得
+    const upcoming = schedules.filter(s =>
+      s.event_date === tomorrowStr || s.event_date === dayAfterStr
+    );
+
+    // 準備系キーワード検知
+    const PREP_KEYWORDS = [
+      'お弁当','弁当','体操服','持ち物','上履き','水着','給食袋',
+      '遠足','校外学習','運動会','発表会','学習発表','作品展',
+      'プリント','通知表','提出','材料','道具','工作','準備',
+      '早退','遅刻','欠席連絡','お金','集金','振替',
+    ];
+
+    const flagged = upcoming.filter(s =>
+      PREP_KEYWORDS.some(kw => s.title.includes(kw))
+    );
+
+    // 通常の重要イベント（カテゴリ: イベント）も対象
+    const importantEvents = upcoming.filter(s =>
+      s.category === 'イベント' && !flagged.includes(s)
+    );
+
+    const allFlags = [...flagged, ...importantEvents];
+    if (allFlags.length === 0) return;
+
+    const sys = `あなたは「ぽぽちゃん」というかわいいうさぎのAIアシスタントで、忙しいパパ・ママを先回りサポートする「しっかりもの役」です。
+スケジュール漏れや準備忘れを優しく・具体的に・スマートに防いであげます。
+ルール: 責めない・短く（2文以内）・絵文字あり・具体的な予定名を必ず入れる。`;
+    const dateLabel = (d) => d === tomorrowStr ? '明日' : '明後日';
+    const usr = `${ownerMembers.map(m=>m.display_name).join('・')}さんへ。`
+      + `${allFlags.map(s => `${dateLabel(s.event_date)}「${s.title}」`).join('、')}があります。`
+      + `準備や確認を優しくリマインドしてください。`;
+    const msg = await _callAgent(sys, usr, 200);
+    if (msg) addAgentMessage(`📋 ${msg}`, 'agent-msg-shikkari');
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // エージェント③：会話の元ネタ（今日の一言コラム）
+  // ──────────────────────────────────────────────────────────────
+  async function runConversationStarter() {
+    const { todayStr } = getDateStrings();
+    const todaySchedules = schedules.filter(s =>
+      s.event_date === todayStr || !s.event_date
+    );
+    const memberNames = members.map(m => m.display_name).join('・');
+    const hour = new Date().getHours();
+    const timeZone = hour < 11 ? 'あさ' : hour < 17 ? 'ひる' : 'よる';
+
+    const sys = `あなたは家族のコミュニケーションコーディネーターです。
+今日の予定や家族の状況をもとに、家族みんなが自然に笑顔で話せる「今日の会話の元ネタ」を1つ提案します。
+ルール: 子どもも大人も話に乗れる・ユーモアあり・押しつけがましくない・短く温かく（1〜2文）・絵文字あり。`;
+    const usr = `家族メンバー：${memberNames}。${timeZone}の時間帯。`
+      + `今日の予定：${todaySchedules.length > 0 ? todaySchedules.map(s=>s.title).join('、') : '特になし'}。`
+      + `今日の会話の元ネタを1つ提案してください（例：「今日はパパのカレー当番だね！隠し味は何かな？」）`;
+    const msg = await _callAgent(sys, usr, 150);
+    if (msg) addAgentMessage(`💬 今日の話題：${msg}`, 'agent-msg-collab');
+  }
+
+  // ===== マルチエージェントシステム ここまで =====
 
   // ===== ルーレット =====
   const PRIZES = [
@@ -1026,6 +1270,8 @@
       await loadStampData();
       updateFamilyHeader();
       showScreen('app');
+      // デイリーエージェント起動（1日1回・非同期・UIに影響しない）
+      runDailyAgents().catch(e => console.warn('[agent] daily run failed:', e));
     } else {
       showScreen('apiKey');
     }
@@ -2072,6 +2318,7 @@
   document.getElementById('dutyModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideDutyModal(); });
   document.getElementById('dutyCellMenu').addEventListener('click', e => { if(e.target===e.currentTarget) closeDutyCellMenu(); });
   document.getElementById('rouletteModal').addEventListener('click', e => { if(e.target===e.currentTarget) hideRouletteModal(); });
+  document.getElementById('slideProposalModal').addEventListener('click', e => { if(e.target===e.currentTarget) document.getElementById('slideProposalModal').classList.add('hidden'); });
   document.querySelectorAll('.day-chip').forEach(chip => {
     chip.addEventListener('click', () => chip.classList.toggle('active'));
   });
