@@ -1340,8 +1340,7 @@
       .select('claude_api_key').eq('user_id', currentUser.id).single();
     if (settings?.claude_api_key) {
       claudeApiKey = settings.claude_api_key;
-      await loadMembers();
-      loadEmojiCustom();
+      await loadMembers(); // emoji も DB から取得するため loadEmojiCustom() 不要
       await autoCloseEvents();
       await loadSchedules();
       await loadPastSchedules();
@@ -1399,31 +1398,45 @@
   }
 
   async function loadMembers() {
-    const { data } = await sb.from('family_members').select('display_name, role').eq('family_id', familyId);
+    // emoji 列も取得して全端末で同期する
+    const { data } = await sb.from('family_members').select('display_name, role, emoji').eq('family_id', familyId);
     members = data || [];
+    // DB が source of truth → memberEmojiCustom を上書き
+    memberEmojiCustom = {};
+    members.forEach(m => { if (m.emoji) memberEmojiCustom[m.display_name] = m.emoji; });
+    // localStorage にもキャッシュ（オフライン時の表示用）
+    try { localStorage.setItem('poppo_emojis_' + familyId, JSON.stringify(memberEmojiCustom)); } catch(e) {}
   }
 
   function getMemberEmojiMap() {
     const map = {};
     members.forEach((m, i) => {
-      map[m.display_name] = memberEmojiCustom[m.display_name] || MEMBER_EMOJIS[i % MEMBER_EMOJIS.length];
+      map[m.display_name] = m.emoji || memberEmojiCustom[m.display_name] || MEMBER_EMOJIS[i % MEMBER_EMOJIS.length];
     });
     return map;
   }
 
   function loadEmojiCustom() {
+    // loadMembers() が DB から読むため通常は不要。オフライン fallback 用に残す
     try {
       const saved = localStorage.getItem('poppo_emojis_' + familyId);
-      memberEmojiCustom = saved ? JSON.parse(saved) : {};
-    } catch(e) { memberEmojiCustom = {}; }
+      const cached = saved ? JSON.parse(saved) : {};
+      // DB 取得済みのキーは上書きしない
+      Object.keys(cached).forEach(k => { if (!memberEmojiCustom[k]) memberEmojiCustom[k] = cached[k]; });
+    } catch(e) {}
   }
 
-  function setMemberEmoji(idx, emoji) {
-    const name = members[idx]?.display_name;
-    if (!name) return;
+  async function setMemberEmoji(idx, emoji) {
+    const member = members[idx];
+    if (!member) return;
+    const name = member.display_name;
+    // メモリ・localStorage を即時更新（UI を瞬時に反映）
     memberEmojiCustom[name] = emoji;
-    localStorage.setItem('poppo_emojis_' + familyId, JSON.stringify(memberEmojiCustom));
+    member.emoji = emoji; // members 配列内のオブジェクトも更新
+    try { localStorage.setItem('poppo_emojis_' + familyId, JSON.stringify(memberEmojiCustom)); } catch(e) {}
     renderFamilyModalContent();
+    // Supabase に保存（これで他端末にも同期される）
+    await sb.from('family_members').update({ emoji }).eq('family_id', familyId).eq('display_name', name);
   }
 
   function toggleEmojiPicker(idx) {
@@ -1445,7 +1458,7 @@
     const { error } = await sb.from('user_settings').upsert({ user_id: currentUser.id, claude_api_key: key, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) { errEl.textContent='保存に失敗: '+error.message; errEl.style.display='block'; return; }
     claudeApiKey = key;
-    await loadMembers(); loadEmojiCustom(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadTemplates(); await loadDuties(); await loadConversationHistory();
+    await loadMembers(); await autoCloseEvents(); await loadSchedules(); await loadPastSchedules(); await loadPastDone(); await loadTodayDone(); await loadTemplates(); await loadDuties(); await loadConversationHistory();
     await loadStampData();
     updateFamilyHeader();
     showScreen('app');
