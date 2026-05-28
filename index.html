@@ -150,6 +150,16 @@
   .duty-cell-menu-btn.skip{background:#f5f5f5;color:#aaa;}
   .duty-cell-menu-btn.reset{background:#f9f9f9;color:#bbb;font-size:12px;padding:9px;}
   .duty-cell-menu-btn.cancel{background:#f0e8f0;color:var(--brown);}
+  .duty-cell-menu-btn.substitute{background:linear-gradient(135deg,#fff8e1,#ffe082);color:#e65100;}
+  /* 期間タブ */
+  .duty-period-tabs{display:flex;gap:5px;padding:8px 16px;flex-shrink:0;}
+  .duty-period-tab{flex:1;padding:7px 2px;border-radius:10px;border:2px solid transparent;font-family:'Zen Maru Gothic',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:#bbb;background:none;transition:all 0.2s;}
+  .duty-period-tab.active{background:var(--lavender);color:var(--brown);border-color:var(--lavender-dark);}
+  .duty-sort-btn{background:none;border:1px solid #ddd;border-radius:7px;font-size:10px;padding:2px 5px;cursor:pointer;color:var(--brown);font-family:'Zen Maru Gothic',sans-serif;white-space:nowrap;}
+  /* コインページ */
+  .coin-member-card{background:linear-gradient(135deg,#FFF8E1,#FFF3CD);border-radius:16px;padding:14px 16px;margin-bottom:4px;}
+  .coin-total{font-size:20px;font-weight:800;color:#E65100;}
+  .coin-history-row{font-size:11px;color:#888;display:flex;justify-content:space-between;padding:2px 0;}
 
   .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
   .chat-area::-webkit-scrollbar{display:none;}
@@ -429,10 +439,18 @@
       <h2 style="margin:0;">📋 当番表</h2>
       <button onclick="hideDutyModal()" style="background:none;border:none;font-size:22px;color:#bbb;cursor:pointer;padding:4px;">✕</button>
     </div>
-    <div class="duty-week-nav">
-      <button class="duty-nav-btn" onclick="navigateDutyWeek(-1)">◀ 先週</button>
+    <!-- 期間タブ -->
+    <div class="duty-period-tabs">
+      <button class="duty-period-tab"        id="dutyTabYearly"  onclick="switchDutyView('yearly')">年次</button>
+      <button class="duty-period-tab"        id="dutyTabMonthly" onclick="switchDutyView('monthly')">月次</button>
+      <button class="duty-period-tab"        id="dutyTabWeekly"  onclick="switchDutyView('weekly')">週次</button>
+      <button class="duty-period-tab active" id="dutyTabDaily"   onclick="switchDutyView('daily')">日次</button>
+    </div>
+    <!-- 先週／来週ナビ（年次では非表示） -->
+    <div class="duty-week-nav" id="dutyNavArea">
+      <button class="duty-nav-btn" id="dutyNavPrev" onclick="navigateDuty(-1)">◀ 先週</button>
       <span class="duty-week-label" id="dutyWeekLabel"></span>
-      <button class="duty-nav-btn" onclick="navigateDutyWeek(1)">来週 ▶</button>
+      <button class="duty-nav-btn" id="dutyNavNext" onclick="navigateDuty(1)">来週 ▶</button>
     </div>
     <div class="duty-table-wrap">
       <div id="dutyTableWrap"></div>
@@ -444,6 +462,12 @@
       <div id="addDutyForm" class="hidden duty-add-form">
         <select id="dutyPersonSelect" style="width:100%;"></select>
         <input id="dutyTitleInput" placeholder="当番内容（例：テーブルふき）" style="width:100%;box-sizing:border-box;">
+        <select id="dutyPeriodType" style="width:100%;">
+          <option value="daily">日次（毎日チェック）</option>
+          <option value="weekly">週次（毎週チェック）</option>
+          <option value="monthly">月次（毎月チェック）</option>
+          <option value="yearly">年次（毎年チェック）</option>
+        </select>
         <button class="duty-add-btn" onclick="addDuty()">追加する</button>
       </div>
     </div>
@@ -457,8 +481,9 @@
 <div class="modal-overlay hidden z400" id="dutyCellMenu">
   <div class="duty-cell-menu">
     <div class="duty-cell-menu-title" id="dutyCellMenuTitle"></div>
-    <button class="duty-cell-menu-btn done"   onclick="setDutyStatus('done')">✅ できた</button>
-    <button class="duty-cell-menu-btn failed" onclick="setDutyStatus('failed')">❌ できなかった</button>
+    <button class="duty-cell-menu-btn done"       onclick="setDutyStatus('done')">✅ できた</button>
+    <button class="duty-cell-menu-btn substitute" onclick="setDutyStatus('substitute')">🤝 当番以外の人がやった</button>
+    <button class="duty-cell-menu-btn failed"     onclick="setDutyStatus('failed')">❌ できなかった</button>
     <button class="duty-cell-menu-btn skip"   onclick="setDutyStatus('skip')">ー 対象外</button>
     <button class="duty-cell-menu-btn reset"  onclick="setDutyStatus(null)">🔄 リセット（未入力に戻す）</button>
     <button class="duty-cell-menu-btn cancel" onclick="closeDutyCellMenu()">キャンセル</button>
@@ -518,6 +543,7 @@
     <div class="stamp-tab-row">
       <button class="stamp-tab active" id="stampTabStamp" onclick="switchStampTab('stamp')">🌟 スタンプ</button>
       <button class="stamp-tab" id="stampTabPrize" onclick="switchStampTab('prize')">🎰 景品</button>
+      <button class="stamp-tab" id="stampTabCoin"  onclick="switchStampTab('coin')">🪙 コイン</button>
     </div>
     <!-- スタンプページ -->
     <div id="stampPage">
@@ -534,6 +560,10 @@
     <!-- 景品ページ -->
     <div id="prizePage" class="hidden">
       <div id="prizeHistoryList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <!-- コインページ -->
+    <div id="coinPage" class="hidden">
+      <div id="coinMemberList" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
     <button class="btn btn-secondary" onclick="hideStampModal()">とじる</button>
   </div>
@@ -648,7 +678,10 @@
   let pendingEdit = null; // { id, title, assignedTo, category, isDone, originalIsDone, originalAssignedTo }
   let duties = [];
   let dutyLogs = {}; // key: `${dutyId}_${dateStr}` → { id, status }
-  let currentDutyWeekOffset = 0;
+  let currentDutyWeekOffset = 0; // kept for compat
+  let currentDutyView   = 'daily';   // 'daily'|'weekly'|'monthly'|'yearly'
+  let currentDutyOffset = 0;         // week/month/year offset from today
+  let dutySortMode      = 0;         // 0=登録順 1=担当者 2=当番内容
   let pendingDutyCell = null; // { dutyId, date, personName, dutyTitle }
   let currentListSection = null; // 'today' | 'tomorrow' | 'week'
 
@@ -1080,11 +1113,60 @@
 
   function switchStampTab(tab) {
     const isStamp = tab === 'stamp';
+    const isPrize = tab === 'prize';
+    const isCoin  = tab === 'coin';
     document.getElementById('stampPage').classList.toggle('hidden', !isStamp);
-    document.getElementById('prizePage').classList.toggle('hidden',  isStamp);
-    document.getElementById('stampTabStamp').classList.toggle('active',  isStamp);
-    document.getElementById('stampTabPrize').classList.toggle('active', !isStamp);
-    if (!isStamp) renderPrizeHistory();
+    document.getElementById('prizePage').classList.toggle('hidden', !isPrize);
+    document.getElementById('coinPage').classList.toggle('hidden',  !isCoin);
+    document.getElementById('stampTabStamp').classList.toggle('active', isStamp);
+    document.getElementById('stampTabPrize').classList.toggle('active', isPrize);
+    document.getElementById('stampTabCoin').classList.toggle('active',  isCoin);
+    if (isPrize) renderPrizeHistory();
+    if (isCoin)  renderCoinPage();
+  }
+
+  async function renderCoinPage() {
+    const el = document.getElementById('coinMemberList');
+    el.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:20px;">読み込み中...</p>';
+    const { data } = await sb.from('duty_coins').select('*')
+      .eq('family_id', familyId).order('calculated_at', { ascending: false });
+    const coins = data || [];
+
+    // member_name → { total, history[] }
+    const byMember = {};
+    coins.forEach(c => {
+      if (!byMember[c.member_name]) byMember[c.member_name] = { total: 0, history: [] };
+      byMember[c.member_name].total += parseFloat(c.amount);
+      byMember[c.member_name].history.push(c);
+    });
+
+    const emojiMap = getMemberEmojiMap();
+    const PERIOD_LABEL = { daily:'日次', weekly:'週次', monthly:'月次', yearly:'年次' };
+    let html = '';
+    members.forEach(m => {
+      const name = m.display_name;
+      const d = byMember[name];
+      if (!d) return;
+      const emoji = emojiMap[name] || '🐰';
+      const total = d.total;
+      const totalStr = (total % 1 === 0) ? total : total.toFixed(1);
+      html += `<div class="coin-member-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-weight:700;color:var(--brown);font-size:15px;">${emoji} ${name}</div>
+          <div class="coin-total">🪙 ${totalStr}</div>
+        </div>`;
+      d.history.slice(0, 6).forEach(c => {
+        const amt = parseFloat(c.amount);
+        const amtStr = (amt % 1 === 0) ? amt : amt.toFixed(1);
+        const pl = PERIOD_LABEL[c.period_type] || c.period_type;
+        html += `<div class="coin-history-row">
+          <span>${pl}｜${c.period_key}</span>
+          <span style="color:#E65100;font-weight:700;">+${amtStr} 🪙</span>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    el.innerHTML = html || '<p style="color:#aaa;font-size:13px;text-align:center;padding:20px;">まだコインがありません。<br>当番をがんばろう！🪙</p>';
   }
 
   // ── ホイール描画 ──────────────────────────────────────────────
@@ -2494,20 +2576,131 @@
 
   // ===== 当番表 =====
   const DAY_LABELS_DUTY = ['日','月','火','水','木','金','土'];
+  const DUTY_STATUS_ICON  = { done:'✅', substitute:'🤝', failed:'❌', skip:'ー' };
+  const DUTY_STATUS_LABEL = { done:'✅ できた', substitute:'🤝 他の人がやった', failed:'❌ できなかった', skip:'ー 対象外' };
 
-  function getDutyWeekDates(offset = 0) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const dow = today.getDay(); // 0=Sun
-    const daysToMon = dow === 0 ? -6 : 1 - dow;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + daysToMon + offset * 7);
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday); d.setDate(monday.getDate() + i);
-      dates.push(localDateStr(d));
+  // ── 期間に応じた date 文字列配列を返す ──
+  function getDutyPeriodDates() {
+    const now = new Date();
+    if (currentDutyView === 'daily') {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dow = today.getDay();
+      const daysToMon = dow === 0 ? -6 : 1 - dow;
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + daysToMon + currentDutyOffset * 7);
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday); d.setDate(monday.getDate() + i);
+        dates.push(localDateStr(d));
+      }
+      return dates;
     }
-    return dates;
+    if (currentDutyView === 'weekly') {
+      // 対象月の全日曜日（日曜始まりの週代表）
+      const base = new Date(now.getFullYear(), now.getMonth() + currentDutyOffset, 1);
+      const yr = base.getFullYear(), mo = base.getMonth();
+      const last = new Date(yr, mo + 1, 0).getDate();
+      const dates = [];
+      for (let d = 1; d <= last; d++) {
+        if (new Date(yr, mo, d).getDay() === 0) {
+          dates.push(`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+        }
+      }
+      return dates;
+    }
+    if (currentDutyView === 'monthly') {
+      const yr = now.getFullYear() + currentDutyOffset;
+      const dates = [];
+      for (let m = 1; m <= 12; m++) {
+        dates.push(`${yr}-${String(m).padStart(2,'0')}-01`);
+      }
+      return dates;
+    }
+    if (currentDutyView === 'yearly') {
+      const dates = [];
+      for (let y = 2026; y <= 2036; y++) dates.push(`${y}-01-01`);
+      return dates;
+    }
+    return [];
   }
+
+  // ── 列ヘッダ HTML ──
+  function getDutyColHeader(date) {
+    const d = new Date(date + 'T00:00:00');
+    if (currentDutyView === 'daily') {
+      return `${DAY_LABELS_DUTY[d.getDay()]}<br>${date.slice(5).replace('-','/')}`;
+    }
+    if (currentDutyView === 'weekly') {
+      const m = d.getMonth() + 1, day = d.getDate();
+      let n = 0;
+      for (let dd = 1; dd <= day; dd++) {
+        if (new Date(d.getFullYear(), d.getMonth(), dd).getDay() === 0) n++;
+      }
+      return `${m}月${n}週<br>(${m}/${day})`;
+    }
+    if (currentDutyView === 'monthly') return `${d.getMonth()+1}月`;
+    if (currentDutyView === 'yearly')  return `${d.getFullYear()}年`;
+    return date;
+  }
+
+  // ── ナビエリアのラベル・ボタンテキスト更新 ──
+  function updateDutyNavArea() {
+    const navArea = document.getElementById('dutyNavArea');
+    const prevBtn = document.getElementById('dutyNavPrev');
+    const nextBtn = document.getElementById('dutyNavNext');
+    const label   = document.getElementById('dutyWeekLabel');
+    if (currentDutyView === 'yearly') { navArea.style.display = 'none'; return; }
+    navArea.style.display = '';
+    const now = new Date();
+    if (currentDutyView === 'daily') {
+      prevBtn.textContent = '◀ 先週'; nextBtn.textContent = '来週 ▶';
+      const dates = getDutyPeriodDates();
+      label.textContent = `${dates[0].slice(5).replace('-','/')} 〜 ${dates[6].slice(5).replace('-','/')}`;
+    } else if (currentDutyView === 'weekly') {
+      prevBtn.textContent = '◀ 先月'; nextBtn.textContent = '来月 ▶';
+      const base = new Date(now.getFullYear(), now.getMonth() + currentDutyOffset, 1);
+      label.textContent = `${base.getFullYear()}年${base.getMonth()+1}月`;
+    } else if (currentDutyView === 'monthly') {
+      prevBtn.textContent = '◀ 昨年'; nextBtn.textContent = '来年 ▶';
+      label.textContent = `${now.getFullYear() + currentDutyOffset}年`;
+    }
+  }
+
+  // ── 期間タイプでフィルタ＆ソート ──
+  function getSortedDuties() {
+    const pt = currentDutyView === 'daily' ? 'daily'
+             : currentDutyView === 'weekly' ? 'weekly'
+             : currentDutyView === 'monthly' ? 'monthly' : 'yearly';
+    let filtered = duties.filter(d => (d.period_type || 'daily') === pt);
+    if (dutySortMode === 1) filtered = [...filtered].sort((a,b) => a.person_name.localeCompare(b.person_name,'ja'));
+    else if (dutySortMode === 2) filtered = [...filtered].sort((a,b) => a.title.localeCompare(b.title,'ja'));
+    return filtered;
+  }
+
+  async function cycleDutySort() {
+    dutySortMode = (dutySortMode + 1) % 3;
+    await renderDutyTable();
+  }
+
+  async function switchDutyView(view) {
+    currentDutyView   = view;
+    currentDutyOffset = 0;
+    dutySortMode      = 0;
+    ['Daily','Weekly','Monthly','Yearly'].forEach(v => {
+      document.getElementById(`dutyTab${v}`).classList.toggle('active', v.toLowerCase() === view);
+    });
+    // 追加フォームの頻度セレクトを同期
+    const sel = document.getElementById('dutyPeriodType');
+    if (sel) sel.value = view;
+    await renderDutyTable();
+  }
+
+  async function navigateDuty(delta) {
+    currentDutyOffset += delta;
+    await renderDutyTable();
+  }
+  // 旧名compat
+  async function navigateDutyWeek(delta) { await navigateDuty(delta); }
 
   async function loadDuties() {
     const { data } = await sb.from('duties').select('*').eq('family_id', familyId).order('sort_order').order('created_at');
@@ -2517,18 +2710,20 @@
   async function loadDutyLogs(dateStrings) {
     if (!duties.length) { dutyLogs = {}; return; }
     const { data } = await sb.from('duty_logs').select('*')
-      .eq('family_id', familyId)
-      .in('log_date', dateStrings);
+      .eq('family_id', familyId).in('log_date', dateStrings);
     dutyLogs = {};
     (data || []).forEach(r => { dutyLogs[`${r.duty_id}_${r.log_date}`] = { id: r.id, status: r.status }; });
   }
 
   async function showDutyModal() {
-    currentDutyWeekOffset = 0;
+    currentDutyView   = 'daily';
+    currentDutyOffset = 0;
+    dutySortMode      = 0;
     document.getElementById('dutyModal').classList.remove('hidden');
-    // 追加フォームを閉じる
     document.getElementById('addDutyForm').classList.add('hidden');
-    // 担当者プルダウンを更新
+    ['Daily','Weekly','Monthly','Yearly'].forEach(v => {
+      document.getElementById(`dutyTab${v}`).classList.toggle('active', v === 'Daily');
+    });
     const sel = document.getElementById('dutyPersonSelect');
     sel.innerHTML = members.map(m => `<option value="${m.display_name}">${m.display_name}</option>`).join('');
     await renderDutyTable();
@@ -2539,35 +2734,30 @@
   }
 
   async function renderDutyTable() {
-    const dates = getDutyWeekDates(currentDutyWeekOffset);
+    const dates    = getDutyPeriodDates();
     const todayStr = localDateStr(new Date());
     await loadDutyLogs(dates);
+    updateDutyNavArea();
 
-    // 週ラベル
-    const d0 = dates[0].slice(5).replace('-','/');
-    const d6 = dates[6].slice(5).replace('-','/');
-    document.getElementById('dutyWeekLabel').textContent = `${d0} 〜 ${d6}`;
-
-    if (!duties.length) {
+    const filtered = getSortedDuties();
+    if (!filtered.length) {
       document.getElementById('dutyTableWrap').innerHTML =
         '<p style="padding:20px;color:#aaa;font-size:13px;text-align:center;">当番がまだ登録されていません。＋ボタンから追加してください。</p>';
       return;
     }
 
     const emojiMap = getMemberEmojiMap();
-    const STATUS_ICON = { done: '✅', failed: '❌', skip: 'ー' };
+    const sortLabels = ['登録順','担当↑','当番↑'];
 
     let html = '<table class="duty-table"><thead><tr>';
-    html += '<th class="col-duty">担当 / 当番</th>';
+    html += `<th class="col-duty">担当 / 当番 <button class="duty-sort-btn" onclick="cycleDutySort()">🔃 ${sortLabels[dutySortMode]}</button></th>`;
     dates.forEach(d => {
-      const dayLabel = DAY_LABELS_DUTY[new Date(d + 'T00:00:00').getDay()];
-      const mmdd = d.slice(5).replace('-','/');
-      const isToday = d === todayStr;
-      html += `<th style="${isToday ? 'background:var(--pink);color:white;' : ''}">${dayLabel}<br>${mmdd}</th>`;
+      const isToday = currentDutyView === 'daily' && d === todayStr;
+      html += `<th style="${isToday ? 'background:var(--pink);color:white;' : ''}">${getDutyColHeader(d)}</th>`;
     });
     html += '</tr></thead><tbody>';
 
-    duties.forEach(duty => {
+    filtered.forEach(duty => {
       const emoji = emojiMap[duty.person_name] || '📋';
       html += '<tr>';
       html += `<td class="col-duty">
@@ -2580,32 +2770,26 @@
         </div>
       </td>`;
       dates.forEach(d => {
-        const key = `${duty.id}_${d}`;
-        const log = dutyLogs[key];
-        const icon = log ? STATUS_ICON[log.status] : '・';
-        const cls = log ? '' : ' empty';
-        const isToday = d === todayStr;
+        const key  = `${duty.id}_${d}`;
+        const log  = dutyLogs[key];
+        const icon = log ? (DUTY_STATUS_ICON[log.status] || '・') : '・';
+        const cls  = log ? '' : ' empty';
+        const isToday = currentDutyView === 'daily' && d === todayStr;
         html += `<td style="${isToday ? 'background:rgba(255,180,200,0.12);' : ''}">
           <span class="duty-cell${cls}" onclick="openDutyCellMenu('${duty.id}','${d}','${duty.person_name}','${duty.title.replace(/'/g,"\\'")}')">${icon}</span>
         </td>`;
       });
       html += '</tr>';
     });
-
     html += '</tbody></table>';
     document.getElementById('dutyTableWrap').innerHTML = html;
-  }
-
-  async function navigateDutyWeek(delta) {
-    currentDutyWeekOffset += delta;
-    await renderDutyTable();
   }
 
   function openDutyCellMenu(dutyId, date, personName, dutyTitle) {
     pendingDutyCell = { dutyId, date, personName, dutyTitle };
     const log = dutyLogs[`${dutyId}_${date}`];
     const mmdd = date.slice(5).replace('-','/');
-    const statusLabel = log ? { done:'✅ できた', failed:'❌ できなかった', skip:'ー 対象外' }[log.status] || '' : '未入力';
+    const statusLabel = log ? (DUTY_STATUS_LABEL[log.status] || '未入力') : '未入力';
     document.getElementById('dutyCellMenuTitle').textContent = `${personName}・${dutyTitle}（${mmdd}）— ${statusLabel}`;
     document.getElementById('dutyCellMenu').classList.remove('hidden');
   }
@@ -2622,13 +2806,11 @@
     closeDutyCellMenu();
 
     if (status === null) {
-      // リセット：ログを削除
       if (dutyLogs[key]) {
         await sb.from('duty_logs').delete().eq('id', dutyLogs[key].id);
         delete dutyLogs[key];
       }
     } else {
-      // upsert
       const { data, error } = await sb.from('duty_logs').upsert(
         { family_id: familyId, duty_id: dutyId, log_date: date, status },
         { onConflict: 'duty_id,log_date' }
@@ -2636,15 +2818,12 @@
       if (!error && data) dutyLogs[key] = { id: data.id, status: data.status };
     }
 
-    // テーブルを再描画
-    const STATUS_ICON = { done: '✅', failed: '❌', skip: 'ー' };
-    const log = dutyLogs[key];
-    const icon = log ? STATUS_ICON[log.status] : '・';
-    const cls = log ? '' : ' empty';
-    // セルだけ即時更新（全再描画は重いため）
-    document.querySelectorAll(`.duty-cell`).forEach(el => {
-      const onclick = el.getAttribute('onclick') || '';
-      if (onclick.includes(`'${dutyId}','${date}'`)) {
+    // セルのみ即時更新
+    const log  = dutyLogs[key];
+    const icon = log ? (DUTY_STATUS_ICON[log.status] || '・') : '・';
+    const cls  = log ? '' : ' empty';
+    document.querySelectorAll('.duty-cell').forEach(el => {
+      if ((el.getAttribute('onclick') || '').includes(`'${dutyId}','${date}'`)) {
         el.className = `duty-cell${cls}`;
         el.textContent = icon;
       }
@@ -2655,17 +2834,21 @@
     const f = document.getElementById('addDutyForm');
     f.classList.toggle('hidden');
     if (!f.classList.contains('hidden')) {
+      // 現在の表示タブに合わせて頻度セレクトを初期化
+      const sel = document.getElementById('dutyPeriodType');
+      if (sel) sel.value = currentDutyView;
       document.getElementById('dutyTitleInput').focus();
     }
   }
 
   async function addDuty() {
     const personName = document.getElementById('dutyPersonSelect').value;
-    const title = document.getElementById('dutyTitleInput').value.trim();
+    const title      = document.getElementById('dutyTitleInput').value.trim();
+    const periodType = document.getElementById('dutyPeriodType').value || 'daily';
     if (!title) { alert('当番内容を入力してください'); return; }
     const { data, error } = await sb.from('duties').insert({
       family_id: familyId, person_name: personName, title,
-      sort_order: duties.length
+      period_type: periodType, sort_order: duties.length
     }).select('*').single();
     if (error) { alert('追加に失敗しました: ' + error.message); return; }
     duties.push(data);
@@ -2678,7 +2861,6 @@
     if (!confirm('この当番を削除しますか？記録もすべて消えます。')) return;
     await sb.from('duties').delete().eq('id', id);
     duties = duties.filter(d => d.id !== id);
-    // 関連するログをキャッシュから削除
     Object.keys(dutyLogs).forEach(k => { if (k.startsWith(id)) delete dutyLogs[k]; });
     await renderDutyTable();
   }
