@@ -762,6 +762,14 @@
     await runConversationStarter();
   }
 
+  // 学年に応じた口調スタイルを返す
+  function _gradeStyle(gradeInfo) {
+    if (!gradeInfo) return 'ひらがな多め・絵文字たっぷり・短く元気よく（2文以内）';
+    if (gradeInfo.includes('中学')) return '中学生らしいノリで・タメ口OK・絵文字はさりげなく・短くかっこよく（2文以内）・説教くさくしない';
+    if (gradeInfo.includes('小学') && /[456]年/.test(gradeInfo)) return 'ひらがな少なめ・絵文字あり・小学高学年らしく・短く（2文以内）';
+    return 'ひらがな多め・絵文字たっぷり・短く元気よく（2文以内）'; // 小学低中学年
+  }
+
   // ──────────────────────────────────────────────────────────────
   // エージェント①：チアリーダー役（子どものモチベーション・メンタルケア）
   // ──────────────────────────────────────────────────────────────
@@ -776,13 +784,15 @@
     const targets = childCandidates.length > 0 ? childCandidates : members;
 
     for (const member of targets) {
-      const name    = member.display_name;
-      const emoji   = emojiMap[name] || '🐰';
-      const streak  = streakData[name]?.current  || 0;
-      const longest = streakData[name]?.longest  || 0;
-      const stamps  = stampData[name]?.total     || 0;
-      const myUndone = schedules.filter(s => s.event_date === todayStr && s.assigned_to === name);
-      const myDone   = todayDoneSchedules.filter(s => s.assigned_to === name);
+      const name      = member.display_name;
+      const emoji     = emojiMap[name] || '🐰';
+      const grade     = member.grade_info || '';
+      const style     = _gradeStyle(grade);
+      const streak    = streakData[name]?.current  || 0;
+      const longest   = streakData[name]?.longest  || 0;
+      const stamps    = stampData[name]?.total     || 0;
+      const myUndone  = schedules.filter(s => s.event_date === todayStr && s.assigned_to === name);
+      const myDone    = todayDoneSchedules.filter(s => s.assigned_to === name);
       const totalToday = myUndone.length + myDone.length;
 
       // ────────────────────────────
@@ -792,14 +802,14 @@
       if (streak >= 3 || (totalToday > 0 && myUndone.length === 0)) {
         const sys = `あなたは「ぽぽちゃん」というかわいいうさぎのAIアシスタントで、子どもの「チアリーダー役」です。
 子どもの頑張りを全力で大絶賛し、やる気を最大限に引き出すことが得意です。
-ルール: ひらがな多め・絵文字たっぷり・短く元気よく（2文以内）・具体的な数字や実績を褒める。`;
-        const usr = `${name}ちゃん（${emoji}）は今日のタスクを${myDone.length}件完了！`
+${grade ? `相手は${grade}です。` : ''}ルール: ${style}・具体的な数字や実績を褒める。`;
+        const usr = `${name}（${emoji}）は今日のタスクを${myDone.length}件完了！`
           + `連続記録${streak}日（最長${longest}日）、スタンプ合計${stamps}個です。`
           + `${streak >= 3 ? `${streak}日連続はすごすぎる！` : '今日のタスク全完了！'}`
           + `スタンプ帳と連動した大絶賛メッセージをお願いします！`;
         const msg = await _callAgent(sys, usr);
         if (msg) addAgentMessage(`${emoji} ${msg}`, 'agent-msg-cheerleader');
-        break; // 1人分で十分
+        break;
       }
 
       // ────────────────────────────
@@ -810,15 +820,14 @@
         const isLate = hour >= 20;
         const sys = `あなたは「ぽぽちゃん」というかわいいうさぎのAIアシスタントで、子どもに寄り添う「チアリーダー役」です。
 絶対に子どもを責めず、疲れを全力で労い、罪悪感をゼロにしてあげることが使命です。
-ルール: ひらがな多め・絵文字あり・やさしく短く（2文以内）・明日への希望を持たせる。`;
-        const usr = `${name}ちゃんは${isLate ? '夜' + hour + '時になっても' : '今日は忙しくて'}`
+${grade ? `相手は${grade}です。` : ''}ルール: ${style}・明日への希望を持たせる。`;
+        const usr = `${name}は${isLate ? '夜' + hour + '時になっても' : '今日は忙しくて'}`
           + `「${myUndone.map(s => s.title).join('・')}」（${myUndone.length}件）がまだ残っています。`
           + `${myDone.length > 0 ? `でも${myDone.length}件はできました！` : ''}`
           + `寄り添うメッセージをお願いします。絶対に責めないで。`;
         const msg = await _callAgent(sys, usr);
         if (msg) {
           addAgentMessage(`${emoji} ${msg}`, 'agent-msg-cheerleader');
-          // 翌日スライドを提案（少し遅らせて表示）
           if (myUndone.length > 0) {
             setTimeout(() => showSlideProposal(name, myUndone), 1200);
           }
@@ -1399,7 +1408,7 @@
 
   async function loadMembers() {
     // emoji 列も取得して全端末で同期する
-    const { data } = await sb.from('family_members').select('display_name, role, emoji').eq('family_id', familyId);
+    const { data } = await sb.from('family_members').select('display_name, role, emoji, grade_info').eq('family_id', familyId);
     members = data || [];
     // DB が source of truth → memberEmojiCustom を上書き
     memberEmojiCustom = {};
