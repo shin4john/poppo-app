@@ -160,6 +160,18 @@
   .coin-member-card{background:linear-gradient(135deg,#FFF8E1,#FFF3CD);border-radius:16px;padding:14px 16px;margin-bottom:4px;}
   .coin-total{font-size:20px;font-weight:800;color:#E65100;}
   .coin-history-row{font-size:11px;color:#888;display:flex;justify-content:space-between;padding:2px 0;}
+  /* 目標設定 */
+  #goalModal .modal{height:85vh;overflow:hidden;padding:0;gap:0;}
+  .goal-cell{cursor:pointer;border-radius:8px;padding:4px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:48px;transition:background 0.15s;}
+  .goal-cell:active{background:var(--cream);}
+  .goal-add-btn{background:var(--lavender);border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;color:var(--brown);font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;}
+  .goal-status-icon{font-size:18px;line-height:1;}
+  .goal-preview{font-size:10px;color:#999;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;}
+  .goal-status-btn{width:100%;padding:12px;border-radius:14px;border:2px solid #eee;background:#f9f9f9;font-family:'Zen Maru Gothic',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.2s;color:#aaa;}
+  .goal-status-btn.sel-in_progress{background:linear-gradient(135deg,#FFF3E0,#FFCC80);color:#E65100;border-color:#FF9800;}
+  .goal-status-btn.sel-achieved{background:linear-gradient(135deg,#f0fff4,#a5d6a7);color:#1b5e20;border-color:#4caf50;}
+  .goal-status-btn.sel-not_achieved{background:linear-gradient(135deg,#fff0f0,#ef9a9a);color:#b71c1c;border-color:#f44336;}
+  .goal-char-count{text-align:right;font-size:11px;color:#aaa;margin-top:2px;}
 
   .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
   .chat-area::-webkit-scrollbar{display:none;}
@@ -370,6 +382,7 @@
     <button class="qr-btn" onclick="sendQuick('今週のイベントは？')">🎉 イベント</button>
     <button class="qr-btn" onclick="sendQuick('予定を全部見せて')">📋 一覧</button>
     <a class="qr-btn" href="https://shin4john.github.io/poppo-app/guide.html" target="_blank" style="text-decoration:none;">📖 使い方</a>
+    <button class="qr-btn" onclick="showGoalModal()">🏆 目標設定</button>
     <a class="qr-btn" href="https://shin4john.github.io/poppo-app/family_dx_project_presentation.html" target="_blank" style="text-decoration:none;">🎯 目的</a>
   </div>
 
@@ -581,6 +594,57 @@
   </div>
 </div>
 
+<!-- 目標設定モーダル -->
+<div class="modal-overlay hidden" id="goalModal">
+  <div class="modal">
+    <div class="duty-modal-header">
+      <h2 style="margin:0;">🏆 目標設定</h2>
+      <button onclick="hideGoalModal()" style="background:none;border:none;font-size:22px;color:#bbb;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <!-- 期間タブ：年次・月次・週次 -->
+    <div class="duty-period-tabs">
+      <button class="duty-period-tab active" id="goalTabYearly"  onclick="switchGoalView('yearly')">年次</button>
+      <button class="duty-period-tab"        id="goalTabMonthly" onclick="switchGoalView('monthly')">月次</button>
+      <button class="duty-period-tab"        id="goalTabWeekly"  onclick="switchGoalView('weekly')">週次</button>
+    </div>
+    <!-- ナビ（年次は非表示） -->
+    <div class="duty-week-nav" id="goalNavArea">
+      <button class="duty-nav-btn" id="goalNavPrev" onclick="navigateGoal(-1)">◀ 先月</button>
+      <span class="duty-week-label" id="goalNavLabel"></span>
+      <button class="duty-nav-btn" id="goalNavNext" onclick="navigateGoal(1)">来月 ▶</button>
+    </div>
+    <div class="duty-table-wrap">
+      <div id="goalTableWrap"></div>
+    </div>
+    <div style="padding:0 16px 16px;flex-shrink:0;">
+      <button class="btn btn-secondary" onclick="hideGoalModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 目標入力モーダル -->
+<div class="modal-overlay hidden z300" id="goalEditModal">
+  <div class="modal">
+    <h2>📝 目標を設定する</h2>
+    <p id="goalEditSubtitle" style="font-size:13px;color:#888;margin-top:-8px;margin-bottom:4px;"></p>
+    <textarea id="goalContentInput"
+      placeholder="目標を入力してください（400字まで）"
+      maxlength="400" rows="5"
+      oninput="updateGoalCharCount()"
+      style="width:100%;border:2px solid var(--lavender);border-radius:12px;padding:10px 14px;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;outline:none;resize:none;box-sizing:border-box;color:var(--text);"></textarea>
+    <div class="goal-char-count"><span id="goalCharCount">0</span>/400</div>
+    <div style="font-size:13px;font-weight:700;color:var(--brown);margin:10px 0 8px;">達成度合い</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="goal-status-btn" id="goalBtnInProgress"   onclick="selectGoalStatus('in_progress')">🔥 実施中</button>
+      <button class="goal-status-btn" id="goalBtnAchieved"     onclick="selectGoalStatus('achieved')">✅ 達成</button>
+      <button class="goal-status-btn" id="goalBtnNotAchieved"  onclick="selectGoalStatus('not_achieved')">❌ 未達</button>
+    </div>
+    <button class="btn btn-primary" onclick="saveGoal()" style="margin-top:12px;">💾 保存する</button>
+    <button class="delete-confirm-btn hidden" id="goalDeleteBtn" onclick="deleteGoal()">🗑️ この目標を削除する</button>
+    <button class="btn btn-secondary" onclick="hideGoalEditModal()">キャンセル</button>
+  </div>
+</div>
+
 <!-- ルーレットモーダル -->
 <div class="modal-overlay hidden" id="rouletteModal">
   <div class="modal" style="align-items:center;">
@@ -692,6 +756,13 @@
   let stampData = {};
   let streakData = {};
   let rewardsData = [];
+
+  // 目標設定
+  let goals = {};            // key: `${name}_${periodType}_${periodKey}` → { id, content, status }
+  let currentGoalView   = 'yearly';
+  let currentGoalOffset = 0;
+  let pendingGoalCell   = null; // { memberName, periodKey, label }
+  let pendingGoalStatus = 'in_progress';
 
   const COMPLETION_KEYWORDS = ['終わった','おわった','できた','やった','かんりょう','完了','おわり','すんだ','できたよ','おわったよ'];
   const NON_COMPLETION = ['？','?','なに','何','どうする','どうやって','教えて','おしえて','できない','わからない'];
@@ -2887,6 +2958,261 @@ ${grade ? `相手は${grade}です。` : ''}ルール: ${style}・明日への�
     Object.keys(dutyLogs).forEach(k => { if (k.startsWith(id)) delete dutyLogs[k]; });
     await renderDutyTable();
   }
+
+  // =====================================================
+  // ===== 目標設定 =====
+  // =====================================================
+
+  const GOAL_STATUS_ICON = { in_progress: '🔥', achieved: '✅', not_achieved: '❌' };
+
+  // ── 期間キー一覧を返す ──
+  function getGoalPeriodKeys() {
+    const now = new Date();
+    if (currentGoalView === 'yearly') {
+      return Array.from({ length: 11 }, (_, i) => String(2026 + i));
+    }
+    if (currentGoalView === 'monthly') {
+      const year = now.getFullYear() + currentGoalOffset;
+      return Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
+    }
+    if (currentGoalView === 'weekly') {
+      const base = new Date(now.getFullYear(), now.getMonth() + currentGoalOffset, 1);
+      const yr = base.getFullYear(), mo = base.getMonth();
+      const last = new Date(yr, mo + 1, 0).getDate();
+      const keys = [];
+      for (let d = 1; d <= last; d++) {
+        if (new Date(yr, mo, d).getDay() === 0) {
+          keys.push(`${yr}-${String(mo + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+        }
+      }
+      return keys;
+    }
+    return [];
+  }
+
+  // ── 列ヘッダー文字列 ──
+  function getGoalColHeader(key) {
+    if (currentGoalView === 'yearly') return `${key}年`;
+    if (currentGoalView === 'monthly') return `${parseInt(key.split('-')[1])}月`;
+    if (currentGoalView === 'weekly') {
+      const d = new Date(key + 'T00:00:00');
+      const m = d.getMonth() + 1, day = d.getDate();
+      let n = 0;
+      for (let dd = 1; dd <= day; dd++) {
+        if (new Date(d.getFullYear(), d.getMonth(), dd).getDay() === 0) n++;
+      }
+      return `${m}月${n}週<br>(${m}/${day})`;
+    }
+    return key;
+  }
+
+  // ── ナビエリア更新 ──
+  function updateGoalNavArea() {
+    const nav = document.getElementById('goalNavArea');
+    const prev = document.getElementById('goalNavPrev');
+    const next = document.getElementById('goalNavNext');
+    const label = document.getElementById('goalNavLabel');
+    if (currentGoalView === 'yearly') { nav.style.display = 'none'; return; }
+    nav.style.display = '';
+    const now = new Date();
+    if (currentGoalView === 'monthly') {
+      prev.textContent = '◀ 昨年'; next.textContent = '来年 ▶';
+      label.textContent = `${now.getFullYear() + currentGoalOffset}年`;
+    } else {
+      prev.textContent = '◀ 先月'; next.textContent = '来月 ▶';
+      const base = new Date(now.getFullYear(), now.getMonth() + currentGoalOffset, 1);
+      label.textContent = `${base.getFullYear()}年${base.getMonth() + 1}月`;
+    }
+  }
+
+  // ── Supabaseから目標をロード ──
+  async function loadGoals(periodKeys) {
+    if (!members.length || !periodKeys.length) return;
+    const { data } = await sb.from('goals').select('*')
+      .eq('family_id', familyId)
+      .eq('period_type', currentGoalView)
+      .in('period_key', periodKeys);
+    (data || []).forEach(g => {
+      goals[`${g.member_name}_${g.period_type}_${g.period_key}`] = {
+        id: g.id, content: g.content, status: g.status
+      };
+    });
+  }
+
+  // ── 表をレンダリング ──
+  async function renderGoalTable() {
+    const keys = getGoalPeriodKeys();
+    await loadGoals(keys);
+    updateGoalNavArea();
+
+    const emojiMap = getMemberEmojiMap();
+    let html = '<table class="duty-table"><thead><tr>';
+    html += '<th class="col-duty">担当</th>';
+    keys.forEach(k => { html += `<th>${getGoalColHeader(k)}</th>`; });
+    html += '</tr></thead><tbody>';
+
+    members.forEach(m => {
+      const emoji = emojiMap[m.display_name] || '🐰';
+      html += '<tr>';
+      html += `<td class="col-duty"><div class="duty-person-tag">${emoji} ${m.display_name}</div></td>`;
+      keys.forEach(k => {
+        const gKey  = `${m.display_name}_${currentGoalView}_${k}`;
+        const goal  = goals[gKey];
+        const label = getGoalColHeader(k).replace('<br>', ' ');
+        const safe  = k.replace(/'/g, "\\'");
+        const safeMember = m.display_name.replace(/'/g, "\\'");
+        const safeLabel  = label.replace(/'/g, "\\'");
+        if (goal) {
+          const preview = goal.content.length > 6 ? goal.content.slice(0, 6) + '…' : goal.content;
+          html += `<td><div class="goal-cell" onclick="openGoalEditModal('${safeMember}','${safe}','${safeLabel}')">
+            <span class="goal-status-icon">${GOAL_STATUS_ICON[goal.status] || '📝'}</span>
+            <span class="goal-preview">${preview}</span>
+          </div></td>`;
+        } else {
+          html += `<td><div class="goal-cell" onclick="openGoalEditModal('${safeMember}','${safe}','${safeLabel}')">
+            <button class="goal-add-btn" tabindex="-1">＋</button>
+          </div></td>`;
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('goalTableWrap').innerHTML = html;
+  }
+
+  // ── 表示タブ切り替え ──
+  async function switchGoalView(view) {
+    currentGoalView   = view;
+    currentGoalOffset = 0;
+    ['Yearly','Monthly','Weekly'].forEach(v => {
+      document.getElementById(`goalTab${v}`).classList.toggle('active', v.toLowerCase() === view);
+    });
+    await renderGoalTable();
+  }
+
+  async function navigateGoal(delta) {
+    currentGoalOffset += delta;
+    await renderGoalTable();
+  }
+
+  // ── モーダル開閉 ──
+  async function showGoalModal() {
+    currentGoalView   = 'yearly';
+    currentGoalOffset = 0;
+    goals = {};
+    document.getElementById('goalModal').classList.remove('hidden');
+    ['Yearly','Monthly','Weekly'].forEach(v => {
+      document.getElementById(`goalTab${v}`).classList.toggle('active', v === 'Yearly');
+    });
+    await renderGoalTable();
+  }
+
+  function hideGoalModal() {
+    document.getElementById('goalModal').classList.add('hidden');
+  }
+
+  // ── 目標編集モーダル ──
+  function openGoalEditModal(memberName, periodKey, periodLabel) {
+    pendingGoalCell   = { memberName, periodKey };
+    pendingGoalStatus = 'in_progress';
+    const gKey  = `${memberName}_${currentGoalView}_${periodKey}`;
+    const existing = goals[gKey];
+
+    document.getElementById('goalEditSubtitle').textContent =
+      `${memberName} ／ ${periodLabel}`;
+    document.getElementById('goalContentInput').value  = existing?.content || '';
+    document.getElementById('goalCharCount').textContent = (existing?.content || '').length;
+
+    // ステータスボタンのリセット
+    ['in_progress','achieved','not_achieved'].forEach(s => {
+      document.getElementById({ in_progress:'goalBtnInProgress', achieved:'goalBtnAchieved', not_achieved:'goalBtnNotAchieved' }[s])
+        .className = 'goal-status-btn';
+    });
+    if (existing?.status) {
+      pendingGoalStatus = existing.status;
+      _highlightGoalStatus(existing.status);
+    }
+
+    // 削除ボタン（既存のみ表示）
+    document.getElementById('goalDeleteBtn').classList.toggle('hidden', !existing);
+    document.getElementById('goalEditModal').classList.remove('hidden');
+  }
+
+  function hideGoalEditModal() {
+    pendingGoalCell = null;
+    document.getElementById('goalEditModal').classList.add('hidden');
+  }
+
+  function selectGoalStatus(status) {
+    pendingGoalStatus = status;
+    ['in_progress','achieved','not_achieved'].forEach(s => {
+      document.getElementById({ in_progress:'goalBtnInProgress', achieved:'goalBtnAchieved', not_achieved:'goalBtnNotAchieved' }[s])
+        .className = 'goal-status-btn';
+    });
+    _highlightGoalStatus(status);
+  }
+
+  function _highlightGoalStatus(status) {
+    const btnId = { in_progress:'goalBtnInProgress', achieved:'goalBtnAchieved', not_achieved:'goalBtnNotAchieved' }[status];
+    if (btnId) document.getElementById(btnId).className = `goal-status-btn sel-${status}`;
+  }
+
+  function updateGoalCharCount() {
+    document.getElementById('goalCharCount').textContent =
+      document.getElementById('goalContentInput').value.length;
+  }
+
+  // ── 保存 ──
+  async function saveGoal() {
+    if (!pendingGoalCell) return;
+    const content = document.getElementById('goalContentInput').value.trim();
+    if (!content) { alert('目標を入力してください'); return; }
+    const { memberName, periodKey } = pendingGoalCell;
+    const gKey = `${memberName}_${currentGoalView}_${periodKey}`;
+    const existing = goals[gKey];
+    const row = {
+      family_id: familyId, member_name: memberName,
+      period_type: currentGoalView, period_key: periodKey,
+      content, status: pendingGoalStatus,
+      updated_at: new Date().toISOString()
+    };
+    if (existing) {
+      const { data, error } = await sb.from('goals').update(row).eq('id', existing.id)
+        .select('id,content,status').single();
+      if (error) { alert('保存失敗: ' + error.message); return; }
+      if (data) goals[gKey] = { id: data.id, content: data.content, status: data.status };
+    } else {
+      const { data, error } = await sb.from('goals').insert(row)
+        .select('id,content,status').single();
+      if (error) { alert('保存失敗: ' + error.message); return; }
+      if (data) goals[gKey] = { id: data.id, content: data.content, status: data.status };
+    }
+    hideGoalEditModal();
+    await renderGoalTable();
+  }
+
+  // ── 削除 ──
+  async function deleteGoal() {
+    if (!pendingGoalCell) return;
+    if (!confirm('この目標を削除しますか？')) return;
+    const { memberName, periodKey } = pendingGoalCell;
+    const gKey = `${memberName}_${currentGoalView}_${periodKey}`;
+    const existing = goals[gKey];
+    if (existing) {
+      await sb.from('goals').delete().eq('id', existing.id);
+      delete goals[gKey];
+    }
+    hideGoalEditModal();
+    await renderGoalTable();
+  }
+
+  // モーダルの外側クリックで閉じる
+  document.getElementById('goalModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) hideGoalModal();
+  });
+  document.getElementById('goalEditModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) hideGoalEditModal();
+  });
 
   window.addEventListener('load', () => {
     google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID });
